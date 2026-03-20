@@ -1,0 +1,294 @@
+/* ============================================
+   SCANLINE OVERLAY - For past events
+   ============================================ */
+
+.scanlines {
+  position: relative;
+}
+
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.3) 2px,
+    rgba(0, 0, 0, 0.3) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ============================================
+   FILM GRAIN OVERLAY
+   ============================================ */
+
+.film-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  animation: grain 50ms steps(1) infinite;
+}
+
+/* ============================================
+   PERSPECTIVE GRID FLOOR
+   ============================================ */
+
+.perspective-grid {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  perspective: 500px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.perspective-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grey-dark) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grey-dark) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: rotateX(60deg);
+  transform-origin: center bottom;
+}
+
+.perspective-grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--black) 0%, transparent 30%, transparent 70%, var(--black) 100%);
+}
+
+/* ============================================
+   JAGGED BORDERS
+   ============================================ */
+
+.jagged-border {
+  clip-path: polygon(
+    0% 2%,
+    3% 0%,
+    8% 3%,
+    15% 0%,
+    22% 2%,
+    28% 0%,
+    35% 1%,
+    42% 0%,
+    48% 2%,
+    55% 0%,
+    62% 1%,
+    68% 0%,
+    75% 2%,
+    82% 0%,
+    88% 1%,
+    95% 0%,
+    100% 2%,
+    100% 98%,
+    97% 100%,
+    92% 98%,
+    85% 100%,
+    78% 98%,
+    72% 100%,
+    65% 99%,
+    58% 100%,
+    52% 98%,
+    45% 100%,
+    38% 99%,
+    32% 100%,
+    25% 98%,
+    18% 100%,
+    12% 99%,
+    5% 100%,
+    0% 98%
+  );
+}
+
+/* ============================================
+   TORN INPUT BORDER
+   ============================================ */
+
+.torn-border {
+  clip-path: polygon(
+    0% 0%,
+    2% 100%,
+    5% 98%,
+    8% 100%,
+    12% 97%,
+    15% 100%,
+    20% 99%,
+    25% 100%,
+    30% 98%,
+    35% 100%,
+    40% 97%,
+    45% 100%,
+    50% 99%,
+    55% 100%,
+    60% 98%,
+    65% 100%,
+    70% 97%,
+    75% 100%,
+    80% 99%,
+    85% 100%,
+    90% 98%,
+    95% 100%,
+    98% 97%,
+    100% 100%,
+    100% 0%
+  );
+}
+
+/* ============================================
+   BLOOM EFFECT
+   ============================================ */
+
+.bloom {
+  filter: brightness(1.5);
+  text-shadow:
+    0 0 10px var(--white),
+    0 0 20px var(--white),
+    0 0 40px var(--white);
+}
+
+.bloom-red {
+  filter: brightness(1.3);
+  text-shadow:
+    0 0 10px var(--red-bright),
+    0 0 20px var(--red-bright),
+    0 0 40px var(--red-dark);
+}
+
+/* ============================================
+   GLITCH SLICE BANDS
+   ============================================ */
+
+.glitch-band {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.glitch-band-1 { clip-path: inset(0 0 75% 0); }
+.glitch-band-2 { clip-path: inset(25% 0 50% 0); }
+.glitch-band-3 { clip-path: inset(50% 0 25% 0); }
+.glitch-band-4 { clip-path: inset(75% 0 0 0); }
+
+/* ============================================
+   VOID STAMP
+   ============================================ */
+
+.void-stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  font-family: 'MedievalSharp', cursive;
+  font-size: 4rem;
+  color: var(--red-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  border: 4px solid var(--red-dark);
+  padding: 0.5rem 2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.void-stamp.visible {
+  opacity: 0.9;
+  animation: stamp-bloom 0.3s ease-out;
+}
+
+@keyframes stamp-bloom {
+  0% {
+    filter: brightness(2);
+    text-shadow: 0 0 30px var(--red-bright);
+  }
+  100% {
+    filter: brightness(1);
+    text-shadow: none;
+  }
+}
+
+/* ============================================
+   TENDRIL CORNERS
+   ============================================ */
+
+.tendril-corner {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  opacity: 0.3;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.tendril-corner.top-left {
+  top: 0;
+  left: 0;
+}
+
+.tendril-corner.top-right {
+  top: 0;
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.tendril-corner.bottom-left {
+  bottom: 0;
+  left: 0;
+  transform: scaleY(-1);
+}
+
+.tendril-corner.bottom-right {
+  bottom: 0;
+  right: 0;
+  transform: scale(-1);
+}
+
+.tendril-active .tendril-corner {
+  opacity: 0.7;
+}
+
+.tendril-active .tendril-corner.top-left { transform: translate(10px, 10px); }
+.tendril-active .tendril-corner.top-right { transform: scaleX(-1) translate(10px, 10px); }
+.tendril-active .tendril-corner.bottom-left { transform: scaleY(-1) translate(10px, -10px); }
+.tendril-active .tendril-corner.bottom-right { transform: scale(-1) translate(10px, -10px); }
+
+/* ============================================
+   DRIP INDICATOR
+   ============================================ */
+
+.drip {
+  position: relative;
+}
+
+.drip::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 12px;
+  background: var(--red-bright);
+  border-radius: 0 0 50% 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.drip.active::after {
+  opacity: 1;
+  animation: drip-pulse 2s ease-in-out infinite;
+}
+
+@keyframes drip-pulse {
+  0%, 100% { height: 12px; }
+  50% { height: 16px; }
+}
