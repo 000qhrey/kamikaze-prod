@@ -67,5 +67,7 @@ export function useImagePreloader(imagePaths: string[]): UseImagePreloaderResult
 
 // Generate frame paths for the sigil sequence
 export function generateFramePaths(count: number = 120): string[] {
-  return Array.from({ length: count }, (_, i) => getAssetPath(`/sequence/${i + 1}.png`))
+  return Array.from({ length: count }, (_, i) =>
+    getAssetPath(`/frames/frame_${String(i + 1).padStart(3, '0')}.webp`)
+  )
 }

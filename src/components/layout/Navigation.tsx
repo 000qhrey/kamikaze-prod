@@ -1,11 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTransition } from '@/providers/TransitionProvider'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { MobileNav } from './MobileNav'
-import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
 
 const NAV_LINKS = [
@@ -15,11 +14,16 @@ const NAV_LINKS = [
   { href: '/contact', label: 'CONTACT' },
 ]
 
+const GLITCH_CHARS = '▓▒░█▄▀■□●○◆◇▲△▼▽◀▶◁▷★☆⬛⬜'
+const TARGET_TEXT = 'UNDERGROUND NEVER DIES'
+const BLOB_TEXT = '▓▓▓▓▓▓▓'
+
 export function Navigation() {
   const pathname = usePathname()
   const { navigateTo } = useTransition()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [sigilHovered, setSigilHovered] = useState(false)
+  const [logoHovered, setLogoHovered] = useState(false)
+  const [displayText, setDisplayText] = useState(BLOB_TEXT)
 
   const handleNavClick = (href: string) => {
     if (href !== pathname) {
@@ -27,34 +31,75 @@ export function Navigation() {
     }
   }
 
+  // Morphing animation
+  const morphTo = useCallback((targetText: string, fromText: string) => {
+    const maxLength = Math.max(targetText.length, fromText.length)
+    let frame = 0
+    const totalFrames = 20
+
+    const interval = setInterval(() => {
+      frame++
+
+      if (frame >= totalFrames) {
+        setDisplayText(targetText)
+        clearInterval(interval)
+        return
+      }
+
+      const progress = frame / totalFrames
+      const revealedCount = Math.floor(progress * targetText.length)
+
+      // Build the morphing string
+      let result = ''
+      for (let i = 0; i < maxLength; i++) {
+        if (i < revealedCount) {
+          // Revealed character from target
+          result += targetText[i] || ''
+        } else if (i < targetText.length) {
+          // Random glitch character
+          result += GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+        }
+      }
+
+      setDisplayText(result)
+    }, 30)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Handle hover state changes
+  useEffect(() => {
+    if (logoHovered) {
+      return morphTo(TARGET_TEXT, BLOB_TEXT)
+    } else {
+      return morphTo(BLOB_TEXT, TARGET_TEXT)
+    }
+  }, [logoHovered, morphTo])
+
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-transparent">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Sigil Logo */}
+          {/* Morphing Logo */}
           <button
             onClick={() => handleNavClick('/')}
-            onMouseEnter={() => setSigilHovered(true)}
-            onMouseLeave={() => setSigilHovered(false)}
-            className="relative w-9 h-9 flex items-center justify-center"
+            onMouseEnter={() => setLogoHovered(true)}
+            onMouseLeave={() => setLogoHovered(false)}
+            className="relative flex items-center"
             aria-label="Home"
           >
-            <div
+            <span
               className={clsx(
-                'w-full h-full bg-white transition-transform duration-500',
-                sigilHovered ? 'animate-fast-rotate' : 'animate-slow-rotate'
+                'font-mono text-sm tracking-wider transition-all duration-300',
+                logoHovered ? 'text-white' : 'text-grey-mid'
               )}
               style={{
-                maskImage: `url(${getAssetPath('/sequence/1.png')})`,
-                maskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center',
-                WebkitMaskImage: `url(${getAssetPath('/sequence/1.png')})`,
-                WebkitMaskSize: 'contain',
-                WebkitMaskRepeat: 'no-repeat',
-                WebkitMaskPosition: 'center',
+                textShadow: logoHovered ? '0 0 20px rgba(204, 0, 0, 0.6)' : 'none',
+                minWidth: logoHovered ? '220px' : '80px',
               }}
-            />
+            >
+              {displayText}
+            </span>
           </button>
 
           {/* Desktop Nav Links */}
@@ -101,22 +146,10 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileOpen(true)}
-            className="md:hidden w-9 h-9 flex items-center justify-center"
+            className="md:hidden font-mono text-xs text-grey-mid"
             aria-label="Open menu"
           >
-            <div
-              className="w-full h-full bg-white"
-              style={{
-                maskImage: `url(${getAssetPath('/sequence/1.png')})`,
-                maskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center',
-                WebkitMaskImage: `url(${getAssetPath('/sequence/1.png')})`,
-                WebkitMaskSize: 'contain',
-                WebkitMaskRepeat: 'no-repeat',
-                WebkitMaskPosition: 'center',
-              }}
-            />
+            [MENU]
           </button>
         </div>
       </nav>

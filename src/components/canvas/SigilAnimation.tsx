@@ -55,7 +55,7 @@ export function SigilAnimation({
           setIsLoaded(true)
         }
       }
-      img.src = getAssetPath(`/sequence/${i + 1}.png`)
+      img.src = getAssetPath(`/frames/frame_${String(i + 1).padStart(3, '0')}.webp`)
       images[i] = img
     }
 

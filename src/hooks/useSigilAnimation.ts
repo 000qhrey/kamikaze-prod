@@ -51,7 +51,7 @@ export function useSigilAnimation(
           }
           resolve()
         }
-        img.src = getAssetPath(`/sequence/${index + 1}.png`)
+        img.src = getAssetPath(`/frames/frame_${String(index + 1).padStart(3, '0')}.webp`)
       })
     }
 

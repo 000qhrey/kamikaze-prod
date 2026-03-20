@@ -9,7 +9,7 @@ import '@/styles/globals.css'
 export const metadata: Metadata = {
   title: 'KAMIKAZE | Underground Never Dies',
   description: 'We don\'t make music. We make ruptures. Underground techno events. The underground never dies.',
-  keywords: ['techno', 'rave', 'underground', 'electronic music', 'Berlin', 'events', 'kamikaze'],
+  keywords: ['techno', 'rave', 'underground', 'electronic music', 'IN', 'events', 'kamikaze'],
   openGraph: {
     title: 'KAMIKAZE',
     description: 'Underground. Uncompromising. Unrepeatable.',
