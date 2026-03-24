@@ -28,9 +28,9 @@ const config: Config = {
         signal: '#00ff41',
       },
       fontFamily: {
-        display: ['Slaughter', 'Archivo Black', 'sans-serif'],
+        display: ['CyberpunkCity', 'Archivo Black', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        ritual: ['Slaughter', 'Archivo Black', 'sans-serif'],
+        ritual: ['CyberpunkCity', 'Archivo Black', 'sans-serif'],
       },
       fontSize: {
         'hero': 'clamp(4rem, 15vw, 10rem)',

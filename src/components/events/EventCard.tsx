@@ -1,10 +1,19 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Event, formatEventDate } from '@/data/events'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { triggerSigilGlitch } from '@/hooks/useSigilGlitch'
 import clsx from 'clsx'
+
+// Glitch characters for the reveal effect
+const GLITCH_CHARS = '█▓▒░╔╗╚╝│─┌┐└┘?#@$%&*'
+
+// Fake location words for ACCESS_DENIED sequence
+const FAKE_LOCATIONS = [
+  'AMSTERDAM', 'BERLIN', 'TOKYO', 'MUMBAI', 'LONDON',
+  'DETROIT', 'TBILISI', 'MELBOURNE', 'SAO_PAULO', 'KIEV'
+]
 
 interface EventCardProps {
   event: Event
@@ -15,8 +24,109 @@ export function EventCard({ event, index }: EventCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
+  const [isHacking, setIsHacking] = useState(false)
+  const [hackAttempt, setHackAttempt] = useState(0)
+  const [displayCity, setDisplayCity] = useState('')
+  const [hackStatus, setHackStatus] = useState<'idle' | 'trying' | 'denied' | 'partial'>('idle')
+  const [currentGuess, setCurrentGuess] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
+  const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isSoldOut = !event.ticketUrl
+  const isSecretLocation = event.isSecretLocation
+
+  // Initialize display city
+  useEffect(() => {
+    if (isSecretLocation && hackStatus === 'idle') {
+      // Secret locations start fully masked
+      setDisplayCity('█'.repeat(event.city.length))
+    } else if (!isSecretLocation) {
+      setDisplayCity(event.city.toUpperCase())
+    }
+  }, [event.city, isSecretLocation, hackStatus])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hackTimeoutRef.current) {
+        clearTimeout(hackTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Handle ACQUIRE_ACCESS for secret locations - ACCESS_DENIED sequence
+  const handleSecretAccess = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (hackStatus === 'partial') return // Already done
+    if (isHacking) return
+
+    setIsHacking(true)
+    setHackStatus('trying')
+    triggerSigilGlitch(1, 500)
+
+    const cityUpper = event.city.toUpperCase()
+    let attempt = 0
+    const maxAttempts = 5
+
+    const tryNextGuess = () => {
+      attempt++
+      setHackAttempt(attempt)
+
+      // Pick a random fake location
+      const guess = FAKE_LOCATIONS[Math.floor(Math.random() * FAKE_LOCATIONS.length)]
+      setCurrentGuess(guess)
+
+      // Scramble display while "trying"
+      let scrambleCount = 0
+      const scrambleInterval = setInterval(() => {
+        scrambleCount++
+        setDisplayCity(
+          Array(event.city.length).fill(0).map(() =>
+            GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+          ).join('')
+        )
+        if (scrambleCount > 10) {
+          clearInterval(scrambleInterval)
+          setDisplayCity(guess.slice(0, event.city.length).padEnd(event.city.length, '█'))
+          triggerSigilGlitch(0.5, 200)
+
+          // Show ACCESS_DENIED
+          hackTimeoutRef.current = setTimeout(() => {
+            setHackStatus('denied')
+            triggerSigilGlitch(0.8, 300)
+
+            if (attempt < maxAttempts) {
+              // Try again
+              hackTimeoutRef.current = setTimeout(() => {
+                setHackStatus('trying')
+                tryNextGuess()
+              }, 800)
+            } else {
+              // Final: reveal only first letter
+              hackTimeoutRef.current = setTimeout(() => {
+                setHackStatus('partial')
+                setIsHacking(false)
+                const firstLetter = cityUpper[0]
+                const masked = '█'.repeat(cityUpper.length - 1)
+                setDisplayCity(firstLetter + masked)
+                triggerSigilGlitch(1, 500)
+              }, 800)
+            }
+          }, 600)
+        }
+      }, 50)
+    }
+
+    tryNextGuess()
+  }, [event.city, isHacking, hackStatus])
+
+  // Handle normal ACQUIRE_ACCESS - just go to ticket URL
+  const handleNormalAccess = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (event.ticketUrl) {
+      window.open(event.ticketUrl, '_blank')
+    }
+  }, [event.ticketUrl])
 
   // Track mouse within card for crosshair
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -133,7 +243,16 @@ export function EventCard({ event, index }: EventCardProps) {
         <div className="relative p-8 pl-16 md:pl-24">
           {/* Date badge - small */}
           <div className="font-mono text-xs text-arterial mb-2 tracking-widest">
-            {formatEventDate(event.date)} {'// '}{event.city.toUpperCase()}
+            {formatEventDate(event.date)} {'// '}
+            <span className={clsx(
+              'transition-colors',
+              hackStatus === 'trying' ? 'text-signal animate-pulse' :
+              hackStatus === 'denied' ? 'text-red-bright' :
+              hackStatus === 'partial' ? 'text-arterial' :
+              'text-arterial'
+            )}>
+              {displayCity || (isSecretLocation ? '█'.repeat(event.city.length) : event.city.toUpperCase())}
+            </span>
           </div>
 
           {/* Event name - huge */}
@@ -172,22 +291,62 @@ export function EventCard({ event, index }: EventCardProps) {
               </p>
             )}
 
-            {isSoldOut ? (
+            {/* Secret location event - hacking sequence */}
+            {isSecretLocation ? (
+              <div className="space-y-3">
+                {/* Hacking status display */}
+                {hackStatus !== 'idle' && (
+                  <div className={clsx(
+                    'font-mono text-xs tracking-widest border-l-2 pl-3 py-1',
+                    hackStatus === 'trying' ? 'border-signal text-signal' :
+                    hackStatus === 'denied' ? 'border-red-bright text-red-bright' :
+                    'border-arterial text-grey-mid'
+                  )}>
+                    {hackStatus === 'trying' && (
+                      <span className="animate-pulse">
+                        ATTEMPTING: {currentGuess}... [{hackAttempt}/5]
+                      </span>
+                    )}
+                    {hackStatus === 'denied' && (
+                      <span className="animate-pulse">
+                        ACCESS_DENIED // INVALID_COORDINATES
+                      </span>
+                    )}
+                    {hackStatus === 'partial' && (
+                      <span>
+                        PARTIAL_DECRYPT: 10% // SIGNAL_INTERCEPTED
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* ACQUIRE_ACCESS button */}
+                <button
+                  onClick={handleSecretAccess}
+                  className="inline-block"
+                  disabled={isHacking}
+                >
+                  <TerminalButton>
+                    {hackStatus === 'idle' ? 'ACQUIRE_ACCESS' :
+                     hackStatus === 'partial' ? 'SIGNAL_LOCKED' :
+                     'BREACH_IN_PROGRESS...'}
+                  </TerminalButton>
+                </button>
+              </div>
+            ) : isSoldOut ? (
               <div className="inline-block">
                 <span className="font-mono text-grey-dark line-through tracking-widest">
                   [VOID] NO ENTRY
                 </span>
               </div>
             ) : (
-              <a
-                href={event.ticketUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
+              /* Normal event - direct ticket link */
+              <button
+                onClick={handleNormalAccess}
                 className="inline-block"
               >
                 <TerminalButton>ACQUIRE_ACCESS</TerminalButton>
-              </a>
+              </button>
             )}
           </div>
 

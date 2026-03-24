@@ -8,7 +8,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { getAssetPath } from '@/lib/basePath'
 import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
-import { getBass, getMids, getHighs } from '@/hooks/useAudioEngine'
+import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
 
 // Configure drei's useGLTF to use Draco decoder from CDN
 const dracoLoader = new DRACOLoader()
@@ -193,27 +193,41 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
       0.1
     )
 
-    // Glitch/shake effect
-    if (glitchIntensity > 0 || hoveredNav) {
-      const intensity = hoveredNav ? 0.3 : glitchIntensity
-      group.current.position.x = (Math.random() - 0.5) * 0.3 * intensity
-      group.current.position.z = (Math.random() - 0.5) * 0.2 * intensity
+    // Glitch/shake effect - includes channel switching glitch
+    const isSwitching = getIsSwitching()
+    if (glitchIntensity > 0 || hoveredNav || isSwitching) {
+      const intensity = isSwitching ? 1.0 : hoveredNav ? 0.3 : glitchIntensity
+      group.current.position.x = (Math.random() - 0.5) * 0.5 * intensity
+      group.current.position.z = (Math.random() - 0.5) * 0.3 * intensity
+      // Extra violent shake on channel switch
+      if (isSwitching) {
+        group.current.rotation.x += (Math.random() - 0.5) * 0.1
+        group.current.rotation.z += (Math.random() - 0.5) * 0.1
+      }
     } else {
       group.current.position.x *= 0.9
       group.current.position.z *= 0.9
     }
 
     // Material: color shift + audio-reactive emissive
+    const channel = getCurrentChannel()
     const targetMaterial = section === 'contact' ? silverChrome : redChrome
-    const targetEmissive = 0.5 + smoothedBass * 2 // Glow brighter on bass
+    const targetEmissive = isSwitching ? 3 : 0.5 + smoothedBass * 2 // Flash bright on switch
 
-    smoothEmissive.current = THREE.MathUtils.lerp(smoothEmissive.current, targetEmissive, 0.2)
+    smoothEmissive.current = THREE.MathUtils.lerp(smoothEmissive.current, targetEmissive, isSwitching ? 0.5 : 0.2)
 
     meshesRef.current.forEach((mesh) => {
       const mat = mesh.material as THREE.MeshStandardMaterial
-      mat.color.lerp(targetMaterial.color, 0.02)
-      mat.emissive.lerp(targetMaterial.emissive, 0.02)
-      mat.emissiveIntensity = smoothEmissive.current
+      if (isSwitching) {
+        // Flash channel color during switch
+        const channelColor = new THREE.Color(channel.color)
+        mat.emissive.lerp(channelColor, 0.3)
+        mat.emissiveIntensity = smoothEmissive.current
+      } else {
+        mat.color.lerp(targetMaterial.color, 0.02)
+        mat.emissive.lerp(targetMaterial.emissive, 0.02)
+        mat.emissiveIntensity = smoothEmissive.current
+      }
     })
 
     // Update animation mixer
