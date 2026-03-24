@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { href: '/', label: 'HOME' },
   { href: '/events', label: 'EVENTS' },
   { href: '/artists', label: 'ARTISTS' },
-  { href: '/merch', label: 'MERCH' },
+  { href: '/merch', label: 'ARTIFACTS' },
   { href: '/contact', label: 'CONTACT' },
 ]
 

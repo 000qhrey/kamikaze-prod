@@ -37,17 +37,6 @@ export const events: Event[] = [
     isFullyRedacted: true,
   },
   {
-    id: 'redacted-session-02',
-    name: '[REDACTED SESSION]',
-    date: '2025-06-28',
-    venue: 'UNKNOWN',
-    city: 'UNKNOWN',
-    lineup: ['█████████', '███████', '██████'],
-    isPast: false,
-    description: 'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
-    isFullyRedacted: true,
-  },
-  {
     id: 'ritual-001',
     name: 'RITUAL 001',
     date: '2025-02-22',

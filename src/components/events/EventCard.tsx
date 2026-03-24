@@ -9,22 +9,21 @@ import clsx from 'clsx'
 // Glitch characters for the reveal effect
 const GLITCH_CHARS = '█▓▒░╔╗╚╝│─┌┐└┘?#@$%&*'
 
-// Fake location words for ACCESS_DENIED sequence
-const FAKE_LOCATIONS = [
-  'AMSTERDAM', 'BERLIN', 'TOKYO', 'MUMBAI', 'LONDON',
-  'DETROIT', 'TBILISI', 'MELBOURNE', 'SAO_PAULO', 'KIEV'
+// City lists for each attempt - scan through these before failing
+const ATTEMPT_CITIES = [
+  ['BERLIN', 'AMSTERDAM', 'LONDON', 'DETROIT'],
+  ['TOKYO', 'MUMBAI', 'TBILISI', 'KIEV'],
+  ['MELBOURNE', 'SAO_PAULO', 'LAGOS', 'CAIRO'],
 ]
 
-// Denial messages
+// Denial messages for each attempt
 const DENIAL_MESSAGES = [
-  'ACCESS_DENIED // INVALID_KEY',
-  'REJECTED // CLEARANCE_INSUFFICIENT',
-  'BLOCKED // FIREWALL_ACTIVE',
-  'FAILED // ENCRYPTION_MISMATCH',
-  'DENIED // PROTOCOL_VIOLATION',
+  'ACCESS_DENIED // FIREWALL_ACTIVE',
+  'REJECTED // ENCRYPTION_MISMATCH',
+  'BLOCKED // PROTOCOL_VIOLATION',
 ]
 
-const MAX_ATTEMPTS = 5
+const MAX_ATTEMPTS = 3
 
 interface EventCardProps {
   event: Event
@@ -76,6 +75,7 @@ export function EventCard({ event, index }: EventCardProps) {
   }
 
   // Handle each ACQUIRE_ACCESS click - manual attempts
+  // Each attempt scans through 3-4 cities before failing
   const handleSecretAccessClick = useCallback(() => {
     if (hackStatus === 'partial' || hackStatus === 'compromised') return
     if (isProcessing) return
@@ -83,30 +83,49 @@ export function EventCard({ event, index }: EventCardProps) {
     const newAttempt = hackAttempt + 1
     setHackAttempt(newAttempt)
     setIsProcessing(true)
+    setHackStatus('denied')
     triggerSigilGlitch(0.8, 400)
 
     const cityUpper = event.city.toUpperCase()
+    const cityLength = event.city.length
 
-    // Pick a random fake location to "try"
-    const guess = FAKE_LOCATIONS[Math.floor(Math.random() * FAKE_LOCATIONS.length)]
+    // Get cities to scan for this attempt
+    const citiesToScan = ATTEMPT_CITIES[newAttempt - 1] || ATTEMPT_CITIES[0]
+    let cityIndex = 0
+    let phase: 'scramble' | 'show_city' | 'next' = 'scramble'
+    let scrambleFrames = 0
 
-    // Scramble display while processing
-    let scrambleCount = 0
-    const scrambleInterval = setInterval(() => {
-      scrambleCount++
-      setDisplayCity(
-        Array(event.city.length).fill(0).map(() =>
-          GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-        ).join('')
-      )
+    const scanInterval = setInterval(() => {
+      if (phase === 'scramble') {
+        // Scramble effect
+        scrambleFrames++
+        setDisplayCity(
+          Array(cityLength).fill(0).map(() =>
+            GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+          ).join('')
+        )
+        setStatusMessage(`SCANNING_NODE_${cityIndex + 1}...`)
 
-      if (scrambleCount > 15) {
-        clearInterval(scrambleInterval)
+        if (scrambleFrames >= 8) {
+          scrambleFrames = 0
+          phase = 'show_city'
+        }
+      } else if (phase === 'show_city') {
+        // Show current city being "tried"
+        const currentCity = citiesToScan[cityIndex]
+        setDisplayCity(currentCity.slice(0, cityLength).padEnd(cityLength, '█'))
+        setStatusMessage(`TRYING: ${currentCity}...`)
+        phase = 'next'
+      } else if (phase === 'next') {
+        cityIndex++
+        if (cityIndex < citiesToScan.length) {
+          // Move to next city
+          phase = 'scramble'
+          triggerSigilGlitch(0.3, 100)
+        } else {
+          // Done scanning all cities - show failure
+          clearInterval(scanInterval)
 
-        // Show the fake guess briefly
-        setDisplayCity(guess.slice(0, event.city.length).padEnd(event.city.length, '█'))
-
-        hackTimeoutRef.current = setTimeout(() => {
           if (newAttempt >= MAX_ATTEMPTS) {
             // Final attempt - they're watching!
             setHackStatus('compromised')
@@ -124,15 +143,15 @@ export function EventCard({ event, index }: EventCardProps) {
             }, 1500)
           } else {
             // Failed attempt - show denial
-            setHackStatus('denied')
             setStatusMessage(DENIAL_MESSAGES[newAttempt - 1] || DENIAL_MESSAGES[0])
-            setDisplayCity('█'.repeat(event.city.length))
+            setDisplayCity('█'.repeat(cityLength))
             setIsProcessing(false)
             triggerSigilGlitch(0.5, 200)
           }
-        }, 400)
+        }
       }
-    }, 40)
+    }, 150) // 150ms per frame for more dramatic effect
+
   }, [event.city, hackAttempt, hackStatus, isProcessing])
 
   // Handle normal ACQUIRE_ACCESS - just go to ticket URL

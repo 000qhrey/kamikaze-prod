@@ -42,7 +42,7 @@ export function Footer() {
             <div className="font-mono text-[10px] text-white/60 tracking-wider">
               &copy; {new Date().getFullYear()} KAMIKAZE
               <span className="mx-3 text-white/30">{'//'}</span>
-              INDIA
+              GLOBAL
               <span className="mx-3 text-white/30">{'//'}</span>
               STAY_UNDERGROUND
             </div>

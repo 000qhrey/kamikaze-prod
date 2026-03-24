@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
 import {
   initAudioEngine,
@@ -18,11 +19,15 @@ import {
   CHANNELS,
 } from '@/hooks/useAudioEngine'
 
+type PlayerMode = 'widget' | 'bar'
+
 export function TerminalAudioPlayer() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
+  const playerRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useState(getAudioState)
-  const [isExpanded, setIsExpanded] = useState(true) // Default maximized
+  const [mode, setMode] = useState<PlayerMode>('widget') // widget = floating, bar = attached to footer
+  const [isManuallyMinimized, setIsManuallyMinimized] = useState(false)
   const [showChannelSelector, setShowChannelSelector] = useState(false)
   const [bars, setBars] = useState<number[]>(new Array(16).fill(0.1))
   const [trackTitle, setTrackTitle] = useState('INITIALIZING...')
@@ -32,6 +37,28 @@ export function TerminalAudioPlayer() {
   const [isFading, setIsFading] = useState(false)
   const savedVolumeRef = useRef(70) // Store volume during fade
   const animationRef = useRef<number>(0)
+
+  // Scroll detection - switch to bar mode when near footer
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isManuallyMinimized) return // User manually minimized, don't auto-switch
+
+      const scrollBottom = window.scrollY + window.innerHeight
+      const docHeight = document.documentElement.scrollHeight
+      const footerThreshold = 200 // pixels from bottom to trigger bar mode
+
+      if (docHeight - scrollBottom < footerThreshold) {
+        setMode('bar')
+      } else {
+        setMode('widget')
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll() // Check initial position
+
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isManuallyMinimized])
 
   // Load SoundCloud Widget API script
   useEffect(() => {
@@ -184,16 +211,19 @@ export function TerminalAudioPlayer() {
   // SoundCloud embed URL (hidden)
   const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(currentUrl)}&color=%23CC0000&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`
 
+  // Handle manual minimize toggle
+  const handleMinimize = () => {
+    setIsManuallyMinimized(true)
+    setMode('bar')
+  }
+
+  const handleExpand = () => {
+    setIsManuallyMinimized(false)
+    setMode('widget')
+  }
+
   return (
-    <div
-      className={clsx(
-        'fixed bottom-4 left-4 z-50',
-        'font-mono text-[10px]',
-        'border border-arterial/30 bg-void/95',
-        'transition-all duration-300',
-        isExpanded ? 'w-72' : 'w-44'
-      )}
-    >
+    <>
       {/* Hidden SoundCloud iframe */}
       <iframe
         ref={iframeRef}
@@ -203,124 +233,188 @@ export function TerminalAudioPlayer() {
         title="Audio Stream"
       />
 
-      {/* Terminal header */}
-      <div
-        className="flex items-center justify-between px-2 py-1 border-b border-arterial/20 cursor-pointer select-none"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center gap-1.5">
-          <span className={clsx('text-[8px]', state.isPlaying ? 'text-arterial animate-pulse' : 'text-grey-dark')}>
-            {state.isPlaying ? '[LIVE]' : '[IDLE]'}
-          </span>
-          <span className="text-grey-mid">AUDIO_TAP</span>
-        </div>
-        <span className="text-grey-dark">{isExpanded ? '[-]' : '[+]'}</span>
-      </div>
-
-      {/* Frequency visualizer - 8-bit blocky style */}
-      <div className="flex items-end justify-between h-8 px-2 py-1 gap-px bg-black/50">
-        {bars.map((height, i) => (
+      {/* === WIDGET MODE: Floating panel in corner === */}
+      <AnimatePresence mode="wait">
+        {mode === 'widget' && (
+          <motion.div
+            key="widget"
+            ref={playerRef}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-4 left-4 z-50 w-72 border border-arterial/30 bg-void/95 font-mono"
+            style={{ fontSize: '10px' }}
+          >
+          {/* Terminal header */}
           <div
-            key={i}
-            className={clsx(
-              'w-full transition-all duration-75',
-              state.isPlaying ? 'bg-arterial' : 'bg-grey-dark/50'
-            )}
-            style={{
-              height: `${Math.max(8, height * 100)}%`,
-              opacity: state.isPlaying ? 0.4 + height * 0.6 : 0.3,
-            }}
-          />
-        ))}
-      </div>
+            className="flex items-center justify-between px-2 py-1 border-b border-arterial/20 cursor-pointer select-none"
+            onClick={handleMinimize}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className={clsx('text-[8px]', state.isPlaying ? 'text-arterial animate-pulse' : 'text-grey-dark')}>
+                {state.isPlaying ? '[LIVE]' : '[IDLE]'}
+              </span>
+              <span className="text-grey-mid">SIGNAL_TAP</span>
+            </div>
+            <span className="text-grey-dark hover:text-arterial">[-]</span>
+          </div>
 
-      {/* Track info */}
-      <div className="px-2 py-1.5">
-        <div className={clsx(
-          'truncate tracking-wider',
-          scReady ? 'text-white/90' : 'text-grey-mid animate-pulse'
-        )}>
-          {!scApiLoaded ? 'LOADING_API...' : !scReady ? 'CONNECTING...' : trackTitle}
-        </div>
-        <div className="flex items-center gap-2 text-grey-dark truncate">
-          <span style={{ color: channel.color }}>[{channel.code}]</span>
-          <span>{channel.name}</span>
-          <span className="text-arterial">{state.spm} SPM</span>
-        </div>
-      </div>
+          {/* Frequency visualizer */}
+          <div className="flex items-end justify-between h-8 px-2 py-1 gap-px bg-black/50">
+            {bars.map((height, i) => (
+              <div
+                key={i}
+                className={clsx(
+                  'w-full transition-all duration-75',
+                  state.isPlaying ? 'bg-arterial' : 'bg-grey-dark/50'
+                )}
+                style={{
+                  height: `${Math.max(8, height * 100)}%`,
+                  opacity: state.isPlaying ? 0.4 + height * 0.6 : 0.3,
+                }}
+              />
+            ))}
+          </div>
 
-      {/* Expanded controls */}
-      {isExpanded && (
-        <div className="px-2 py-2 border-t border-arterial/10 mt-1">
-          {/* Transport controls */}
-          <div className="flex items-center justify-center gap-3 mb-2">
+          {/* Track info */}
+          <div className="px-2 py-1.5">
+            <div className={clsx(
+              'truncate tracking-wider',
+              scReady ? 'text-white/90' : 'text-grey-mid animate-pulse'
+            )}>
+              {!scApiLoaded ? 'LOADING_API...' : !scReady ? 'CONNECTING...' : trackTitle}
+            </div>
+            <div className="flex items-center gap-2 text-grey-dark truncate">
+              <span style={{ color: channel.color }}>[{channel.code}]</span>
+              <span>{channel.name}</span>
+              <span className="text-arterial">{state.spm} SPM</span>
+            </div>
+          </div>
+
+          {/* Controls section */}
+          <div className="px-2 py-2 border-t border-arterial/10 mt-1">
+            {/* Transport controls */}
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <button onClick={prevTrack} className="text-grey-mid hover:text-arterial transition-colors">|&lt;</button>
+              <button
+                onClick={handlePlayPause}
+                className={clsx(
+                  'px-3 py-1 border transition-colors',
+                  state.isPlaying
+                    ? 'border-arterial text-arterial hover:bg-arterial/10'
+                    : 'border-grey-mid text-grey-mid hover:border-arterial hover:text-arterial'
+                )}
+              >
+                {state.isPlaying ? 'PAUSE' : 'PLAY_'}
+              </button>
+              <button onClick={nextTrack} className="text-grey-mid hover:text-arterial transition-colors">&gt;|</button>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-2 text-[8px] mb-2">
+              <span className="text-grey-dark">VOL:</span>
+              <div className="flex-1 flex gap-px">
+                {[...Array(10)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setVolume((i + 1) / 10)}
+                    className={clsx(
+                      'flex-1 h-2 transition-colors',
+                      i < state.volume * 10 ? 'bg-arterial/70 hover:bg-arterial' : 'bg-grey-dark/30 hover:bg-grey-dark/50'
+                    )}
+                  />
+                ))}
+              </div>
+              <span className="text-grey-mid w-6 text-right">{Math.round(state.volume * 100)}%</span>
+            </div>
+
+            {/* Channel selector button */}
+            <div className="flex items-center gap-2 text-[8px]">
+              <span className="text-grey-dark">FREQ:</span>
+              <button
+                onClick={() => setShowChannelSelector(true)}
+                className="flex-1 px-2 py-1 border border-arterial/30 hover:bg-arterial/10 hover:border-arterial transition-colors text-left"
+              >
+                <span style={{ color: channel.color }}>[{channel.code}]</span>
+                <span className="text-grey-mid ml-1">{channel.name}</span>
+                <span className="text-arterial/50 ml-2">{'// SWITCH'}</span>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* === BAR MODE: Full-width bar above footer === */}
+      <AnimatePresence mode="wait">
+        {mode === 'bar' && (
+          <motion.div
+            key="bar"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-0 left-0 right-0 z-50 h-10 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono"
+            style={{ fontSize: '10px' }}
+          >
+          <div className="h-full flex items-center px-4 gap-4">
+            {/* Expand button */}
             <button
-              onClick={prevTrack}
-              className="text-grey-mid hover:text-arterial transition-colors"
-              title="Previous"
+              onClick={handleExpand}
+              className="text-grey-mid hover:text-arterial transition-colors shrink-0"
             >
-              |&lt;
+              [+]
             </button>
+
+            {/* Play/Pause */}
             <button
               onClick={handlePlayPause}
               className={clsx(
-                'px-3 py-1 border transition-colors',
+                'shrink-0 px-2 py-0.5 border transition-colors',
                 state.isPlaying
-                  ? 'border-arterial text-arterial hover:bg-arterial/10'
-                  : 'border-grey-mid text-grey-mid hover:border-arterial hover:text-arterial'
+                  ? 'border-arterial text-arterial'
+                  : 'border-grey-dark text-grey-mid hover:border-arterial hover:text-arterial'
               )}
             >
-              {state.isPlaying ? 'PAUSE' : 'PLAY_'}
+              {state.isPlaying ? '||' : '▶'}
             </button>
-            <button
-              onClick={nextTrack}
-              className="text-grey-mid hover:text-arterial transition-colors"
-              title="Next"
-            >
-              &gt;|
-            </button>
-          </div>
 
-          {/* Volume */}
-          <div className="flex items-center gap-2 text-[8px] mb-2">
-            <span className="text-grey-dark">VOL:</span>
-            <div className="flex-1 flex gap-px">
-              {[...Array(10)].map((_, i) => (
-                <button
+            {/* Signal bars */}
+            <div className="flex-1 flex items-center h-6 gap-px overflow-hidden">
+              {bars.map((height, i) => (
+                <div
                   key={i}
-                  onClick={() => setVolume((i + 1) / 10)}
-                  className={clsx(
-                    'flex-1 h-2 transition-colors',
-                    i < state.volume * 10
-                      ? 'bg-arterial/70 hover:bg-arterial'
-                      : 'bg-grey-dark/30 hover:bg-grey-dark/50'
-                  )}
+                  className={clsx('flex-1 transition-all duration-75', state.isPlaying ? 'bg-arterial' : 'bg-grey-dark/30')}
+                  style={{ height: `${Math.max(15, height * 100)}%`, opacity: state.isPlaying ? 0.5 + height * 0.5 : 0.2 }}
                 />
               ))}
             </div>
-            <span className="text-grey-mid w-6 text-right">
-              {Math.round(state.volume * 100)}%
-            </span>
-          </div>
 
-          {/* Channel selector button */}
-          <div className="flex items-center gap-2 text-[8px]">
-            <span className="text-grey-dark">FREQ:</span>
+            {/* Track info */}
+            <div className="shrink-0 text-right max-w-[200px] truncate hidden sm:block">
+              <span className="text-grey-mid">{trackTitle.slice(0, 25)}</span>
+            </div>
+
+            {/* Channel indicator */}
             <button
               onClick={() => setShowChannelSelector(true)}
-              className="flex-1 px-2 py-1 border border-arterial/30 hover:bg-arterial/10 hover:border-arterial transition-colors text-left"
+              className="shrink-0 flex items-center gap-1 hover:text-arterial transition-colors"
             >
-              <span style={{ color: channel.color }}>[{channel.code}]</span>
-              <span className="text-grey-mid ml-1">{channel.name}</span>
-              <span className="text-arterial/50 ml-2">{'// SWITCH'}</span>
+              <span className="w-2 h-4 inline-block" style={{ backgroundColor: channel.color }} />
+              <span className="text-grey-dark">[{channel.code}]</span>
             </button>
-          </div>
-        </div>
-      )}
 
-      {/* Channel Selector Popup */}
+            {/* SPM */}
+            <span className="shrink-0 text-arterial">{state.spm} SPM</span>
+          </div>
+        </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Channel Selector Popup - centered on screen */}
       {showChannelSelector && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
@@ -329,7 +423,7 @@ export function TerminalAudioPlayer() {
 
           {/* Selector panel */}
           <div
-            className="relative bg-void border border-arterial/50 p-4 min-w-[300px]"
+            className="relative bg-void border border-arterial/50 p-4 w-full max-w-[320px] max-h-[80vh] overflow-y-auto"
             style={{
               clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%)',
             }}
@@ -339,7 +433,7 @@ export function TerminalAudioPlayer() {
               <span className="text-arterial tracking-wider text-sm">SIGNAL_ACQUISITION</span>
               <button
                 onClick={() => setShowChannelSelector(false)}
-                className="text-grey-mid hover:text-arterial transition-colors"
+                className="text-grey-mid hover:text-arterial transition-colors text-lg"
               >
                 [X]
               </button>
@@ -358,24 +452,14 @@ export function TerminalAudioPlayer() {
                       : 'border-grey-dark/50 hover:border-arterial/50 hover:bg-arterial/5'
                   )}
                 >
-                  {/* Channel indicator */}
-                  <div
-                    className="w-2 h-8 transition-colors"
-                    style={{ backgroundColor: ch.color }}
-                  />
-
-                  {/* Channel info */}
+                  <div className="w-2 h-8 transition-colors" style={{ backgroundColor: ch.color }} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-grey-mid text-[10px]">[{ch.code}]</span>
                       <span className="text-white tracking-wider text-sm">{ch.name}</span>
                     </div>
-                    <div className="text-grey-dark text-[10px]">
-                      {ch.spm} SPM
-                    </div>
+                    <div className="text-grey-dark text-[10px]">{ch.spm} SPM</div>
                   </div>
-
-                  {/* Active indicator */}
                   {state.currentChannel === ch.id && (
                     <span className="text-arterial text-[10px] animate-pulse">ACTIVE</span>
                   )}
@@ -390,24 +474,6 @@ export function TerminalAudioPlayer() {
           </div>
         </div>
       )}
-
-      {/* Collapsed mini controls */}
-      {!isExpanded && (
-        <div className="flex items-center justify-center gap-2 px-2 py-1.5">
-          <button
-            onClick={handlePlayPause}
-            className="text-arterial hover:text-white transition-colors"
-          >
-            {state.isPlaying ? '[||]' : '[>]'}
-          </button>
-          <button
-            onClick={nextTrack}
-            className="text-grey-mid hover:text-arterial transition-colors text-[8px]"
-          >
-            SKIP&gt;
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
