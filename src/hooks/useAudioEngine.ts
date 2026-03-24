@@ -69,6 +69,9 @@ const state: AudioEngineState = {
   frequencyData: new Uint8Array(128) as Uint8Array<ArrayBuffer>,
 }
 
+// Pending play flag - set when play() is called before widget is ready
+let pendingPlay = false
+
 const listeners: Set<() => void> = new Set()
 let beatPhase = 0
 let lastBeatTime = 0
@@ -98,6 +101,12 @@ export function initSoundCloudWidget(iframe: HTMLIFrameElement) {
     state.isInitialized = true
     state.isSwitching = false
     notifyListeners()
+
+    // If play was requested before widget was ready, play now
+    if (pendingPlay) {
+      pendingPlay = false
+      scWidget.play()
+    }
   })
 
   scWidget.bind(window.SC.Widget.Events.PLAY, () => {
@@ -146,6 +155,9 @@ export function getCurrentChannel() {
 export function play() {
   if (state.mode === 'soundcloud' && scWidget) {
     scWidget.play()
+  } else {
+    // Widget not ready yet - set pending flag
+    pendingPlay = true
   }
 }
 
