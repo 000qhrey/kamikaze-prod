@@ -1,4 +1,3 @@
-import { SignalFeed } from '@/components/artists/SignalFeed'
 import { SignalUpload } from '@/components/artists/SignalUpload'
 import { AsciiSigilBackground } from '@/components/canvas/AsciiSigil'
 
@@ -44,8 +43,11 @@ export default function ArtistsPage() {
           </div>
         </header>
 
+        {/* Signal Upload Form */}
+        <SignalUpload />
+
         {/* Manifesto snippet */}
-        <div className="mb-16 py-8 border-y border-white/20">
+        <div className="mt-16 py-8 border-y border-white/20">
           <p className="font-mono text-sm text-white/70 leading-relaxed max-w-2xl">
             <span className="text-arterial">{'>'}</span> We are not here to
             build idols. We are here to amplify sound. The underground was
@@ -53,12 +55,6 @@ export default function ArtistsPage() {
             Become part of the signal.
           </p>
         </div>
-
-        {/* Signal Feed */}
-        <SignalFeed />
-
-        {/* Signal Upload Form */}
-        <SignalUpload />
       </div>
     </div>
   )

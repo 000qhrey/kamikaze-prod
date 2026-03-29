@@ -63,17 +63,14 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
     const transition = transitionRef.current
 
     if (transition) {
-      // Glitch out
-      await transition.glitchOut(350)
-
-      // Navigate
+      // Start navigation immediately (runs in parallel with animation)
       router.push(href)
 
-      // Small delay
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      // Chromatic aberration flash out (covers navigation time)
+      await transition.glitchOut(180)
 
-      // Glitch in
-      await transition.glitchIn(300)
+      // Chromatic aberration flash in (reveals new page)
+      await transition.glitchIn(120)
     } else {
       router.push(href)
     }

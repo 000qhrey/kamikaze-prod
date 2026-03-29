@@ -299,6 +299,32 @@ const GENRE_SIGILS: Record<Genre, string> = {
 
 const DEFAULT_SIGIL = SIGIL_INDUSTRIAL
 
+// All sigils for auto-cycling
+const ALL_SIGILS = [
+  SIGIL_INDUSTRIAL,
+  SIGIL_DARK,
+  SIGIL_ACID,
+  SIGIL_HARDCORE,
+  SIGIL_GABBER,
+  SIGIL_BREAKCORE,
+  SIGIL_EBM,
+  SIGIL_NOISE,
+  SIGIL_AMBIENT,
+]
+
+// Colors for auto-cycling (genre-inspired but independent)
+const SIGIL_COLORS = [
+  { color: '#3a9a9a', glow: 'rgba(0, 255, 255, 0.4)' },    // cyan (default)
+  { color: '#cc0000', glow: 'rgba(204, 0, 0, 0.5)' },      // arterial red
+  { color: '#00cc00', glow: 'rgba(0, 204, 0, 0.5)' },      // acid green
+  { color: '#9933ff', glow: 'rgba(153, 51, 255, 0.5)' },   // purple
+  { color: '#ff6600', glow: 'rgba(255, 102, 0, 0.5)' },    // orange
+  { color: '#ffcc00', glow: 'rgba(255, 204, 0, 0.5)' },    // yellow
+  { color: '#ff0066', glow: 'rgba(255, 0, 102, 0.5)' },    // magenta
+  { color: '#00ffcc', glow: 'rgba(0, 255, 204, 0.5)' },    // teal
+  { color: '#ffffff', glow: 'rgba(255, 255, 255, 0.3)' },  // white
+]
+
 // ============================================
 // GLITCH EFFECT UTILITIES
 // ============================================
@@ -369,9 +395,57 @@ export function AsciiSigilBackground() {
   const currentSigilRef = useRef<string>(DEFAULT_SIGIL)
   const targetSigilRef = useRef<string>(DEFAULT_SIGIL)
   const transitionRef = useRef<number>(0)
+  const currentSigilIndexRef = useRef<number>(0)
+  const currentColorIndexRef = useRef<number>(0)
+  const autoCycleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Subscribe to genre hover changes
   const { genre, isHovering } = useActiveFrequency()
+
+  // Auto-cycle sigils when not hovering on a specific genre
+  useEffect(() => {
+    if (!mounted) return
+
+    const triggerAutoCycle = () => {
+      // Only auto-cycle if not hovering on a genre
+      if (!isHovering) {
+        // Pick a different random sigil
+        let newSigilIndex = currentSigilIndexRef.current
+        while (newSigilIndex === currentSigilIndexRef.current && ALL_SIGILS.length > 1) {
+          newSigilIndex = Math.floor(Math.random() * ALL_SIGILS.length)
+        }
+        currentSigilIndexRef.current = newSigilIndex
+        targetSigilRef.current = ALL_SIGILS[newSigilIndex]
+
+        // Pick a different random color
+        let newColorIndex = currentColorIndexRef.current
+        while (newColorIndex === currentColorIndexRef.current && SIGIL_COLORS.length > 1) {
+          newColorIndex = Math.floor(Math.random() * SIGIL_COLORS.length)
+        }
+        currentColorIndexRef.current = newColorIndex
+        const newColor = SIGIL_COLORS[newColorIndex]
+        setCurrentColor(newColor.color)
+        setGlowColor(newColor.glow)
+
+        // Trigger heavy shatter transition
+        transitionRef.current = 1.0
+      }
+
+      // Schedule next cycle (random 5-10 seconds)
+      const nextDelay = 5000 + Math.random() * 5000
+      autoCycleTimerRef.current = setTimeout(triggerAutoCycle, nextDelay)
+    }
+
+    // Start first cycle after initial delay
+    const initialDelay = 3000 + Math.random() * 2000
+    autoCycleTimerRef.current = setTimeout(triggerAutoCycle, initialDelay)
+
+    return () => {
+      if (autoCycleTimerRef.current) {
+        clearTimeout(autoCycleTimerRef.current)
+      }
+    }
+  }, [mounted, isHovering])
 
   // Update sigil and colors when genre changes
   useEffect(() => {

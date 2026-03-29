@@ -17,57 +17,63 @@ export class GlitchTransition {
     this.canvas.height = window.innerHeight
   }
 
-  // Simple glitch out - horizontal slices with RGB split
-  async glitchOut(duration: number = 400): Promise<void> {
+  // Simple chromatic aberration flash out
+  async glitchOut(duration: number = 200): Promise<void> {
     return new Promise((resolve) => {
+      const { width, height } = this.canvas
       const startTime = performance.now()
 
       const animate = (timestamp: number) => {
         const elapsed = timestamp - startTime
         const progress = Math.min(elapsed / duration, 1)
-        const intensity = Math.pow(progress, 1.5)
 
-        const { width, height } = this.canvas
-        this.ctx.fillStyle = '#000'
-        this.ctx.fillRect(0, 0, width, height)
+        // Clear canvas
+        this.ctx.clearRect(0, 0, width, height)
 
-        // Horizontal glitch slices
-        const sliceCount = 12
-        const sliceHeight = height / sliceCount
+        // Chromatic aberration intensity - peaks in middle, fades at end
+        const intensity = Math.sin(progress * Math.PI) * 0.6
 
-        for (let i = 0; i < sliceCount; i++) {
-          const y = i * sliceHeight
-          const offset = (Math.random() - 0.5) * intensity * 80
+        if (intensity > 0.05) {
+          // Red channel - offset left
+          this.ctx.fillStyle = `rgba(255, 0, 0, ${intensity * 0.4})`
+          this.ctx.fillRect(0, 0, width * 0.4, height)
 
-          // Red slice
-          this.ctx.fillStyle = `rgba(204, 0, 0, ${0.4 * intensity})`
-          this.ctx.fillRect(offset - 10, y, width, sliceHeight * 0.8)
+          // Cyan channel - offset right
+          this.ctx.fillStyle = `rgba(0, 255, 255, ${intensity * 0.4})`
+          this.ctx.fillRect(width * 0.6, 0, width * 0.4, height)
 
-          // Cyan slice
-          this.ctx.fillStyle = `rgba(0, 255, 255, ${0.3 * intensity})`
-          this.ctx.fillRect(offset + 10, y, width, sliceHeight * 0.8)
+          // Horizontal glitch lines
+          const lineCount = Math.floor(intensity * 8)
+          for (let i = 0; i < lineCount; i++) {
+            const y = Math.random() * height
+            const lineHeight = 2 + Math.random() * 4
+            const offset = (Math.random() - 0.5) * 20 * intensity
+
+            this.ctx.fillStyle = `rgba(255, 0, 0, ${intensity * 0.6})`
+            this.ctx.fillRect(offset, y, width, lineHeight)
+
+            this.ctx.fillStyle = `rgba(0, 255, 255, ${intensity * 0.6})`
+            this.ctx.fillRect(-offset, y + 2, width, lineHeight)
+          }
+
+          // Edge glow
+          this.ctx.fillStyle = `rgba(204, 0, 0, ${intensity * 0.5})`
+          this.ctx.fillRect(0, 0, 4, height)
+          this.ctx.fillStyle = `rgba(0, 255, 255, ${intensity * 0.5})`
+          this.ctx.fillRect(width - 4, 0, 4, height)
         }
 
-        // Random noise lines
-        for (let i = 0; i < 5 * intensity; i++) {
-          const y = Math.random() * height
-          this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.15})`
-          this.ctx.fillRect(0, y, width, 2)
+        // Fade to black at end
+        if (progress > 0.7) {
+          const fadeProgress = (progress - 0.7) / 0.3
+          this.ctx.fillStyle = `rgba(0, 0, 0, ${fadeProgress})`
+          this.ctx.fillRect(0, 0, width, height)
         }
-
-        // Scanlines
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)'
-        for (let y = 0; y < height; y += 3) {
-          this.ctx.fillRect(0, y, width, 1)
-        }
-
-        // Fade to black
-        this.ctx.fillStyle = `rgba(0, 0, 0, ${progress * 0.7})`
-        this.ctx.fillRect(0, 0, width, height)
 
         if (progress < 1) {
           this.animationFrame = requestAnimationFrame(animate)
         } else {
+          // End with black screen
           this.ctx.fillStyle = '#000'
           this.ctx.fillRect(0, 0, width, height)
           resolve()
@@ -78,42 +84,53 @@ export class GlitchTransition {
     })
   }
 
-  // Simple glitch in - reverse effect
-  async glitchIn(duration: number = 350): Promise<void> {
+  // Simple chromatic aberration flash in (from black)
+  async glitchIn(duration: number = 150): Promise<void> {
     return new Promise((resolve) => {
+      const { width, height } = this.canvas
       const startTime = performance.now()
 
       const animate = (timestamp: number) => {
         const elapsed = timestamp - startTime
         const progress = Math.min(elapsed / duration, 1)
-        const intensity = 1 - Math.pow(progress, 0.5)
 
-        const { width, height } = this.canvas
+        // Start from black, fade out
+        const blackOpacity = 1 - progress
+
+        this.ctx.clearRect(0, 0, width, height)
+
+        // Chromatic aberration - strongest at start, fades out
+        const intensity = (1 - progress) * 0.4
 
         if (intensity > 0.05) {
-          this.ctx.fillStyle = '#000'
-          this.ctx.fillRect(0, 0, width, height)
+          // Red channel - offset left
+          this.ctx.fillStyle = `rgba(255, 0, 0, ${intensity * 0.3})`
+          this.ctx.fillRect(0, 0, width * 0.3, height)
 
-          // Fading glitch slices
-          const sliceCount = 8
-          const sliceHeight = height / sliceCount
+          // Cyan channel - offset right
+          this.ctx.fillStyle = `rgba(0, 255, 255, ${intensity * 0.3})`
+          this.ctx.fillRect(width * 0.7, 0, width * 0.3, height)
 
-          for (let i = 0; i < sliceCount; i++) {
-            const y = i * sliceHeight
-            const offset = (Math.random() - 0.5) * intensity * 50
+          // Quick glitch lines at start
+          if (progress < 0.3) {
+            const lineCount = Math.floor((1 - progress / 0.3) * 5)
+            for (let i = 0; i < lineCount; i++) {
+              const y = Math.random() * height
+              const offset = (Math.random() - 0.5) * 15
 
-            this.ctx.fillStyle = `rgba(204, 0, 0, ${0.3 * intensity})`
-            this.ctx.fillRect(offset, y, width, sliceHeight * 0.6)
+              this.ctx.fillStyle = `rgba(255, 0, 0, ${intensity})`
+              this.ctx.fillRect(offset, y, width, 2)
 
-            this.ctx.fillStyle = `rgba(0, 255, 255, ${0.2 * intensity})`
-            this.ctx.fillRect(-offset, y, width, sliceHeight * 0.6)
+              this.ctx.fillStyle = `rgba(0, 255, 255, ${intensity})`
+              this.ctx.fillRect(-offset, y + 1, width, 2)
+            }
           }
+        }
 
-          // Fade from black
-          this.ctx.fillStyle = `rgba(0, 0, 0, ${intensity})`
+        // Black overlay fading out
+        if (blackOpacity > 0.05) {
+          this.ctx.fillStyle = `rgba(0, 0, 0, ${blackOpacity})`
           this.ctx.fillRect(0, 0, width, height)
-        } else {
-          this.clear()
         }
 
         if (progress < 1) {
