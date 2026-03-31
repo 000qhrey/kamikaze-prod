@@ -3,6 +3,7 @@ import { EventCard } from '@/components/events/EventCard'
 import { PastEventCard } from '@/components/events/PastEventCard'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
+import { ScrambleText } from '@/components/effects/ScrambleText'
 
 export const metadata = {
   title: 'EVENTS | KAMIKAZE',
@@ -29,9 +30,16 @@ export default function EventsPage() {
       <div className="relative z-10 max-w-4xl mx-auto px-6 flex-grow pb-16">
         {/* Header */}
         <header className="mb-16">
-          <h1 className="font-display text-5xl md:text-7xl tracking-wider mb-4">
+          <ScrambleText
+            className="font-display text-5xl md:text-7xl tracking-wider mb-4 block"
+            triggerOnView
+            triggerOnHover={false}
+            duration={600}
+            resolveToColor="#CC0000"
+            finalColor="#EFEFEF"
+          >
             EVENTS
-          </h1>
+          </ScrambleText>
           <p className="font-mono text-white/70">
             Every event is a controlled collapse.
           </p>

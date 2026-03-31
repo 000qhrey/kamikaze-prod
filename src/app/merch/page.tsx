@@ -5,10 +5,13 @@ import { merchItems, MerchItem, CartItem } from '@/data/merch'
 import { MerchHeader } from '@/components/merch/MerchHeader'
 import { MerchGrid } from '@/components/merch/MerchGrid'
 import { ProductModal } from '@/components/merch/ProductModal'
+import { RitualChamber } from '@/components/merch/RitualChamber'
 import { useTransition } from '@/providers/TransitionProvider'
+import { useCountdown } from '@/hooks/useCountdown'
 
 export default function MerchPage() {
   const { navigateTo } = useTransition()
+  const countdown = useCountdown()
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [selectedItem, setSelectedItem] = useState<MerchItem | null>(null)
   const hasLoaded = useRef(false)
@@ -62,6 +65,12 @@ export default function MerchPage() {
   // Calculate cart count
   const cartCount = cartItems.reduce((sum, ci) => sum + ci.quantity, 0)
 
+  // Show Ritual Chamber lockup if countdown is not complete
+  if (!countdown.isComplete) {
+    return <RitualChamber />
+  }
+
+  // Show full merch page when countdown is complete
   return (
     <main className="min-h-screen bg-void">
       {/* Cart button - fixed, higher z-index than nav */}

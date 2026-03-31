@@ -1,6 +1,7 @@
 import { ManifestoSection } from '@/components/about/ManifestoSection'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
+import { ScrambleText } from '@/components/effects/ScrambleText'
 
 export const metadata = {
   title: 'MANIFESTO | KAMIKAZE',
@@ -38,9 +39,16 @@ export default function AboutPage() {
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
               [FILE://
             </span>
-            <h1 className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl tracking-wider break-words">
+            <ScrambleText
+              className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl tracking-wider break-words"
+              triggerOnView
+              triggerOnHover={false}
+              duration={600}
+              resolveToColor="#CC0000"
+              finalColor="#EFEFEF"
+            >
               MAIN_MANIFESTO
-            </h1>
+            </ScrambleText>
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
               ]
             </span>

@@ -1,5 +1,6 @@
 import { SignalUpload } from '@/components/artists/SignalUpload'
 import { AsciiSigilBackground } from '@/components/canvas/AsciiSigil'
+import { ScrambleText } from '@/components/effects/ScrambleText'
 
 export const metadata = {
   title: 'OPEN SIGNAL NETWORK | KAMIKAZE',
@@ -21,9 +22,16 @@ export default function ArtistsPage() {
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
               [SYS://
             </span>
-            <h1 className="font-display text-2xl xs:text-3xl sm:text-5xl md:text-7xl tracking-wider break-words">
+            <ScrambleText
+              className="font-display text-2xl xs:text-3xl sm:text-5xl md:text-7xl tracking-wider break-words"
+              triggerOnView
+              triggerOnHover={false}
+              duration={600}
+              resolveToColor="#CC0000"
+              finalColor="#EFEFEF"
+            >
               OPEN_SIGNAL_NETWORK
-            </h1>
+            </ScrambleText>
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
               ]
             </span>
