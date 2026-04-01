@@ -29,8 +29,8 @@ export const manifesto: MotoPanel[] = [
 ]
 
 export const contactInfo = {
-  email: 'enter@kamikaze.events',
-  booking: 'booking@kamikaze.events',
+  email: 'enter@kamikaze.host',
+  booking: 'booking@kamikaze.host',
   instagram: '@kamikaze.events',
   instagramUrl: 'https://instagram.com/kamikaze.events',
 }

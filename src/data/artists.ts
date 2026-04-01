@@ -25,7 +25,7 @@ export const artists: Artist[] = [
     slug: 'ibliiiz',
     photo: '/artists/ibliiiz.png',
     location: 'Underground',
-    bio: `The architect of sonic destruction. IBLIIIZ emerged from the depths of the underground scene with a singular mission—to dismantle the boundary between noise and transcendence.
+    bio: `The architect of sonic destruction. ibliiiz emerged from the depths of the underground scene with a singular mission—to dismantle the boundary between noise and transcendence.
 
 Every set is a ritual. Every track, an incantation. The dancefloor doesn't move to the music—it surrenders to it.
 
