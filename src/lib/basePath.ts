@@ -1,7 +1,6 @@
 // Base path for assets - must match next.config.js basePath
-// GitHub Pages (staging) needs /kamikaze prefix, Vercel (prod) is at root
-const isVercel = process.env.VERCEL === '1'
-export const basePath = process.env.NODE_ENV === 'production' && !isVercel ? '/kamikaze' : ''
+// Set NEXT_PUBLIC_BASE_PATH="" in Vercel, or "/kamikaze" for GitHub Pages
+export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 export function getAssetPath(path: string): string {
   // Ensure path starts with /

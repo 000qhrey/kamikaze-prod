@@ -31,6 +31,8 @@ jobs:
 
       - name: Build
         run: bun run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /kamikaze
 
       - name: Add .nojekyll
         run: touch out/.nojekyll

@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const path = require('path')
 
-const isProd = process.env.NODE_ENV === 'production'
-const isVercel = process.env.VERCEL === '1'
-
-// GitHub Pages (staging) needs /kamikaze prefix, Vercel (prod) is at root
-const basePath = isProd && !isVercel ? '/kamikaze' : ''
+// Set NEXT_PUBLIC_BASE_PATH="" in Vercel, or "/kamikaze" for GitHub Pages
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 const nextConfig = {
   output: 'export',
