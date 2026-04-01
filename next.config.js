@@ -2,11 +2,15 @@
 const path = require('path')
 
 const isProd = process.env.NODE_ENV === 'production'
+const isVercel = process.env.VERCEL === '1'
+
+// GitHub Pages (staging) needs /kamikaze prefix, Vercel (prod) is at root
+const basePath = isProd && !isVercel ? '/kamikaze' : ''
 
 const nextConfig = {
   output: 'export',
-  basePath: isProd ? '/kamikaze' : '',
-  assetPrefix: isProd ? '/kamikaze' : '',
+  basePath,
+  assetPrefix: basePath,
   trailingSlash: true,
   images: {
     unoptimized: true,
