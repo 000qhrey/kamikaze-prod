@@ -73,6 +73,7 @@ export function ManifestoTexture({
           lineHeight: 1,
           transform: `translateY(${parallaxOffset}px) translateX(-10%)`,
           top: '20%',
+          willChange: 'transform',
         }}
       >
         {displayText}
@@ -86,6 +87,7 @@ export function ManifestoTexture({
           lineHeight: 1,
           transform: `translateY(${parallaxOffset * 0.7}px) translateX(5%)`,
           top: '55%',
+          willChange: 'transform',
         }}
       >
         {displayText}
@@ -101,6 +103,7 @@ export function ManifestoTexture({
           right: '5%',
           top: '10%',
           transform: `translateY(${parallaxOffset * 0.5}px)`,
+          willChange: 'transform',
         }}
       >
         {displayText.split(' ').slice(0, 2).join(' ')}

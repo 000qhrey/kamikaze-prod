@@ -61,7 +61,7 @@ export function RitualChamber() {
       />
 
       {/* Ambient particles */}
-      <EmberParticles count={30} />
+      <EmberParticles count={15} />
 
       {/* Ambient glow layer */}
       <div

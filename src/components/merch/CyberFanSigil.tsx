@@ -1,14 +1,18 @@
 'use client'
 
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Environment } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import { useGLTF } from '@react-three/drei'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import * as THREE from 'three'
 import { getAssetPath } from '@/lib/basePath'
 
 // Configure Draco decoder
 useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+
+// Cached colors to avoid creating new objects every frame
+const ARTERIAL_RED = new THREE.Color('#CC0000')
+const SIGNAL_GREEN = new THREE.Color('#00ff41')
+const TEMP_COLOR = new THREE.Color()
 
 interface CyberFanModelProps {
   progress: number // 0-1 countdown progress
@@ -87,34 +91,21 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
     smoothEmissive.current = THREE.MathUtils.lerp(smoothEmissive.current, targetEmissive, 0.1)
 
     // Update materials - shift toward signal green as progress approaches 1
+    // Use cached colors to avoid GC pressure
+    TEMP_COLOR.copy(ARTERIAL_RED).lerp(SIGNAL_GREEN, smoothProgress.current * 0.3)
+
     meshesRef.current.forEach((mesh) => {
       const mat = mesh.material as THREE.MeshStandardMaterial
       mat.emissiveIntensity = smoothEmissive.current
-
-      // Color shift: arterial red -> signal green as countdown completes
-      const arterialRed = new THREE.Color('#CC0000')
-      const signalGreen = new THREE.Color('#00ff41')
-      const targetColor = arterialRed.clone().lerp(signalGreen, smoothProgress.current * 0.3)
-      mat.emissive.lerp(targetColor, 0.02)
+      mat.emissive.lerp(TEMP_COLOR, 0.02)
     })
   })
 
   return <primitive ref={group} object={clonedScene} scale={2} />
 }
 
-function PostProcessing({ progress }: { progress: number }) {
-  return (
-    <EffectComposer>
-      <Bloom
-        intensity={0.6 + progress * 0.4}
-        luminanceThreshold={0.2}
-        luminanceSmoothing={0.9}
-        mipmapBlur
-      />
-      <Vignette darkness={0.6} offset={0.3} />
-    </EffectComposer>
-  )
-}
+// Removed heavy post-processing (Bloom/Vignette) for performance
+// The emissive materials provide sufficient glow effect
 
 function LoadingFallback() {
   return (
@@ -128,17 +119,14 @@ function LoadingFallback() {
 function Scene({ progress }: { progress: number }) {
   return (
     <>
-      {/* No background - transparent canvas */}
-      <Environment preset="night" />
-
-      {/* Ambient */}
-      <ambientLight intensity={0.15} />
+      {/* Ambient - slightly increased to compensate for removed Environment */}
+      <ambientLight intensity={0.25} />
 
       {/* Key light - arterial red */}
       <pointLight position={[5, 5, 5]} intensity={1.2} color="#CC0000" />
       <pointLight position={[-5, -5, 5]} intensity={0.5} color="#400000" />
 
-      {/* Progress-reactive accent light - subtle red, not green */}
+      {/* Progress-reactive accent light */}
       <pointLight
         position={[0, 3, 0]}
         intensity={progress * 0.5}
@@ -146,8 +134,6 @@ function Scene({ progress }: { progress: number }) {
       />
 
       <CyberFanModel progress={progress} />
-
-      <PostProcessing progress={progress} />
     </>
   )
 }
@@ -159,7 +145,10 @@ interface CyberFanSigilProps {
 
 export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
   const [canRender, setCanRender] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Check WebGL support
   useEffect(() => {
     try {
       const canvas = document.createElement('canvas')
@@ -172,10 +161,26 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     }
   }, [])
 
+  // Lazy render - only when in viewport
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1, rootMargin: '100px' }
+    )
+
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
+
   if (!canRender) {
     // Fallback for no WebGL - show simple CSS sigil
     return (
-      <div className={`w-64 h-64 flex items-center justify-center ${className || ''}`}>
+      <div
+        ref={containerRef}
+        className={`w-64 h-64 flex items-center justify-center ${className || ''}`}
+      >
         <div
           className="w-32 h-32 border border-arterial/50 rotate-45"
           style={{
@@ -187,10 +192,14 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
   }
 
   return (
-    <div className={`w-80 h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] ${className || ''}`}>
+    <div
+      ref={containerRef}
+      className={`w-80 h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] ${className || ''}`}
+    >
       <Canvas
         camera={{ position: [0, 0, 6], fov: 40 }}
-        dpr={[1, 2]}
+        dpr={[1, 1.5]}
+        frameloop={isVisible ? 'always' : 'demand'}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <Suspense fallback={<LoadingFallback />}>

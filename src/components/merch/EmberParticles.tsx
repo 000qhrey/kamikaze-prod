@@ -16,7 +16,7 @@ interface EmberParticlesProps {
   className?: string
 }
 
-export function EmberParticles({ count = 25, className }: EmberParticlesProps) {
+export function EmberParticles({ count = 15, className }: EmberParticlesProps) {
   const embers = useMemo<Ember[]>(() => {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -43,6 +43,7 @@ export function EmberParticles({ count = 25, className }: EmberParticlesProps) {
             opacity: ember.opacity,
             filter: 'blur(1px)',
             animation: `ember-float ${ember.duration}s linear ${ember.delay}s infinite`,
+            willChange: 'transform, opacity',
           }}
         />
       ))}
