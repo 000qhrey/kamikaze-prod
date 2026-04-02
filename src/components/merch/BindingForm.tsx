@@ -1,67 +1,78 @@
 'use client'
 
-import { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent } from 'react'
 import { TornInput } from '@/components/ui/TornInput'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
-import {
-  addToWaitlist,
-  isAlreadyBound,
-  getWaitlistCount,
-  isValidEmail,
-  getEntry,
-  WaitlistEntry,
-} from '@/lib/waitlist'
 import clsx from 'clsx'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'already_bound' | 'error'
+
+// Construct Edge Function URL from Supabase URL
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const EDGE_FUNCTION_URL = SUPABASE_URL
+  ? `${SUPABASE_URL}/functions/v1/join-waitlist`
+  : ''
+
+interface WaitlistResponse {
+  success: boolean
+  message: string
+  serialKey?: string
+}
 
 export function BindingForm() {
   const [email, setEmail] = useState('')
   const [formState, setFormState] = useState<FormState>('idle')
   const [isFormFocused, setIsFormFocused] = useState(false)
-  const [initiateNumber, setInitiateNumber] = useState<number | null>(null)
-  const [waitlistCount, setWaitlistCount] = useState(247)
+  const [serialKey, setSerialKey] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
-
-  // Load initial count
-  useEffect(() => {
-    setWaitlistCount(getWaitlistCount())
-  }, [])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrorMessage('')
 
-    // Validate email
-    if (!isValidEmail(email)) {
+    // Basic client-side validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailPattern.test(email.trim())) {
       setErrorMessage('INVALID FREQUENCY FORMAT // Expected: signal@domain.ext')
       setFormState('error')
       return
     }
 
-    // Check if already bound
-    const existingEntry = getEntry(email)
-    if (existingEntry) {
-      setInitiateNumber(existingEntry.initiateNumber)
-      setFormState('already_bound')
+    if (!EDGE_FUNCTION_URL) {
+      setErrorMessage('UPLINK_OFFLINE // System not configured.')
+      setFormState('error')
       return
     }
 
     setFormState('submitting')
 
-    // Simulate network delay for dramatic effect
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
 
-    // Add to waitlist
-    const entry = addToWaitlist(email)
-    if (entry) {
-      setInitiateNumber(entry.initiateNumber)
-      setWaitlistCount(entry.initiateNumber)
-      setFormState('success')
-    } else {
-      setFormState('already_bound')
+      const result: WaitlistResponse = await response.json()
+
+      if (result.success) {
+        setSerialKey(result.serialKey || null)
+        setFormState('success')
+      } else if (result.message === 'SIGNAL_ALREADY_BOUND') {
+        setSerialKey(result.serialKey || null)
+        setFormState('already_bound')
+      } else if (result.message === 'INVALID_FREQUENCY_FORMAT') {
+        setErrorMessage('INVALID FREQUENCY FORMAT // Expected: signal@domain.ext')
+        setFormState('error')
+      } else {
+        setErrorMessage('UPLINK_FAILED // Signal transmission error. Retry.')
+        setFormState('error')
+      }
+    } catch {
+      setErrorMessage('TRANSMISSION_ERROR // Network failure. Retry.')
+      setFormState('error')
     }
   }
 
@@ -77,7 +88,7 @@ export function BindingForm() {
           </GlitchSlice>
 
           <div className="font-display text-2xl text-arterial mb-4">
-            INITIATE #{initiateNumber}
+            #{serialKey}
           </div>
 
           <p className="font-mono text-sm text-white/60 leading-relaxed">
@@ -88,7 +99,7 @@ export function BindingForm() {
 
           <div className="mt-6 pt-4 border-t border-white/10">
             <span className="font-mono text-xs text-white/40">
-              {waitlistCount} ENTITIES BOUND TO THIS FREQUENCY
+              CHECK YOUR INBOX FOR CONFIRMATION
             </span>
           </div>
         </div>
@@ -106,7 +117,7 @@ export function BindingForm() {
           </div>
 
           <div className="font-display text-xl text-white mb-4">
-            INITIATE #{initiateNumber}
+            #{serialKey}
           </div>
 
           <p className="font-mono text-sm text-white/60">
@@ -196,7 +207,7 @@ export function BindingForm() {
         {/* Social proof */}
         <div className="text-center pt-4 border-t border-white/10">
           <span className="font-mono text-xs text-white/40">
-            {waitlistCount} INITIATES HAVE BOUND THEIR SIGNAL
+            PRIORITY ACCESS FOR EARLY INITIATES
           </span>
         </div>
       </form>

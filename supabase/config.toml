@@ -1,0 +1,4 @@
+# Supabase config for kamikaze project
+
+[functions.join-waitlist]
+verify_jwt = false
