@@ -4,8 +4,8 @@ import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'KAMIKAZE | Underground Never Dies',
-  description: 'We don\'t make music. We make ruptures. Underground techno events. The underground never dies.',
+  title: 'KAMIKAZE | Underground Will Never Die',
+  description: 'We don\'t make music. We make ruptures. Underground techno events. The underground will never die.',
   keywords: ['techno', 'rave', 'underground', 'electronic music', 'IN', 'events', 'kamikaze'],
   openGraph: {
     title: 'KAMIKAZE',

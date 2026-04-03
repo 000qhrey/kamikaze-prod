@@ -20,7 +20,7 @@ const NAV_LINKS = [
 const GLITCH_CHARS = '▓▒░█▄▀■□●○◆◇▲△▼▽◀▶◁▷★☆⬛⬜'
 const KANJI_TEXT = '神風'
 const BATTERY_TEXT = '▓▓▓▓▓▓▓'
-const FULL_TEXT = 'UNDERGROUND NEVER DIES'
+const FULL_TEXT = 'UNDERGROUND WILL NEVER DIE'
 
 type HoverPhase = 'kanji' | 'battery' | 'full'
 

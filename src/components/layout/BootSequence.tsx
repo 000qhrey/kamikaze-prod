@@ -201,7 +201,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
         KAMIKAZE_NET
       </div>
       <div className="absolute bottom-4 left-4 font-mono text-[10px] text-white/50">
-        THE UNDERGROUND NEVER DIES
+        THE UNDERGROUND WILL NEVER DIE
       </div>
       <div className="absolute bottom-4 right-4 font-mono text-[10px] text-white/50">
         {isReady ? '[INTERACTIVE]' : '[LOADING...]'}

@@ -68,14 +68,7 @@ export function DepthLayers() {
         aria-hidden="true"
       />
 
-      {/* Vignette */}
-      <div
-        className="fixed inset-0 pointer-events-none z-[50]"
-        style={{
-          boxShadow: `inset 0 0 ${200 + scrollProgress * 50}px ${60 + scrollProgress * 40}px rgba(0, 0, 0, 0.85)`,
-        }}
-        aria-hidden="true"
-      />
+      {/* Vignette + Scanlines removed - handled by SigilScene3D post-processing */}
 
       {/* Red corner bleed */}
       <div
@@ -89,10 +82,7 @@ export function DepthLayers() {
         aria-hidden="true"
       />
 
-      {/* Scanlines */}
-      <div className="scanlines" aria-hidden="true" />
-
-      {/* Film grain */}
+      {/* Film grain - now CSS-based, minimal overhead */}
       <FilmGrain />
 
       {/* Random glitch tear */}

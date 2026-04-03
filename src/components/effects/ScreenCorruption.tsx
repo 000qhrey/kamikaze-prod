@@ -78,26 +78,9 @@ export function ScreenCorruption() {
 
   if (dangerLevel === 0) return null
 
-  const scanlineOpacity = dangerLevel === 3 ? 0.15 : dangerLevel === 2 ? 0.1 : 0.05
-  const noiseOpacity = dangerLevel === 3 ? 0.08 : dangerLevel === 2 ? 0.04 : 0.02
-
   return (
     <div className="fixed inset-0 pointer-events-none z-[90]">
-      {/* CRT Scanlines - intensity scales with danger */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, ${scanlineOpacity}) 2px,
-            rgba(0, 0, 0, ${scanlineOpacity}) 4px
-          )`,
-        }}
-      />
-
-      {/* VHS Tracking bands - horizontal displacement */}
+      {/* VHS Tracking bands - horizontal displacement (unique effect) */}
       {trackingBands.map((band, i) => (
         <div
           key={i}
@@ -111,15 +94,7 @@ export function ScreenCorruption() {
         />
       ))}
 
-      {/* Noise grain overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          opacity: noiseOpacity,
-          mixBlendMode: 'overlay',
-        }}
-      />
+      {/* Scanlines, noise, vignette removed - handled by SigilScene3D post-processing */}
 
       {/* Red flash on critical (level 3) */}
       <div
@@ -127,14 +102,6 @@ export function ScreenCorruption() {
           'absolute inset-0 bg-arterial/30 transition-opacity duration-75',
           flashActive ? 'opacity-100' : 'opacity-0'
         )}
-      />
-
-      {/* Screen edge vignette - intensifies with danger */}
-      <div
-        className="absolute inset-0"
-        style={{
-          boxShadow: `inset 0 0 ${dangerLevel * 50}px ${dangerLevel * 20}px rgba(0, 0, 0, 0.5)`,
-        }}
       />
 
       {/* Corner warning indicators */}

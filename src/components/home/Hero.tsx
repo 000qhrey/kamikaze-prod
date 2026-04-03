@@ -155,7 +155,7 @@ export function Hero() {
               textShadow: audioIntensity > 0.3 ? '0 0 10px rgba(204, 0, 0, 0.5)' : 'none',
             }}
           >
-            UNDERGROUND NEVER DIES
+            UNDERGROUND WILL NEVER DIE
           </p>
 
           {/* Audio level indicator */}

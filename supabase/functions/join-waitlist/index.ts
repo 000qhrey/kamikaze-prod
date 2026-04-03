@@ -1,17 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-function corsHeaders(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  const allowed = /^https:\/\/(kamikaze\.host|zhreyu\.github\.io)$/.test(origin)
-    ? origin
-    : 'https://kamikaze.host';
-
-  return {
-    'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*', // Lock to 'https://kamikaze.host' in production
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
+
 function generateSerialKey(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let result = 'KMKZ-'
@@ -74,7 +68,7 @@ function buildEmailHtml(serialKey: string): string {
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders(req) })
+    return new Response(null, { headers: corsHeaders })
   }
 
   if (req.method !== 'POST') {

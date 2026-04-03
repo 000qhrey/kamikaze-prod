@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, useAnimations, Environment, ContactShadows, Html } from '@react-three/drei'
-import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, Noise, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import * as THREE from 'three'
@@ -326,24 +326,21 @@ function FloorLight() {
   )
 }
 
-// Post-processing effects (static - refs cause React 19 circular JSON issues)
+// Post-processing effects - optimized for performance
+// multisampling=0 disables MSAA (we have bloom for softening)
 function PostProcessing() {
   return (
-    <EffectComposer>
+    <EffectComposer multisampling={0}>
       <Bloom
-        intensity={0.8}
-        luminanceThreshold={0.2}
+        intensity={0.5} // Reduced from 0.8
+        luminanceThreshold={0.4} // Raised from 0.2 (less bloom triggers)
         luminanceSmoothing={0.9}
         mipmapBlur
+        radius={0.4} // Tighter bloom radius
       />
-      <ChromaticAberration
-        offset={new THREE.Vector2(0.003, 0.003)}
-        blendFunction={BlendFunction.NORMAL}
-        radialModulation={false}
-        modulationOffset={0}
-      />
-      <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
-      <Vignette darkness={0.5} offset={0.3} />
+      {/* ChromaticAberration removed - expensive, subtle effect */}
+      <Noise opacity={0.02} blendFunction={BlendFunction.OVERLAY} />
+      <Vignette darkness={0.4} offset={0.3} />
     </EffectComposer>
   )
 }
@@ -392,22 +389,28 @@ function Scene() {
 
 export default function SigilScene3D() {
   const [canRender, setCanRender] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
+  // Check WebGL support
   useEffect(() => {
     try {
       const canvas = document.createElement('canvas')
       const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
       if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info')
-        if (debugInfo) {
-          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
-          console.log('[SigilScene3D] GPU:', renderer)
-        }
         setCanRender(true)
       }
     } catch {
       console.warn('[SigilScene3D] WebGL not available')
     }
+  }, [])
+
+  // Pause rendering when tab is hidden (saves CPU/GPU)
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsVisible(!document.hidden)
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [])
 
   if (!canRender) {
@@ -418,8 +421,15 @@ export default function SigilScene3D() {
     <div className="fixed inset-0 -z-10 bg-[#050505]">
       <Canvas
         camera={{ position: [0, 0, 10], fov: 35 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        dpr={[0.75, 1.5]} // Reduced from [1, 2] for better perf
+        frameloop={isVisible ? 'always' : 'never'} // Pause when tab hidden
+        gl={{
+          antialias: false, // Disabled - bloom hides jaggies
+          alpha: false,
+          powerPreference: 'high-performance',
+          stencil: false, // Not needed
+          depth: true,
+        }}
       >
         <Suspense fallback={<LoadingFallback />}>
           <Scene />
