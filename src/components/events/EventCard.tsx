@@ -5,6 +5,7 @@ import { Event, formatEventDate } from '@/data/events'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
 import { playErrorSound, playSubmitSound, playHoverSound } from '@/hooks/useSonicFeedback'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import clsx from 'clsx'
 
 // Glitch characters for the reveal effect
@@ -42,6 +43,7 @@ export function EventCard({ event, index }: EventCardProps) {
   const [statusMessage, setStatusMessage] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
   const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isMobile = useIsMobile()
   const isSoldOut = !event.ticketUrl
   const isSecretLocation = event.isSecretLocation
   const isFullyRedacted = event.isFullyRedacted
@@ -187,21 +189,21 @@ export function EventCard({ event, index }: EventCardProps) {
     })
   }, [])
 
-  // Alternate skew direction based on index
+  // Alternate skew direction based on index - disabled on mobile
   const skewDirection = index % 2 === 0 ? -1.5 : 1.5
 
   return (
     <div
       ref={cardRef}
       className={clsx(
-        'relative cursor-none select-none',
+        'relative select-none',
+        isMobile ? 'cursor-pointer' : 'cursor-none',
         'transition-all duration-500 ease-out',
-        isHovered ? 'scale-[1.02]' : 'scale-100'
+        isHovered && !isMobile ? 'scale-[1.02]' : 'scale-100'
       )}
       style={{
-        transform: `skewY(${skewDirection}deg)`,
-        marginLeft: index % 2 === 0 ? '0' : '2rem',
-        marginRight: index % 2 === 0 ? '2rem' : '0',
+        // Disable skew on mobile for better responsiveness
+        transform: isMobile ? 'none' : `skewY(${skewDirection}deg)`,
       }}
       onClick={() => setIsExpanded(!isExpanded)}
       onMouseMove={handleMouseMove}
@@ -237,14 +239,15 @@ export function EventCard({ event, index }: EventCardProps) {
         className={clsx(
           'relative border-l-4 border-arterial glass-card',
           'transition-all duration-300',
-          isHovered ? 'glass-card-heavy border-l-8' : ''
+          isHovered && !isMobile ? 'glass-card-heavy border-l-8' : ''
         )}
         style={{
-          transform: `skewY(${-skewDirection}deg)`, // Counter-skew content
+          // Counter-skew content (disabled on mobile)
+          transform: isMobile ? 'none' : `skewY(${-skewDirection}deg)`,
         }}
       >
-        {/* Crosshair cursor */}
-        {isHovered && (
+        {/* Crosshair cursor - desktop only */}
+        {isHovered && !isMobile && (
           <div
             className="absolute pointer-events-none z-50 transition-opacity duration-150"
             style={{
@@ -271,31 +274,33 @@ export function EventCard({ event, index }: EventCardProps) {
           </div>
         )}
 
-        {/* Giant date - overlapping brutalist style */}
-        <div
-          className={clsx(
-            'absolute -left-4 md:-left-8 top-0 bottom-0 flex items-center',
-            'pointer-events-none select-none'
-          )}
-        >
-          <span
+        {/* Giant date - overlapping brutalist style (desktop only) */}
+        {!isMobile && (
+          <div
             className={clsx(
-              'font-display text-[4rem] md:text-[6rem] leading-none',
-              'text-arterial/20 transition-all duration-500',
-              isHovered ? 'text-arterial/40 scale-110' : ''
+              'absolute -left-4 md:-left-8 top-0 bottom-0 flex items-center',
+              'pointer-events-none select-none'
             )}
-            style={{
-              writingMode: 'vertical-rl',
-              textOrientation: 'mixed',
-              transform: 'rotate(180deg)',
-            }}
           >
-            {getDisplayDate().replace(/\./g, '')}
-          </span>
-        </div>
+            <span
+              className={clsx(
+                'font-display text-[4rem] md:text-[6rem] leading-none',
+                'text-arterial/20 transition-all duration-500',
+                isHovered ? 'text-arterial/40 scale-110' : ''
+              )}
+              style={{
+                writingMode: 'vertical-rl',
+                textOrientation: 'mixed',
+                transform: 'rotate(180deg)',
+              }}
+            >
+              {getDisplayDate().replace(/\./g, '')}
+            </span>
+          </div>
+        )}
 
         {/* Content - left aligned brutalist */}
-        <div className="relative p-8 pl-16 md:pl-24">
+        <div className="relative p-4 sm:p-6 md:p-8 md:pl-24">
           {/* Date badge - small */}
           <div className="font-mono text-xs text-arterial mb-2 tracking-widest">
             {getDisplayDate()} {'// '}
@@ -314,9 +319,9 @@ export function EventCard({ event, index }: EventCardProps) {
           {/* Event name - huge */}
           <h3
             className={clsx(
-              'font-display text-4xl md:text-6xl tracking-tight leading-none mb-6',
+              'font-display text-2xl sm:text-4xl md:text-6xl tracking-tight leading-none mb-4 sm:mb-6',
               'transition-all duration-300',
-              isHovered ? 'tracking-wider' : ''
+              isHovered && !isMobile ? 'tracking-wider' : ''
             )}
           >
             {event.name}
@@ -465,8 +470,8 @@ export function EventCard({ event, index }: EventCardProps) {
           >
             <div
               className={clsx(
-                'font-display text-[6rem] md:text-[10rem] text-arterial/20',
-                'border-8 border-arterial/20 px-12 py-4',
+                'font-display text-[3rem] sm:text-[6rem] md:text-[10rem] text-arterial/20',
+                'border-4 sm:border-8 border-arterial/20 px-6 sm:px-12 py-2 sm:py-4',
                 'transform -rotate-12',
                 'animate-pulse'
               )}

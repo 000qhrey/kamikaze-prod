@@ -22,6 +22,7 @@ import {
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { getAssetPath } from '@/lib/basePath'
 import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
 import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
 
@@ -340,7 +341,25 @@ function FloorLight() {
 }
 
 // Post-processing effects (static - refs cause React 19 circular JSON issues)
-function PostProcessing() {
+// Desktop: Full effects | Mobile: Reduced for performance
+function PostProcessing({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) {
+    // Mobile: Minimal effects - just bloom and vignette
+    return (
+      <EffectComposer multisampling={0}>
+        <Bloom
+          intensity={0.4}
+          luminanceThreshold={0.4}
+          luminanceSmoothing={0.5}
+          mipmapBlur
+          radius={0.2}
+        />
+        <Vignette darkness={0.4} offset={0.3} />
+      </EffectComposer>
+    )
+  }
+
+  // Desktop: Full effects
   return (
     <EffectComposer>
       <Bloom
@@ -370,7 +389,7 @@ function LoadingFallback() {
   )
 }
 
-function Scene() {
+function Scene({ isMobile }: { isMobile: boolean }) {
   return (
     <>
       <color attach="background" args={['#050505']} />
@@ -389,22 +408,26 @@ function Scene() {
 
       <SigilModel hoveredNav={null} />
 
-      <ContactShadows
-        position={[0, -3.5, 0]}
-        opacity={0.4}
-        scale={15}
-        blur={2}
-        far={4.5}
-      />
+      {/* ContactShadows: disable on mobile for performance */}
+      {!isMobile && (
+        <ContactShadows
+          position={[0, -3.5, 0]}
+          opacity={0.4}
+          scale={15}
+          blur={2}
+          far={4.5}
+        />
+      )}
 
       {/* Post-processing effects */}
-      <PostProcessing />
+      <PostProcessing isMobile={isMobile} />
     </>
   )
 }
 
 export default function SigilScene3D() {
   const [canRender, setCanRender] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     try {
@@ -427,15 +450,23 @@ export default function SigilScene3D() {
     return <div className="fixed inset-0 -z-10 bg-[#050505]" />
   }
 
+  // Mobile: lower DPR, no antialiasing | Desktop: full quality
+  const dpr: [number, number] = isMobile ? [1, 1.5] : [1, 2]
+
   return (
     <div className="fixed inset-0 -z-10 bg-[#050505]">
       <Canvas
         camera={{ position: [0, 0, 10], fov: 35 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        dpr={dpr}
+        gl={{
+          antialias: !isMobile,
+          alpha: false,
+          powerPreference: 'high-performance',
+          stencil: false,
+        }}
       >
         <Suspense fallback={<LoadingFallback />}>
-          <Scene />
+          <Scene isMobile={isMobile} />
         </Suspense>
       </Canvas>
     </div>

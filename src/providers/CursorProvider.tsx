@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react'
 import { CursorTrailRenderer } from '@/lib/canvas/cursorTrail'
+import { checkIsMobile } from '@/hooks/useIsMobile'
 
 interface CursorContextValue {
   isHovering: boolean
@@ -27,6 +28,11 @@ export function CursorProvider({ children }: CursorProviderProps) {
   const trailRef = useRef<CursorTrailRenderer | null>(null)
 
   useEffect(() => {
+    // Skip cursor trail on mobile - no cursor on touch devices
+    if (checkIsMobile()) {
+      return
+    }
+
     // Create canvas for cursor trail
     const canvas = document.createElement('canvas')
     canvas.style.cssText = `

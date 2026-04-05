@@ -37,8 +37,8 @@ export function TelemetryCard({
   return (
     <div
       className={clsx(
-        'relative group',
-        onClick && 'cursor-pointer',
+        'relative group transition-transform duration-150',
+        onClick && 'cursor-pointer active:scale-[0.98]',
         className
       )}
       onClick={onClick}
@@ -105,11 +105,11 @@ export function TelemetryCard({
         {children}
       </div>
 
-      {/* Hover glow effect */}
+      {/* Hover/Active glow effect */}
       <div
         className={clsx(
-          'absolute inset-0 bg-arterial/5 opacity-0 group-hover:opacity-100',
-          'transition-opacity duration-300 pointer-events-none'
+          'absolute inset-0 bg-arterial/5 opacity-0 group-hover:opacity-100 group-active:opacity-100 group-active:bg-arterial/10',
+          'transition-all duration-300 pointer-events-none'
         )}
       />
     </div>

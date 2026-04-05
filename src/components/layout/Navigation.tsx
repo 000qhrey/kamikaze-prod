@@ -196,10 +196,10 @@ export function Navigation() {
             })}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Enhanced visibility */}
           <button
             onClick={() => setIsMobileOpen(true)}
-            className="md:hidden font-mono text-sm text-white tracking-wider"
+            className="md:hidden font-mono text-sm text-white tracking-wider px-4 py-3 min-h-[44px] border border-arterial/60 bg-black/60 hover:bg-arterial/20 hover:border-arterial active:scale-95 active:bg-arterial/30 focus-visible:ring-2 focus-visible:ring-arterial focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-all menu-pulse"
             aria-label="Open menu"
           >
             [MENU]
@@ -220,6 +220,19 @@ export function Navigation() {
         @keyframes drip-pulse {
           0%, 100% { height: 12px; }
           50% { height: 16px; }
+        }
+        @keyframes menu-pulse {
+          0%, 100% { box-shadow: 0 0 15px rgba(204, 0, 0, 0.4); }
+          50% { box-shadow: 0 0 25px rgba(204, 0, 0, 0.6); }
+        }
+        .menu-pulse {
+          animation: menu-pulse 2s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .menu-pulse {
+            animation: none;
+            box-shadow: 0 0 20px rgba(204, 0, 0, 0.5);
+          }
         }
       `}</style>
     </>

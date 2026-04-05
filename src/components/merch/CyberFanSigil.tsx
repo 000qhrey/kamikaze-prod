@@ -5,6 +5,7 @@ import { useGLTF } from '@react-three/drei'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import { Color, Group, Mesh, MeshStandardMaterial, MathUtils } from 'three'
 import { getAssetPath } from '@/lib/basePath'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 // Configure Draco decoder (local for faster loading)
 useGLTF.setDecoderPath(getAssetPath('/draco/'))
@@ -147,6 +148,7 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
   const [canRender, setCanRender] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
 
   // Check WebGL support
   useEffect(() => {
@@ -191,6 +193,9 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     )
   }
 
+  // Mobile: lower DPR, no antialiasing | Desktop: full quality
+  const dpr: [number, number] = isMobile ? [1, 1] : [1, 1.5]
+
   return (
     <div
       ref={containerRef}
@@ -198,9 +203,14 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     >
       <Canvas
         camera={{ position: [0, 0, 6], fov: 40 }}
-        dpr={[1, 1.5]}
+        dpr={dpr}
         frameloop={isVisible ? 'always' : 'demand'}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: 'high-performance',
+          stencil: false,
+        }}
       >
         <Suspense fallback={<LoadingFallback />}>
           <Scene progress={progress} />

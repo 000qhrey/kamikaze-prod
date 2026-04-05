@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { getScrollProgress } from '@/hooks/useScrollStore'
 import { getBass } from '@/hooks/useAudioEngine'
+import { useTransition } from '@/providers/TransitionProvider'
 import clsx from 'clsx'
 
 export function Hero() {
@@ -13,6 +14,7 @@ export function Hero() {
   const [mouseDistance, setMouseDistance] = useState(0)
   const [audioIntensity, setAudioIntensity] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const { navigateTo } = useTransition()
 
   // Detect mobile to disable depth scrolling
   useEffect(() => {
@@ -174,6 +176,32 @@ export function Hero() {
             </div>
           )}
         </div>
+
+        {/* Mobile Quick Access CTAs - thumb zone positioning */}
+        {isMobile && isVisible && (
+          <div className="absolute bottom-28 left-0 right-0 px-6 flex justify-center gap-6 pointer-events-auto">
+            {/* Primary CTA - Events (filled style) */}
+            <button
+              onClick={() => navigateTo('/events')}
+              className="font-mono text-sm tracking-widest bg-arterial/20 border border-arterial px-6 py-4 min-h-[44px] hover:bg-arterial/30 active:scale-95 active:bg-arterial/40 transition-all"
+              style={{
+                boxShadow: `0 0 ${15 + audioIntensity * 20}px rgba(204, 0, 0, ${0.3 + audioIntensity * 0.3})`,
+              }}
+            >
+              [ EVENTS ]
+            </button>
+            {/* Secondary CTA - Merch (ghost style) */}
+            <button
+              onClick={() => navigateTo('/merch')}
+              className="font-mono text-sm tracking-widest bg-black/70 border border-arterial/50 px-6 py-4 min-h-[44px] hover:border-arterial hover:bg-arterial/10 active:scale-95 active:bg-arterial/20 transition-all"
+              style={{
+                boxShadow: `0 0 ${10 + audioIntensity * 15}px rgba(204, 0, 0, ${0.2 + audioIntensity * 0.2})`,
+              }}
+            >
+              [ MERCH ]
+            </button>
+          </div>
+        )}
 
         {/* Scroll indicator - hidden on mobile (no depth scrolling) */}
         {!isMobile && heroProgress < 0.8 && (

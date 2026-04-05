@@ -13,6 +13,7 @@ import {
   DoubleSide,
 } from 'three'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 // Shared state for cross-component communication
 let activeGenre: Genre | null = null
@@ -274,12 +275,15 @@ function FrequencyRing() {
   )
 }
 
-function Scene() {
+function Scene({ isMobile }: { isMobile: boolean }) {
+  // Mobile: 500 particles | Desktop: 1500 particles
+  const particleCount = isMobile ? 500 : 1500
+
   return (
     <>
       <color attach="background" args={['#050505']} />
       <ambientLight intensity={0.1} />
-      <WaveformParticles count={1500} />
+      <WaveformParticles count={particleCount} />
       <FrequencyRing />
     </>
   )
@@ -291,6 +295,7 @@ function LoadingFallback() {
 
 export default function FrequencySigil() {
   const [canRender, setCanRender] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     try {
@@ -308,19 +313,23 @@ export default function FrequencySigil() {
     return null
   }
 
+  // Mobile: lower DPR, no antialiasing | Desktop: full quality
+  const dpr: [number, number] = isMobile ? [1, 1] : [1, 1.5]
+
   return (
     <div className="absolute inset-0 -z-10 opacity-60">
       <Canvas
         camera={{ position: [0, 8, 0], fov: 50 }}
-        dpr={[1, 1.5]}
+        dpr={dpr}
         gl={{
-          antialias: true,
+          antialias: !isMobile,
           alpha: true,
           powerPreference: 'high-performance',
+          stencil: false,
         }}
       >
         <Suspense fallback={<LoadingFallback />}>
-          <Scene />
+          <Scene isMobile={isMobile} />
         </Suspense>
       </Canvas>
     </div>

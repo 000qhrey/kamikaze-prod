@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { FilmGrain } from './FilmGrain'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 export function DepthLayers() {
+  const isMobile = useIsMobile()
   const [scrollProgress, setScrollProgress] = useState(0)
   const [glitchActive, setGlitchActive] = useState(false)
   const [glitchY, setGlitchY] = useState(0)
@@ -47,8 +49,8 @@ export function DepthLayers() {
 
   return (
     <>
-      {/* Perspective grid floor */}
-      <div className="perspective-grid" aria-hidden="true" />
+      {/* Perspective grid floor - disable on mobile for performance */}
+      {!isMobile && <div className="perspective-grid" aria-hidden="true" />}
 
       {/* Fog layer - thickens with scroll */}
       <div
@@ -89,14 +91,14 @@ export function DepthLayers() {
         aria-hidden="true"
       />
 
-      {/* Scanlines */}
-      <div className="scanlines" aria-hidden="true" />
+      {/* Scanlines - disable on mobile */}
+      {!isMobile && <div className="scanlines" aria-hidden="true" />}
 
-      {/* Film grain */}
-      <FilmGrain />
+      {/* Film grain - disable on mobile for performance */}
+      {!isMobile && <FilmGrain />}
 
-      {/* Random glitch tear */}
-      {glitchActive && (
+      {/* Random glitch tear - disable on mobile */}
+      {!isMobile && glitchActive && (
         <div
           className="fixed left-0 right-0 pointer-events-none z-[9997]"
           style={{

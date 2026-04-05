@@ -26,6 +26,7 @@ import {
 } from 'three'
 import { getScrollVelocity, getRawScrollVelocity } from '@/hooks/useScrollStore'
 import { getBass, getMids, getHighs, getIsSwitching } from '@/hooks/useAudioEngine'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
 
 // ============================================
@@ -539,8 +540,26 @@ function AtmospherePlane() {
 // ============================================
 // POST-PROCESSING
 // Downsampled bloom for performance
+// Desktop: Full effects | Mobile: Minimal
 // ============================================
-function PostProcessing() {
+function PostProcessing({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) {
+    // Mobile: Just bloom and vignette
+    return (
+      <EffectComposer multisampling={0}>
+        <Bloom
+          intensity={0.1}
+          luminanceThreshold={0.8}
+          luminanceSmoothing={0.2}
+          mipmapBlur
+          radius={0.2}
+        />
+        <Vignette darkness={0.3} offset={0.3} />
+      </EffectComposer>
+    )
+  }
+
+  // Desktop: Full effects
   return (
     <EffectComposer multisampling={0}>
       <Bloom
@@ -564,8 +583,12 @@ function PostProcessing() {
 
 // ============================================
 // MAIN SCENE
+// Desktop: Full effects | Mobile: Reduced particles
 // ============================================
-function Scene() {
+function Scene({ isMobile }: { isMobile: boolean }) {
+  // Mobile: 200 particles | Desktop: 600 particles
+  const particleCount = isMobile ? 200 : 600
+
   return (
     <>
       <color attach="background" args={['#050505']} />
@@ -581,17 +604,17 @@ function Scene() {
       {/* Atmosphere background */}
       <AtmospherePlane />
 
-      {/* Data Dust particle stream */}
-      <DataDust count={600} />
+      {/* Data Dust particle stream - reduced on mobile */}
+      <DataDust count={particleCount} />
 
-      {/* Radar mesh floor */}
-      <RadarMesh />
+      {/* Radar mesh floor - disable on mobile for performance */}
+      {!isMobile && <RadarMesh />}
 
       {/* 3D Toroidal pulses - disabled, too organic */}
       {/* <ToroidalPulses /> */}
 
       {/* Post-processing */}
-      <PostProcessing />
+      <PostProcessing isMobile={isMobile} />
     </>
   )
 }
@@ -601,6 +624,7 @@ function Scene() {
 // ============================================
 export default function NeuralVoid() {
   const [canRender, setCanRender] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     try {
@@ -618,11 +642,14 @@ export default function NeuralVoid() {
     return null
   }
 
+  // Mobile: lower DPR | Desktop: standard
+  const dpr: [number, number] = isMobile ? [1, 1] : [1, 1.5]
+
   return (
     <div className="fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 0, 8], fov: 50 }}
-        dpr={[1, 1.5]} // Cap DPR for performance
+        dpr={dpr}
         gl={{
           antialias: false, // Disable for perf (bloom will hide jaggies)
           alpha: false,
@@ -632,7 +659,7 @@ export default function NeuralVoid() {
         }}
       >
         <Suspense fallback={null}>
-          <Scene />
+          <Scene isMobile={isMobile} />
         </Suspense>
       </Canvas>
     </div>

@@ -146,12 +146,13 @@ export function CyberSigil({ isActive, onHover }: CyberSigilProps) {
       className="relative cursor-pointer"
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
+      onClick={() => onHover(!isActive)}
     >
       <svg
         ref={sigilRef}
         viewBox="0 0 400 400"
         className={clsx(
-          'w-64 h-64 md:w-80 md:h-80 transition-all duration-500',
+          'w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 transition-all duration-500',
           isActive ? 'text-arterial' : 'text-white/70'
         )}
         style={{

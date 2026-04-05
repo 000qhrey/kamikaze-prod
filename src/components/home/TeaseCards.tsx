@@ -6,6 +6,7 @@ import { GlitchSlice } from '@/components/effects/GlitchSlice'
 import { useTransition } from '@/providers/TransitionProvider'
 import { getUpcomingEvents, formatEventDate } from '@/data/events'
 import { artists } from '@/data/artists'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 // Asymmetric positioning offsets (y-axis stagger)
 const CARD_OFFSETS = [
@@ -22,6 +23,7 @@ export function TeaseCards() {
   const sectionRef = useRef<HTMLElement>(null)
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
   const [scrollY, setScrollY] = useState(0)
+  const isMobile = useIsMobile()
 
   // Track mouse position relative to section center
   useEffect(() => {
@@ -145,43 +147,77 @@ export function TeaseCards() {
             </GlitchSlice>
           </div>
 
-          {/* System Status - centered */}
+          {/* Mobile: Merch Card | Desktop: System Status */}
           <div style={getParallaxStyle(2)} className="md:mt-8">
             <GlitchSlice delay={0.2}>
-              <TelemetryCard metadata="ENCRYPTION: AES-256-GCM">
-                <div className="min-h-[180px] flex flex-col">
-                  <span className="font-mono text-[10px] text-white/50 tracking-widest mb-3">
-                    &gt; SYS_DIAGNOSTICS
-                  </span>
-                  <div className="flex-1 flex flex-col justify-center gap-2 py-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-white/50">UPLINK_STATUS</span>
-                      <span className="font-mono text-[10px] text-signal">ACTIVE</span>
+              {isMobile ? (
+                <TelemetryCard
+                  metadata="DATA_SOURCE: SUPPLY_CACHE"
+                  onClick={() => navigateTo('/merch')}
+                >
+                  <div className="min-h-[180px] flex flex-col">
+                    <span className="font-mono text-[10px] text-white/50 tracking-widest mb-3">
+                      &gt; EQUIPMENT_DROP
+                    </span>
+                    <h3 className="font-display text-2xl mb-2 tracking-wide">
+                      ARTIFACTS
+                    </h3>
+                    <p className="font-mono text-xs text-arterial/70 mb-3">
+                      UNDERGROUND GEAR
+                    </p>
+                    <div className="flex-1 flex flex-col justify-center gap-2 py-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">CACHE_STATUS</span>
+                        <span className="font-mono text-[10px] text-signal">ONLINE</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">ACCESS_LEVEL</span>
+                        <span className="font-mono text-[10px] text-arterial">UNRESTRICTED</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-white/50">FREQ_LOCK</span>
-                      <span className="font-mono text-[10px] text-arterial">140.2kHz</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-white/50">PROTOCOL</span>
-                      <span className="font-mono text-[10px] text-white/70">UNDERGROUND_V2</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-white/50">MESH_NODES</span>
-                      <span className="font-mono text-[10px] text-white/70">47 CONNECTED</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] text-white/50">LATENCY</span>
-                      <span className="font-mono text-[10px] text-signal">12ms</span>
+                    <div className="mt-auto pt-3 border-t border-white/30/20">
+                      <div className="font-mono text-[10px] text-white/60 text-center tracking-widest">
+                        [ BROWSE GEAR ]
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-auto pt-3 border-t border-white/30/20">
-                    <div className="font-mono text-[8px] text-white/50 text-center tracking-widest">
-                      [ SIGNAL_INTEGRITY: NOMINAL ]
+                </TelemetryCard>
+              ) : (
+                <TelemetryCard metadata="ENCRYPTION: AES-256-GCM">
+                  <div className="min-h-[180px] flex flex-col">
+                    <span className="font-mono text-[10px] text-white/50 tracking-widest mb-3">
+                      &gt; SYS_DIAGNOSTICS
+                    </span>
+                    <div className="flex-1 flex flex-col justify-center gap-2 py-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">UPLINK_STATUS</span>
+                        <span className="font-mono text-[10px] text-signal">ACTIVE</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">FREQ_LOCK</span>
+                        <span className="font-mono text-[10px] text-arterial">140.2kHz</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">PROTOCOL</span>
+                        <span className="font-mono text-[10px] text-white/70">UNDERGROUND_V2</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">MESH_NODES</span>
+                        <span className="font-mono text-[10px] text-white/70">47 CONNECTED</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-white/50">LATENCY</span>
+                        <span className="font-mono text-[10px] text-signal">12ms</span>
+                      </div>
+                    </div>
+                    <div className="mt-auto pt-3 border-t border-white/30/20">
+                      <div className="font-mono text-[8px] text-white/50 text-center tracking-widest">
+                        [ SIGNAL_INTEGRITY: NOMINAL ]
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TelemetryCard>
+                </TelemetryCard>
+              )}
             </GlitchSlice>
           </div>
         </div>
