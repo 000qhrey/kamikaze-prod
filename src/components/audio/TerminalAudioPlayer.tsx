@@ -212,6 +212,23 @@ export function TerminalAudioPlayer() {
       widget.load(newUrl, {
         ...soundCloudPlayerOptions,
         auto_play: wasPlaying,
+        callback: () => {
+          setScReady(true)
+          setTrackTitle(wasPlaying ? 'SIGNAL_LOCKED' : 'READY // PRESS PLAY')
+          widget.setVolume(wasPlaying ? 0 : savedVolumeRef.current)
+
+          if (!wasPlaying) return
+
+          let vol = 0
+          const fadeIn = setInterval(() => {
+            vol += 10
+            widget.setVolume(vol)
+            if (vol >= savedVolumeRef.current) {
+              clearInterval(fadeIn)
+              playWidgetWithRetries(widget)
+            }
+          }, 50)
+        },
       })
 
       if (wasPlaying) {

@@ -139,7 +139,7 @@ export function Footer() {
                   strength={3}
                 />
                 <SignalStrengthLink
-                  href="https://soundcloud.com/kamikaze-events"
+                  href="https://soundcloud.com/k-a-m-i-k-a-z-e-6-6-6"
                   label="SC"
                   strength={7}
                 />

@@ -101,6 +101,14 @@ export function initSoundCloudWidget(iframe: HTMLIFrameElement) {
 
   scIframe = iframe
   scWidget = window.SC.Widget(iframe)
+  state.isInitialized = true
+  state.isSwitching = false
+  notifyListeners()
+
+  if (pendingPlay) {
+    pendingPlay = false
+    playSoundCloudWithRetries()
+  }
 
   scWidget.bind(window.SC.Widget.Events.READY, () => {
     state.isInitialized = true
