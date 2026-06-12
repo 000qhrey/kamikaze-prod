@@ -9,9 +9,9 @@ export default function HomePage() {
     <div className="relative min-h-screen flex flex-col">
       <div className="flex-grow">
         <Hero />
+        <TransmissionPanel />
         <Manifesto />
         <TeaseCards />
-        <TransmissionPanel />
       </div>
       <PerspectiveGrid />
     </div>

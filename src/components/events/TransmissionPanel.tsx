@@ -13,14 +13,25 @@ import {
   getProgressBar,
 } from '@/data/transmission'
 
-const TOTAL_STEPS = 8
+const TOTAL_STEPS = 7
+const SCROLL_TRIGGER_PX = 8
 
 export function TransmissionPanel() {
   const { navigateTo } = useTransition()
   const [isOpen, setIsOpen] = useState(false)
   const [visibleStep, setVisibleStep] = useState(0)
-  const sentinelRef = useRef<HTMLDivElement>(null)
   const hasTriggeredRef = useRef(false)
+
+  const openFragment = useCallback(() => {
+    if (hasTriggeredRef.current) return
+    if (sessionStorage.getItem(FRAGMENT_01_DISMISSED_KEY)) return
+
+    hasTriggeredRef.current = true
+    sessionStorage.setItem(FRAGMENT_01_SEEN_KEY, '1')
+    setIsOpen(true)
+    triggerSigilGlitch(0.6, 500)
+    playSubmitSound()
+  }, [])
 
   const dismiss = useCallback(() => {
     setIsOpen(false)
@@ -36,25 +47,24 @@ export function TransmissionPanel() {
   useEffect(() => {
     if (sessionStorage.getItem(FRAGMENT_01_DISMISSED_KEY)) return
 
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
+    const onScroll = () => {
+      if (window.scrollY >= SCROLL_TRIGGER_PX) {
+        openFragment()
+      }
+    }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasTriggeredRef.current) {
-          hasTriggeredRef.current = true
-          sessionStorage.setItem(FRAGMENT_01_SEEN_KEY, '1')
-          setIsOpen(true)
-          triggerSigilGlitch(0.6, 500)
-          playSubmitSound()
-        }
-      },
-      { threshold: 0.5 }
-    )
+    const onTouch = () => {
+      openFragment()
+    }
 
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [])
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('touchstart', onTouch, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('touchstart', onTouch)
+    }
+  }, [openFragment])
 
   useEffect(() => {
     if (!isOpen) {
@@ -78,8 +88,6 @@ export function TransmissionPanel() {
 
   return (
     <>
-      <div ref={sentinelRef} className="h-px w-full" aria-hidden />
-
       <div
         className={clsx(
           'fixed inset-0 z-40 pointer-events-none transition-opacity duration-700',
@@ -162,19 +170,8 @@ export function TransmissionPanel() {
 
             <div
               className={clsx(
-                'space-y-1 transition-opacity duration-300',
-                show(4) ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <p className="text-white/30">[ PAYLOAD_REDACTED ]</p>
-              <p className="text-white/30">[ PAYLOAD_REDACTED ]</p>
-              <p className="text-white/30">[ PAYLOAD_REDACTED ]</p>
-            </div>
-
-            <div
-              className={clsx(
                 'space-y-1 border-l-2 border-arterial/30 pl-3 transition-opacity duration-300',
-                show(5) ? 'opacity-100' : 'opacity-0'
+                show(4) ? 'opacity-100' : 'opacity-0'
               )}
             >
               <p className="text-white/60">&gt;&gt;&gt; EVENTS_NODE contains additional fragments.</p>
@@ -184,7 +181,7 @@ export function TransmissionPanel() {
             <p
               className={clsx(
                 'text-red-bright text-[10px] tracking-wider animate-pulse transition-opacity duration-300',
-                show(6) ? 'opacity-100' : 'opacity-0'
+                show(5) ? 'opacity-100' : 'opacity-0'
               )}
             >
               CAREFUL — YOU ARE BEING WATCHED!
@@ -193,7 +190,7 @@ export function TransmissionPanel() {
             <div
               className={clsx(
                 'flex flex-col gap-2 pt-2 transition-opacity duration-300',
-                show(7) ? 'opacity-100' : 'opacity-0'
+                show(6) ? 'opacity-100' : 'opacity-0'
               )}
             >
               <button
@@ -207,7 +204,7 @@ export function TransmissionPanel() {
               </p>
             </div>
 
-            {show(8) && (
+            {show(7) && (
               <p className="text-[10px] text-white/20 pt-1">
                 ROUTE: EVENTS://KAMIKAZE_OVERRIDE
               </p>
