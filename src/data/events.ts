@@ -17,13 +17,13 @@ export const events: Event[] = [
   {
     id: 'kamikaze-override',
     name: 'KAMIKAZE OVERRIDE',
-    date: '2026-07-26',
+    date: '2026-09-04',
     venue: 'Undisclosed',
     city: 'Trivandrum',
     lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
-    description: 'The signal reaches the subcontinent. Location decrypts 48 hours before.',
+    description: 'The convention is camouflage. Beneath the dome, the network breathes. Coordinates burn clear at T−48.',
     isSecretLocation: true, // Special flag for hacking sequence
   },
   {

@@ -18,12 +18,9 @@ const ATTEMPT_CITIES = [
   ['MELBOURNE', 'SAO_PAULO', 'LAGOS', 'CAIRO'],
 ]
 
-// Denial messages for each attempt
-const DENIAL_MESSAGES = [
-  'ACCESS_DENIED // FIREWALL_ACTIVE',
-  'REJECTED // ENCRYPTION_MISMATCH',
-  'BLOCKED // PROTOCOL_VIOLATION',
-]
+const TRY_1_DENIED = 'DOME SIGNATURE LOCKED // NEM-01 ACTIVE // ACCESS REJECTED'
+const WATCHING_MESSAGE = 'THE DOME REGISTERED YOUR SCAN // STEP BACK OR COMMIT'
+const PARTIAL_LEAK_MESSAGE = 'LEAK CONFIRMED: SEPTEMBER // CITY: TRIVANDRUM // SUBSTRATE: STILL BURIED'
 
 const MAX_ATTEMPTS = 2
 
@@ -72,7 +69,10 @@ export function EventCard({ event, index }: EventCardProps) {
       return '??.??.????'
     }
     if (isSecretLocation) {
-      return 'XX.?X.X026'
+      if (hackStatus === 'partial') {
+        return 'XX.09.2X26'
+      }
+      return 'XX.??.2X26'
     }
     return formatEventDate(event.date)
   }
@@ -135,20 +135,18 @@ export function EventCard({ event, index }: EventCardProps) {
           if (newAttempt >= MAX_ATTEMPTS) {
             // Final attempt - they're watching!
             setHackStatus('compromised')
-            setStatusMessage('SOMEONE IS WATCHING, ABORTING...')
+            setStatusMessage(WATCHING_MESSAGE)
             triggerSigilGlitch(1.5, 800)
 
             // Critical danger + error sound
             setDangerLevel(3)
             playErrorSound()
 
-            // After dramatic pause, reveal first letter only
+            // After dramatic pause, partial leak
             hackTimeoutRef.current = setTimeout(() => {
               setHackStatus('partial')
-              const firstLetter = cityUpper[0]
-              const masked = '█'.repeat(cityUpper.length - 1)
-              setDisplayCity(firstLetter + masked)
-              setStatusMessage('PARTIAL_DECRYPT: 0x01')
+              setDisplayCity(cityUpper)
+              setStatusMessage(PARTIAL_LEAK_MESSAGE)
               setIsProcessing(false)
 
               // Success sound on partial reveal
@@ -156,7 +154,7 @@ export function EventCard({ event, index }: EventCardProps) {
             }, 1500)
           } else {
             // Failed attempt - show denial
-            setStatusMessage(DENIAL_MESSAGES[newAttempt - 1] || DENIAL_MESSAGES[0])
+            setStatusMessage(TRY_1_DENIED)
             setDisplayCity('█'.repeat(cityLength))
             setIsProcessing(false)
             triggerSigilGlitch(0.5, 200)

@@ -96,7 +96,7 @@ export function TeaseCards() {
                   {nextEvent ? (
                     <>
                       <span className="font-mono text-xs text-arterial mb-2 tracking-wider">
-                        {nextEvent.isSecretLocation ? 'XX.??.2026' : formatEventDate(nextEvent.date)}
+                        {nextEvent.isSecretLocation ? 'XX.??.2X26' : formatEventDate(nextEvent.date)}
                       </span>
                       <h3 className="font-display text-2xl mb-3 tracking-wide">
                         {nextEvent.name}
