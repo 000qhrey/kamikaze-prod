@@ -5,6 +5,7 @@ import { TelemetryCard } from '@/components/ui/TelemetryCard'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 import { useTransition } from '@/providers/TransitionProvider'
 import { getUpcomingEvents, formatEventDate } from '@/data/events'
+import { FRAGMENT_01_SEEN_KEY, MASKED_TIMESTAMP, TRANSMISSION_PROGRESS } from '@/data/transmission'
 import { artists } from '@/data/artists'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -23,7 +24,12 @@ export function TeaseCards() {
   const sectionRef = useRef<HTMLElement>(null)
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
   const [scrollY, setScrollY] = useState(0)
+  const [fragmentSeen, setFragmentSeen] = useState(false)
   const isMobile = useIsMobile()
+
+  useEffect(() => {
+    setFragmentSeen(sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1')
+  }, [])
 
   // Track mouse position relative to section center
   useEffect(() => {
@@ -96,11 +102,18 @@ export function TeaseCards() {
                   {nextEvent ? (
                     <>
                       <span className="font-mono text-xs text-arterial mb-2 tracking-wider">
-                        {nextEvent.isSecretLocation ? 'XX.??.2X26' : formatEventDate(nextEvent.date)}
+                        {nextEvent.isSecretLocation
+                          ? (fragmentSeen ? MASKED_TIMESTAMP : 'XX.??.2026')
+                          : formatEventDate(nextEvent.date)}
                       </span>
                       <h3 className="font-display text-2xl mb-3 tracking-wide">
                         {nextEvent.name}
                       </h3>
+                      {nextEvent.isSecretLocation && fragmentSeen && (
+                        <p className="font-mono text-[10px] text-white/40 mb-2 tracking-wider">
+                          TRANSMISSION RECOVERED: {TRANSMISSION_PROGRESS.FRAGMENT_01}%
+                        </p>
+                      )}
                       <div className="mt-auto pt-4 border-t border-white/30/20">
                         <p className="font-mono text-[10px] text-white/70 tracking-wider">
                           LOC: {nextEvent.isSecretLocation ? '████████' : nextEvent.venue}

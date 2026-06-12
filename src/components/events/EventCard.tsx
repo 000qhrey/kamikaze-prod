@@ -2,6 +2,12 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Event, formatEventDate } from '@/data/events'
+import {
+  FRAGMENT_01_SEEN_KEY,
+  MASKED_TIMESTAMP,
+  TRANSMISSION_PROGRESS,
+  getProgressBar,
+} from '@/data/transmission'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
 import { playErrorSound, playSubmitSound, playHoverSound } from '@/hooks/useSonicFeedback'
@@ -38,6 +44,7 @@ export function EventCard({ event, index }: EventCardProps) {
   const [displayCity, setDisplayCity] = useState('')
   const [hackStatus, setHackStatus] = useState<'idle' | 'denied' | 'compromised' | 'partial'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
+  const [fragmentHint, setFragmentHint] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isMobile = useIsMobile()
@@ -54,14 +61,24 @@ export function EventCard({ event, index }: EventCardProps) {
     }
   }, [event.city, isSecretLocation, hackStatus])
 
-  // Cleanup timeout on unmount
+  // Cleanup timeout on unmount; open decrypt panel when routed from fragment 01
   useEffect(() => {
+    if (isSecretLocation) {
+      setFragmentHint(sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1')
+
+      if (
+        sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1' &&
+        window.location.hash === `#${event.id}`
+      ) {
+        setIsExpanded(true)
+      }
+    }
     return () => {
       if (hackTimeoutRef.current) {
         clearTimeout(hackTimeoutRef.current)
       }
     }
-  }, [])
+  }, [event.id, isSecretLocation])
 
   // Format date - mask for secret/redacted events
   const getDisplayDate = () => {
@@ -69,10 +86,7 @@ export function EventCard({ event, index }: EventCardProps) {
       return '??.??.????'
     }
     if (isSecretLocation) {
-      if (hackStatus === 'partial') {
-        return 'XX.09.2X26'
-      }
-      return 'XX.??.2X26'
+      return MASKED_TIMESTAMP
     }
     return formatEventDate(event.date)
   }
@@ -190,8 +204,17 @@ export function EventCard({ event, index }: EventCardProps) {
   // Alternate skew direction based on index - disabled on mobile
   const skewDirection = index % 2 === 0 ? -1.5 : 1.5
 
+  const transmissionProgress = hackStatus === 'partial'
+    ? TRANSMISSION_PROGRESS.FRAGMENT_02
+    : TRANSMISSION_PROGRESS.FRAGMENT_01
+
+  const expandLabel = isSecretLocation
+    ? (isExpanded ? 'COLLAPSE' : 'DECRYPT TRANSMISSION')
+    : (isExpanded ? 'COLLAPSE' : 'EXPAND')
+
   return (
     <div
+      id={event.id}
       ref={cardRef}
       className={clsx(
         'relative select-none',
@@ -314,6 +337,16 @@ export function EventCard({ event, index }: EventCardProps) {
             </span>
           </div>
 
+          {isSecretLocation && (
+            <div className="font-mono text-[10px] text-white/40 tracking-wider mb-3">
+              {getProgressBar(transmissionProgress)}
+              <span className="block mt-1 text-white/50">
+                TRANSMISSION RECOVERED: {transmissionProgress}%
+                {hackStatus === 'partial' && ' // CITY VECTOR UNLOCKED'}
+              </span>
+            </div>
+          )}
+
           {/* Event name - huge */}
           <h3
             className={clsx(
@@ -370,9 +403,19 @@ export function EventCard({ event, index }: EventCardProps) {
             )}
           >
             {event.description && (
-              <p className="font-mono text-sm text-white/70 mb-8 max-w-xl border-l-2 border-white/30/30 pl-4">
-                {event.description}
-              </p>
+              <div className="font-mono text-sm text-white/70 mb-8 max-w-xl border-l-2 border-white/30/30 pl-4 space-y-3">
+                {isSecretLocation && (
+                  <p className="text-[10px] text-arterial tracking-widest">
+                    TRANSMISSION // FRAGMENT_02
+                  </p>
+                )}
+                <p>{event.description}</p>
+                {isSecretLocation && hackStatus === 'idle' && (
+                  <p className="text-[10px] text-white/50">
+                    &gt;&gt;&gt; Run payload decrypt to recover city coordinates.
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Fully redacted event - no access at all */}
@@ -409,11 +452,11 @@ export function EventCard({ event, index }: EventCardProps) {
                     disabled={isProcessing || hackStatus === 'partial' || hackStatus === 'compromised'}
                   >
                     {isProcessing ? 'DECRYPTING...' :
-                     hackStatus === 'idle' ? 'ACQUIRE_ACCESS' :
-                     hackStatus === 'denied' ? 'TRY AGAIN_' :
+                     hackStatus === 'idle' ? 'DECRYPT PAYLOAD' :
+                     hackStatus === 'denied' ? 'RETRY DECRYPT_' :
                      hackStatus === 'compromised' ? 'ABORTING...' :
-                     hackStatus === 'partial' ? 'SIGNAL_LOST_' :
-                     'ACQUIRE_ACCESS'}
+                     hackStatus === 'partial' ? 'PAYLOAD PARTIAL_' :
+                     'DECRYPT PAYLOAD'}
                   </TerminalButton>
                 </div>
               </div>
@@ -438,10 +481,12 @@ export function EventCard({ event, index }: EventCardProps) {
           <div
             className={clsx(
               'absolute bottom-4 right-4 font-mono text-xs transition-all duration-300',
-              isExpanded ? 'text-arterial' : 'text-white/50'
+              isExpanded ? 'text-arterial' :
+              isSecretLocation && fragmentHint ? 'text-arterial animate-pulse' :
+              'text-white/50'
             )}
           >
-            [{isExpanded ? 'COLLAPSE' : 'EXPAND'}]
+            [{expandLabel}]
           </div>
         </div>
 
