@@ -6,6 +6,7 @@ import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import { Color, Group, Mesh, MeshStandardMaterial, MathUtils } from 'three'
 import { getAssetPath } from '@/lib/basePath'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { usePageVisible } from '@/hooks/usePageVisible'
 
 // Configure Draco decoder (local for faster loading)
 useGLTF.setDecoderPath(getAssetPath('/draco/'))
@@ -149,6 +150,7 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
   const [isVisible, setIsVisible] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
+  const pageVisible = usePageVisible()
 
   // Check WebGL support
   useEffect(() => {
@@ -176,8 +178,8 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     return () => observer.disconnect()
   }, [])
 
-  if (!canRender) {
-    // Fallback for no WebGL - show simple CSS sigil
+  if (!canRender || isMobile) {
+    // Fallback for no WebGL or mobile — CSS sigil only
     return (
       <div
         ref={containerRef}
@@ -204,7 +206,7 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
       <Canvas
         camera={{ position: [0, 0, 6], fov: 40 }}
         dpr={dpr}
-        frameloop={isVisible ? 'always' : 'demand'}
+        frameloop={isVisible && pageVisible ? 'always' : 'demand'}
         gl={{
           antialias: !isMobile,
           alpha: true,

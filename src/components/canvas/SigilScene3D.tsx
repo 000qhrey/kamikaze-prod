@@ -1,9 +1,8 @@
 "use client"
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useGLTF, useAnimations, Environment, ContactShadows, Html } from '@react-three/drei'
-import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
-import { BlendFunction } from 'postprocessing'
+import { useGLTF, useAnimations, Html } from '@react-three/drei'
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import {
   Group,
@@ -12,7 +11,6 @@ import {
   MeshBasicMaterial,
   PointLight,
   SpotLight,
-  Vector2,
   Vector3,
   Color,
   MathUtils,
@@ -20,9 +18,12 @@ import {
   AdditiveBlending,
 } from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { usePathname } from 'next/navigation'
 import { getAssetPath } from '@/lib/basePath'
+import { PERF } from '@/config/performance'
 import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { usePageVisible } from '@/hooks/usePageVisible'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
 import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
 import { SIGIL_SCENE_LINKS } from '@/data/navigation'
@@ -334,42 +335,18 @@ function FloorLight() {
   )
 }
 
-// Post-processing effects (static - refs cause React 19 circular JSON issues)
-// Desktop: Full effects | Mobile: Reduced for performance
-function PostProcessing({ isMobile }: { isMobile: boolean }) {
-  if (isMobile) {
-    // Mobile: Minimal effects - just bloom and vignette
-    return (
-      <EffectComposer multisampling={0}>
-        <Bloom
-          intensity={0.4}
-          luminanceThreshold={0.4}
-          luminanceSmoothing={0.5}
-          mipmapBlur
-          radius={0.2}
-        />
-        <Vignette darkness={0.4} offset={0.3} />
-      </EffectComposer>
-    )
-  }
-
-  // Desktop: Full effects
+// Reduced post-processing site-wide (full stack was GPU-heavy on desktop)
+function PostProcessing() {
   return (
-    <EffectComposer>
+    <EffectComposer multisampling={0}>
       <Bloom
-        intensity={0.8}
-        luminanceThreshold={0.2}
-        luminanceSmoothing={0.9}
+        intensity={0.45}
+        luminanceThreshold={0.35}
+        luminanceSmoothing={0.5}
         mipmapBlur
+        radius={0.25}
       />
-      <ChromaticAberration
-        offset={new Vector2(0.003, 0.003)}
-        blendFunction={BlendFunction.NORMAL}
-        radialModulation={false}
-        modulationOffset={0}
-      />
-      <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
-      <Vignette darkness={0.5} offset={0.3} />
+      <Vignette darkness={0.45} offset={0.3} />
     </EffectComposer>
   )
 }
@@ -383,14 +360,12 @@ function LoadingFallback() {
   )
 }
 
-function Scene({ isMobile }: { isMobile: boolean }) {
+function Scene() {
   return (
     <>
       <color attach="background" args={['#050505']} />
-      {/* Volumetric fog for depth */}
       <fog attach="fog" args={['#050505', 8, 25]} />
-      <Environment preset="night" />
-      <ambientLight intensity={0.2} />
+      <ambientLight intensity={0.35} />
 
       {/* Main light + strobe */}
       <StrobeLight />
@@ -402,26 +377,21 @@ function Scene({ isMobile }: { isMobile: boolean }) {
 
       <SigilModel hoveredNav={null} />
 
-      {/* ContactShadows: disable on mobile for performance */}
-      {!isMobile && (
-        <ContactShadows
-          position={[0, -3.5, 0]}
-          opacity={0.4}
-          scale={15}
-          blur={2}
-          far={4.5}
-        />
-      )}
-
-      {/* Post-processing effects */}
-      <PostProcessing isMobile={isMobile} />
+      <PostProcessing />
     </>
   )
 }
 
+function StaticSigilBackground() {
+  return <div className="fixed inset-0 -z-10 bg-[#050505]" />
+}
+
 export default function SigilScene3D() {
   const [canRender, setCanRender] = useState(false)
+  const pageVisible = usePageVisible()
   const isMobile = useIsMobile()
+  const pathname = usePathname()
+  const isHomePage = pathname === '/'
 
   useEffect(() => {
     try {
@@ -440,18 +410,20 @@ export default function SigilScene3D() {
     }
   }, [])
 
-  if (!canRender) {
-    return <div className="fixed inset-0 -z-10 bg-[#050505]" />
+  // 3D sigil only on home — other pages use static background
+  if (!isHomePage || !canRender) {
+    return <StaticSigilBackground />
   }
 
-  // Mobile: lower DPR, no antialiasing | Desktop: full quality
-  const dpr: [number, number] = isMobile ? [1, 1] : [1, 2]
+  const dpr = isMobile ? PERF.sigilMobileDpr : PERF.sigilDesktopDpr
+  const frameloop = pageVisible ? 'always' : 'never'
 
   return (
     <div className="fixed inset-0 -z-10 bg-[#050505]">
       <Canvas
         camera={{ position: [0, 0, 10], fov: 35 }}
         dpr={dpr}
+        frameloop={frameloop}
         gl={{
           antialias: !isMobile,
           alpha: false,
@@ -460,7 +432,7 @@ export default function SigilScene3D() {
         }}
       >
         <Suspense fallback={<LoadingFallback />}>
-          <Scene isMobile={isMobile} />
+          <Scene />
         </Suspense>
       </Canvas>
     </div>

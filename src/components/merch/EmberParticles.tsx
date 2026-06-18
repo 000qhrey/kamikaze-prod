@@ -1,6 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useLiteMode } from '@/hooks/useLiteMode'
+import { PERF } from '@/config/performance'
 
 interface Ember {
   id: number
@@ -16,8 +18,11 @@ interface EmberParticlesProps {
   className?: string
 }
 
-export function EmberParticles({ count = 15, className }: EmberParticlesProps) {
+export function EmberParticles({ count = PERF.emberParticleCount, className }: EmberParticlesProps) {
+  const lite = useLiteMode()
+
   const embers = useMemo<Ember[]>(() => {
+    if (lite) return []
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
@@ -26,7 +31,9 @@ export function EmberParticles({ count = 15, className }: EmberParticlesProps) {
       delay: Math.random() * 15,
       opacity: 0.3 + Math.random() * 0.5,
     }))
-  }, [count])
+  }, [count, lite])
+
+  if (lite) return null
 
   return (
     <div className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${className || ''}`}>

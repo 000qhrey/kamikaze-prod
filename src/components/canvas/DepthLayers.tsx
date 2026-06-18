@@ -1,15 +1,11 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { FilmGrain } from './FilmGrain'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 export function DepthLayers() {
   const isMobile = useIsMobile()
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [glitchActive, setGlitchActive] = useState(false)
-  const [glitchY, setGlitchY] = useState(0)
-  const [glitchHeight, setGlitchHeight] = useState(10)
 
   // Track scroll progress — skip heavy fog updates on mobile for smoother native scroll
   useEffect(() => {
@@ -39,30 +35,12 @@ export function DepthLayers() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMobile])
 
-  // Random glitch tears
-  useEffect(() => {
-    const triggerGlitch = () => {
-      if (Math.random() > 0.7) {
-        setGlitchActive(true)
-        setGlitchY(Math.random() * 100)
-        setGlitchHeight(5 + Math.random() * 25)
-
-        setTimeout(() => {
-          setGlitchActive(false)
-        }, 100 + Math.random() * 200)
-      }
-    }
-
-    const interval = setInterval(triggerGlitch, 4000 + Math.random() * 6000)
-    return () => clearInterval(interval)
-  }, [])
-
   return (
     <>
-      {/* Perspective grid floor - disable on mobile for performance */}
+      {/* Perspective grid floor - desktop only */}
       {!isMobile && <div className="perspective-grid" aria-hidden="true" />}
 
-      {/* Fog layer - thickens with scroll */}
+      {/* Fog layer - thickens with scroll on desktop */}
       <div
         className="fixed inset-0 pointer-events-none z-[45]"
         style={{
@@ -101,42 +79,20 @@ export function DepthLayers() {
         aria-hidden="true"
       />
 
-      {/* Scanlines - disable on mobile */}
+      {/* Scanlines - desktop only */}
       {!isMobile && <div className="scanlines" aria-hidden="true" />}
-
-      {/* Film grain - disable on mobile for performance */}
-      {!isMobile && <FilmGrain />}
-
-      {/* Random glitch tear - disable on mobile */}
-      {!isMobile && glitchActive && (
-        <div
-          className="fixed left-0 right-0 pointer-events-none z-[9997]"
-          style={{
-            top: `${glitchY}%`,
-            height: `${glitchHeight}px`,
-            background: `linear-gradient(90deg,
-              transparent ${Math.random() * 20}%,
-              rgba(255,0,0,0.4) ${20 + Math.random() * 30}%,
-              rgba(0,255,255,0.4) ${50 + Math.random() * 30}%,
-              transparent ${80 + Math.random() * 20}%
-            )`,
-            transform: `translateX(${(Math.random() - 0.5) * 30}px)`,
-          }}
-          aria-hidden="true"
-        />
-      )}
 
       {/* Scroll indicator - desktop only */}
       {!isMobile && (
-      <div
-        className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-white/30 z-[60]"
-        aria-hidden="true"
-      >
         <div
-          className="w-full bg-arterial transition-all duration-100"
-          style={{ height: `${scrollProgress * 100}%` }}
-        />
-      </div>
+          className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-white/30 z-[60]"
+          aria-hidden="true"
+        >
+          <div
+            className="w-full bg-arterial transition-all duration-100"
+            style={{ height: `${scrollProgress * 100}%` }}
+          />
+        </div>
       )}
     </>
   )

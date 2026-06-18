@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import clsx from 'clsx'
-import { getBass, getMids, getHighs } from '@/hooks/useAudioEngine'
+import { getBass, getMids, getHighs, getAudioState } from '@/hooks/useAudioEngine'
+import { useLiteMode } from '@/hooks/useLiteMode'
+import { usePageVisible } from '@/hooks/usePageVisible'
+import { PERF } from '@/config/performance'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
 
 // ============================================
@@ -383,6 +386,8 @@ function ScanlineOverlay({ color = 'rgba(0, 204, 204, 0.15)' }: { color?: string
 // ============================================
 
 export function AsciiSigilBackground() {
+  const lite = useLiteMode()
+  const pageVisible = usePageVisible()
   const [mounted, setMounted] = useState(false)
   const [displayText, setDisplayText] = useState(DEFAULT_SIGIL)
   const [currentColor, setCurrentColor] = useState('#3a9a9a')
@@ -404,7 +409,7 @@ export function AsciiSigilBackground() {
 
   // Auto-cycle sigils when not hovering on a specific genre
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || lite) return
 
     const triggerAutoCycle = () => {
       // Only auto-cycle if not hovering on a genre
@@ -431,13 +436,13 @@ export function AsciiSigilBackground() {
         transitionRef.current = 1.0
       }
 
-      // Schedule next cycle (random 5-10 seconds)
-      const nextDelay = 5000 + Math.random() * 5000
+      // Schedule next cycle
+      const nextDelay =
+        PERF.asciiAutoCycleMinMs + Math.random() * PERF.asciiAutoCycleRangeMs
       autoCycleTimerRef.current = setTimeout(triggerAutoCycle, nextDelay)
     }
 
-    // Start first cycle after initial delay
-    const initialDelay = 3000 + Math.random() * 2000
+    const initialDelay = PERF.asciiAutoCycleMinMs
     autoCycleTimerRef.current = setTimeout(triggerAutoCycle, initialDelay)
 
     return () => {
@@ -445,10 +450,11 @@ export function AsciiSigilBackground() {
         clearTimeout(autoCycleTimerRef.current)
       }
     }
-  }, [mounted, isHovering])
+  }, [mounted, isHovering, lite])
 
   // Update sigil and colors when genre changes
   useEffect(() => {
+    if (lite) return
     if (genre && GENRE_SIGILS[genre]) {
       targetSigilRef.current = GENRE_SIGILS[genre]
       const genreConfig = GENRE_FREQUENCIES[genre]
@@ -469,52 +475,47 @@ export function AsciiSigilBackground() {
 
     // Trigger transition effect
     transitionRef.current = 1.0
-  }, [genre])
+  }, [genre, lite])
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Animation loop with audio reactivity
+  // Animation loop — throttled, pauses when tab hidden or idle
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || lite) return
 
     const animate = (time: number) => {
       const delta = time - lastUpdateRef.current
+      const isActive =
+        pageVisible &&
+        (isHovering ||
+          transitionRef.current > 0 ||
+          getAudioState().isPlaying)
 
-      // Update at ~30fps for performance
-      if (delta > 33) {
+      if (isActive && delta > PERF.asciiFpsIntervalMs) {
         lastUpdateRef.current = time
 
-        // Get audio levels
         const bass = getBass()
         const mids = getMids()
-        const highs = getHighs()
 
-        // Bass affects scale (the "bop")
-        const bassScale = 1 + bass * 0.08 // subtle 8% scale on kick
+        const bassScale = 1 + bass * 0.08
         setScale(bassScale)
 
-        // Calculate glitch intensity
-        // Base glitch + bass spike + transition spike
-        let intensity = 0.01 // base
-        intensity += bass * 0.15 // bass adds glitch
-        intensity += mids * 0.05 // mids add subtle glitch
+        let intensity = 0.01
+        intensity += bass * 0.15
+        intensity += mids * 0.05
 
-        // During transition, increase glitch
         if (transitionRef.current > 0) {
           intensity += transitionRef.current * 0.3
           transitionRef.current = Math.max(0, transitionRef.current - 0.05)
 
-          // Swap to new sigil midway through transition
           if (transitionRef.current < 0.5 && currentSigilRef.current !== targetSigilRef.current) {
             currentSigilRef.current = targetSigilRef.current
           }
         }
 
         setGlitchIntensity(intensity)
-
-        // Apply glitch to current sigil
         setDisplayText(glitchSigil(currentSigilRef.current, intensity))
       }
 
@@ -523,9 +524,14 @@ export function AsciiSigilBackground() {
 
     frameRef.current = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(frameRef.current)
-  }, [mounted])
+  }, [mounted, lite, pageVisible, isHovering])
 
   if (!mounted) return null
+
+  const staticScale = 1
+  const staticDisplayText = lite ? DEFAULT_SIGIL : displayText
+  const staticColor = lite ? '#3a9a9a' : currentColor
+  const staticGlow = lite ? 'rgba(0, 255, 255, 0.25)' : glowColor
 
   return (
     <div
@@ -544,23 +550,25 @@ export function AsciiSigilBackground() {
           'transition-transform duration-75' // fast transition for bop
         )}
         style={{
-          color: currentColor,
-          textShadow: `
-            0 0 10px ${glowColor},
-            0 0 20px ${glowColor},
-            0 0 40px ${glowColor},
-            0 0 80px ${glowColor}
+          color: staticColor,
+          textShadow: lite
+            ? `0 0 20px ${staticGlow}`
+            : `
+            0 0 10px ${staticGlow},
+            0 0 20px ${staticGlow},
+            0 0 40px ${staticGlow},
+            0 0 80px ${staticGlow}
           `,
           lineHeight: 1.1,
-          transform: `scale(${scale})`,
-          willChange: 'transform',
+          transform: `scale(${lite ? staticScale : scale})`,
+          willChange: lite ? undefined : 'transform',
         }}
       >
-        {displayText}
+        {staticDisplayText}
       </pre>
 
       {/* Scanline overlay with genre color */}
-      <ScanlineOverlay color={glowColor} />
+      {!lite && <ScanlineOverlay color={glowColor} />}
 
       {/* Vignette */}
       <div

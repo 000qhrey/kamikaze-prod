@@ -1,99 +1,46 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-
-const MANIFESTO_PHRASES = [
-  'WE MAKE RUPTURES',
-  'CONTROLLED COLLAPSE',
-  'EVERY BEAT IS A HEARTBEAT',
-  'THIS IS CONGREGATION',
-  'UNDERGROUND WILL NEVER DIE',
-]
-
 interface ManifestoTextureProps {
-  // Which phrase to display (cycles if not specified)
   phrase?: string
-  // Vertical offset for staggering multiple instances
   offsetY?: number
-  // Scroll speed multiplier (lower = slower parallax)
+  /** @deprecated Parallax disabled site-wide for scroll performance */
   parallaxSpeed?: number
 }
 
+/** Static background typography — no scroll listeners or timers */
 export function ManifestoTexture({
-  phrase,
+  phrase = 'KAMIKAZE',
   offsetY = 0,
-  parallaxSpeed = 0.15,
 }: ManifestoTextureProps) {
-  const [scrollY, setScrollY] = useState(0)
-  const [phraseIndex, setPhrase] = useState(0)
-
-  // Track scroll for parallax with RAF throttling for mobile performance
-  const tickingRef = useRef(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!tickingRef.current) {
-        requestAnimationFrame(() => {
-          setScrollY(window.scrollY)
-          tickingRef.current = false
-        })
-        tickingRef.current = true
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Cycle phrases if none specified
-  useEffect(() => {
-    if (phrase) return
-
-    const interval = setInterval(() => {
-      setPhrase((prev) => (prev + 1) % MANIFESTO_PHRASES.length)
-    }, 8000)
-
-    return () => clearInterval(interval)
-  }, [phrase])
-
-  const displayText = phrase || MANIFESTO_PHRASES[phraseIndex]
-  const parallaxOffset = scrollY * parallaxSpeed
-
   return (
     <div
       className="fixed inset-0 pointer-events-none overflow-hidden z-0"
-      style={{
-        transform: `translateY(${offsetY}px)`,
-      }}
+      style={{ transform: `translateY(${offsetY}px)` }}
     >
-      {/* Main huge text */}
       <div
         className="absolute whitespace-nowrap font-display text-white/[0.04] select-none"
         style={{
           fontSize: 'clamp(150px, 25vw, 350px)',
           lineHeight: 1,
-          transform: `translateY(${parallaxOffset}px) translateX(-10%)`,
+          transform: 'translateX(-10%)',
           top: '20%',
-          willChange: 'transform',
         }}
       >
-        {displayText}
+        {phrase}
       </div>
 
-      {/* Secondary offset text for depth */}
       <div
         className="absolute whitespace-nowrap font-display text-arterial/[0.02] select-none"
         style={{
           fontSize: 'clamp(100px, 18vw, 250px)',
           lineHeight: 1,
-          transform: `translateY(${parallaxOffset * 0.7}px) translateX(5%)`,
+          transform: 'translateX(5%)',
           top: '55%',
-          willChange: 'transform',
         }}
       >
-        {displayText}
+        {phrase}
       </div>
 
-      {/* Vertical text on edge */}
       <div
         className="absolute font-mono text-white/[0.03] select-none"
         style={{
@@ -102,11 +49,9 @@ export function ManifestoTexture({
           fontSize: 'clamp(60px, 8vw, 100px)',
           right: '5%',
           top: '10%',
-          transform: `translateY(${parallaxOffset * 0.5}px)`,
-          willChange: 'transform',
         }}
       >
-        {displayText.split(' ').slice(0, 2).join(' ')}
+        {phrase.split(' ').slice(0, 2).join(' ')}
       </div>
     </div>
   )
