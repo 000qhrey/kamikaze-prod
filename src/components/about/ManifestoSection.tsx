@@ -15,7 +15,7 @@ function ManifestoLine({
   isVisible: boolean
 }) {
   if (line.text === '') {
-    return <div className="h-6" />
+    return <div className="h-2" />
   }
 
   const baseClass = clsx(
@@ -88,8 +88,8 @@ export function ManifestoSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative py-12 md:py-16">
-      <div className="flex items-center gap-4 mb-12">
+    <section ref={sectionRef} className="relative py-6 md:py-8">
+      <div className="flex items-center gap-4 mb-8">
         <span className="font-mono text-xs text-arterial tracking-widest">
           [ORIGIN]
         </span>
@@ -110,7 +110,7 @@ export function ManifestoSection() {
         ))}
       </div>
 
-      <div className="mt-16 pt-8 border-t border-white/20">
+      <div className="mt-8 pt-6 border-t border-white/20">
         <p className="font-mono text-xs text-white/50 tracking-widest">
           {ABOUT.attribution}
         </p>

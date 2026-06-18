@@ -6,7 +6,8 @@ import clsx from 'clsx'
 import {
   initAudioEngine,
   initSoundCloudWidget,
-  toggle,
+  play,
+  pause,
   nextTrack,
   prevTrack,
   setVolume,
@@ -128,6 +129,7 @@ export function TerminalAudioPlayer() {
 
       const widget = SC.Widget(iframeRef.current)
       widgetRef.current = widget
+      initSoundCloudWidget(iframeRef.current)
 
       widget.bind(SC.Widget.Events.READY, () => {
         setScReady(true)
@@ -201,11 +203,25 @@ export function TerminalAudioPlayer() {
   }, [state.isPlaying])
 
   const handlePlayPause = useCallback(() => {
-    if (!getAudioState().isInitialized) {
-      initAudioEngine()
+    initAudioEngine()
+
+    if (iframeRef.current && window.SC?.Widget) {
+      initSoundCloudWidget(iframeRef.current)
+      if (!widgetRef.current) {
+        widgetRef.current = window.SC.Widget(iframeRef.current)
+      }
     }
-    toggle()
-  }, [])
+
+    if (state.isPlaying) {
+      pause()
+      return
+    }
+
+    play()
+    if (widgetRef.current) {
+      playWidgetWithRetries(widgetRef.current)
+    }
+  }, [state.isPlaying])
 
   // Handle channel switch with fade transition
   const handleChannelSwitch = useCallback((channelId: number) => {

@@ -4,12 +4,23 @@ import { useState, FormEvent, useEffect } from 'react'
 import clsx from 'clsx'
 import { ARTISTS } from '@/data/siteCopy'
 
-type UploadState = 'idle' | 'uploading' | 'success'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+
+type UploadState = 'idle' | 'uploading' | 'success' | 'error'
 
 interface LogEntry {
   text: string
-  type: 'info' | 'success' | 'data'
+  type: 'info' | 'success' | 'data' | 'error'
 }
+
+const UPLOAD_LOGS: LogEntry[] = [
+  { text: 'Uploading your demo...', type: 'info' },
+  { text: 'Checking SoundCloud link...', type: 'info' },
+  { text: 'Transmitting to review queue...', type: 'info' },
+  { text: 'Received.', type: 'success' },
+  { text: 'Added to our review queue.', type: 'success' },
+  { text: 'We may reach out about future events.', type: 'data' },
+]
 
 export function SignalUpload() {
   const [state, setState] = useState<UploadState>('idle')
@@ -17,39 +28,62 @@ export function SignalUpload() {
   const [artistAlias, setArtistAlias] = useState('')
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [currentLogIndex, setCurrentLogIndex] = useState(0)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const uploadLogs: LogEntry[] = [
-    { text: 'Uploading your demo...', type: 'info' },
-    { text: 'Checking SoundCloud link...', type: 'info' },
-    { text: 'Received.', type: 'success' },
-    { text: 'Added to our review queue.', type: 'success' },
-    { text: 'We may reach out about future events.', type: 'data' },
-  ]
-
-  // Animate logs one by one
   useEffect(() => {
-    if (state !== 'uploading' || currentLogIndex >= uploadLogs.length) {
-      if (currentLogIndex >= uploadLogs.length && state === 'uploading') {
-        setState('success')
-      }
+    if (state !== 'uploading' || currentLogIndex >= UPLOAD_LOGS.length) {
       return
     }
 
     const timer = setTimeout(() => {
-      setLogs((prev) => [...prev, uploadLogs[currentLogIndex]])
+      setLogs((prev) => [...prev, UPLOAD_LOGS[currentLogIndex]])
       setCurrentLogIndex((prev) => prev + 1)
     }, 400 + Math.random() * 300)
 
     return () => clearTimeout(timer)
   }, [state, currentLogIndex])
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!soundcloudLink.trim()) return
 
     setState('uploading')
     setLogs([])
     setCurrentLogIndex(0)
+    setErrorMessage(null)
+
+    try {
+      if (!SUPABASE_URL) {
+        throw new Error('UPLOAD_OFFLINE')
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          soundcloudUrl: soundcloudLink.trim(),
+          artistAlias: artistAlias.trim(),
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'UPLOAD_FAILED')
+      }
+
+      setLogs(UPLOAD_LOGS)
+      setCurrentLogIndex(UPLOAD_LOGS.length)
+      setState('success')
+    } catch (err) {
+      const code = err instanceof Error ? err.message : 'UPLOAD_FAILED'
+      setErrorMessage(
+        code === 'UPLOAD_OFFLINE'
+          ? ARTISTS.uploadOffline
+          : ARTISTS.uploadFailed
+      )
+      setState('error')
+    }
   }
 
   const handleReset = () => {
@@ -58,24 +92,20 @@ export function SignalUpload() {
     setArtistAlias('')
     setLogs([])
     setCurrentLogIndex(0)
+    setErrorMessage(null)
   }
 
   return (
     <section className="relative mt-16">
-      {/* Section header */}
       <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/30">
         <span className="font-mono text-xs text-arterial tracking-widest">
           {ARTISTS.uploadSection}
         </span>
         <div className="flex-1 h-px bg-white/10" />
-        <span className="font-mono text-xs text-white/50">
-          SoundCloud demo
-        </span>
+        <span className="font-mono text-xs text-white/50">SoundCloud demo</span>
       </div>
 
-      {/* Terminal container */}
       <div className="relative border border-white/30 bg-black/50 backdrop-blur-sm">
-        {/* Terminal top bar */}
         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 border-b border-white/30">
           <div className="w-2 h-2 rounded-full bg-arterial/60" />
           <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
@@ -88,7 +118,6 @@ export function SignalUpload() {
         <div className="p-6">
           {state === 'idle' && (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* SoundCloud Link Input */}
               <div>
                 <label className="block font-mono text-xs text-white/70 mb-2">
                   <span className="text-arterial">Link:</span> SoundCloud URL
@@ -108,7 +137,6 @@ export function SignalUpload() {
                 />
               </div>
 
-              {/* Artist Alias Input */}
               <div>
                 <label className="block font-mono text-xs text-white/70 mb-2">
                   <span className="text-arterial">Name:</span> Artist name{' '}
@@ -128,7 +156,6 @@ export function SignalUpload() {
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 className={clsx(
@@ -136,23 +163,9 @@ export function SignalUpload() {
                   'font-mono text-sm tracking-widest text-arterial',
                   'hover:bg-arterial/20 hover:border-arterial',
                   'focus:ring-2 focus:ring-arterial focus:outline-none',
-                  'transition-all duration-200',
-                  'group'
+                  'transition-all duration-200 group'
                 )}
               >
-                {/* Glitch effect layers */}
-                <span
-                  className="absolute inset-0 flex items-center justify-center text-cyan-400/30 opacity-0 group-hover:opacity-100"
-                  style={{ transform: 'translate(-2px, -1px)' }}
-                >
-                  [ {ARTISTS.uploadButton} ]
-                </span>
-                <span
-                  className="absolute inset-0 flex items-center justify-center text-red-500/30 opacity-0 group-hover:opacity-100"
-                  style={{ transform: 'translate(2px, 1px)' }}
-                >
-                  [ {ARTISTS.uploadButton} ]
-                </span>
                 <span className="relative">[ {ARTISTS.uploadButton} ]</span>
               </button>
             </form>
@@ -160,7 +173,6 @@ export function SignalUpload() {
 
           {(state === 'uploading' || state === 'success') && (
             <div className="space-y-2 font-mono text-sm">
-              {/* Log entries */}
               {logs.map((log, index) => (
                 <div
                   key={index}
@@ -176,15 +188,13 @@ export function SignalUpload() {
                 </div>
               ))}
 
-              {/* Cursor while uploading */}
-              {state === 'uploading' && (
+              {state === 'uploading' && currentLogIndex < UPLOAD_LOGS.length && (
                 <div className="flex items-start gap-2 text-white/70">
                   <span className="text-white/50">{'>'}</span>
                   <span className="animate-pulse">_</span>
                 </div>
               )}
 
-              {/* Reset button after success */}
               {state === 'success' && (
                 <div className="pt-6">
                   <button
@@ -203,27 +213,24 @@ export function SignalUpload() {
               )}
             </div>
           )}
-        </div>
 
-        {/* Scan line overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.02]"
-          style={{
-            background: `repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(255, 255, 255, 0.1) 2px,
-              rgba(255, 255, 255, 0.1) 4px
-            )`,
-          }}
-        />
+          {state === 'error' && (
+            <div className="space-y-4 font-mono text-sm">
+              <p className="text-arterial">[ ERROR ] {errorMessage}</p>
+              <button
+                onClick={handleReset}
+                className="px-6 py-3 border border-white/40 text-white/70 hover:border-arterial/50 hover:text-arterial"
+              >
+                [ TRY AGAIN ]
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Disclaimer */}
       <p className="mt-4 font-mono text-xs text-white/50 leading-relaxed">
-        By uploading, you agree that KAMIKAZE may review and feature your music.
-        No guarantees — we listen to everything.
+        Demos go straight to the KAMIKAZE team inbox for review. By uploading, you agree we may
+        listen and contact you about future events. No guarantees — we listen to everything.
       </p>
     </section>
   )

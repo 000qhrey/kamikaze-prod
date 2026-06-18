@@ -178,8 +178,7 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     return () => observer.disconnect()
   }, [])
 
-  if (!canRender || isMobile) {
-    // Fallback for no WebGL or mobile — CSS sigil only
+  if (!canRender) {
     return (
       <div
         ref={containerRef}
@@ -195,14 +194,13 @@ export function CyberFanSigil({ progress, className }: CyberFanSigilProps) {
     )
   }
 
-  // Mobile: lower DPR, no antialiasing | Desktop: full quality
   const dpr: [number, number] = isMobile ? [1, 1] : [1, 1.5]
+  const sizeClass = isMobile
+    ? 'w-64 h-64'
+    : 'w-80 h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem]'
 
   return (
-    <div
-      ref={containerRef}
-      className={`w-80 h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] ${className || ''}`}
-    >
+    <div ref={containerRef} className={`${sizeClass} ${className || ''}`}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 40 }}
         dpr={dpr}

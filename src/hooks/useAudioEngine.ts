@@ -85,11 +85,9 @@ let playRequestId = 0
 // ============================================
 
 export function initAudioEngine(): boolean {
-  if (state.isInitialized) return true
   if (typeof window === 'undefined') return false
 
   state.mode = 'soundcloud'
-  state.isInitialized = true
   notifyListeners()
 
   return true

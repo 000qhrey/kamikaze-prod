@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen flex flex-col pt-24">
+    <div className="relative min-h-screen pt-24 pb-16">
       <ManifestoTexture phrase={ABOUT.texturePhrase} parallaxSpeed={0.08} />
 
       <div
@@ -30,8 +30,8 @@ export default function AboutPage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 flex-grow pb-16">
-        <header className="mb-8">
+      <div className="relative z-10 max-w-4xl mx-auto px-6">
+        <header className="mb-6">
           <ScrambleText
             className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl tracking-wider break-words mb-4 block"
             triggerOnView
@@ -48,7 +48,7 @@ export default function AboutPage() {
           </p>
         </header>
 
-        <div className="flex items-center gap-4 mb-16">
+        <div className="flex items-center gap-4 mb-8">
           <div className="h-px flex-1 bg-gradient-to-r from-arterial/50 to-transparent" />
           <span className="font-mono text-xs text-white/50 tracking-widest">
             {ABOUT.clearance}
@@ -58,7 +58,7 @@ export default function AboutPage() {
 
         <ManifestoSection />
 
-        <section className="mt-24 py-12 border-y border-white/20">
+        <section className="mt-10 py-8 border-y border-white/20">
           <div className="text-center">
             <p className="font-mono text-sm text-white/70 mb-6">
               {ABOUT.ctaPrompt}

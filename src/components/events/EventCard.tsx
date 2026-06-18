@@ -208,13 +208,6 @@ export function EventCard({ event, index }: EventCardProps) {
     setIsExpanded(prev => !prev)
   }, [isSecretLocation, isExpanded, hackStatus, isProcessing, runDecryptSequence, finishReveal])
 
-  const handleNormalAccess = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    if (event.ticketUrl) {
-      window.open(event.ticketUrl, '_blank')
-    }
-  }, [event.ticketUrl])
-
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
@@ -448,13 +441,12 @@ export function EventCard({ event, index }: EventCardProps) {
                 <TerminalButton disabled>[ACCESS DENIED]</TerminalButton>
               </div>
             ) : isSecretLocation ? (
-              isRevealed && event.ticketUrl ? (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <TerminalButton onClick={() => {
-                    if (event.ticketUrl) window.open(event.ticketUrl, '_blank')
-                  }}>
-                    {EVENTS.getTickets}
-                  </TerminalButton>
+              isRevealed ? (
+                <div onClick={(e) => e.stopPropagation()} className="space-y-2">
+                  <TerminalButton disabled>[ {EVENTS.ticketsDropSoon} ]</TerminalButton>
+                  <p className="font-mono text-[10px] text-white/50 tracking-wide">
+                    {EVENTS.ticketsDropSoonHint}
+                  </p>
                 </div>
               ) : isProcessing ? (
                 <span className="font-mono text-xs text-signal tracking-widest animate-pulse">
@@ -466,9 +458,12 @@ export function EventCard({ event, index }: EventCardProps) {
                 [ {EVENTS.accessDenied} ]
               </span>
             ) : (
-              <button onClick={(e) => { e.stopPropagation(); handleNormalAccess(e) }} className="inline-block">
-                <TerminalButton>{EVENTS.getTickets}</TerminalButton>
-              </button>
+              <div onClick={(e) => e.stopPropagation()} className="space-y-2">
+                <TerminalButton disabled>[ {EVENTS.ticketsDropSoon} ]</TerminalButton>
+                <p className="font-mono text-[10px] text-white/50 tracking-wide">
+                  {EVENTS.ticketsDropSoonHint}
+                </p>
+              </div>
             )}
           </div>
 
