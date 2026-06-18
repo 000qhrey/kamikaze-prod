@@ -17,36 +17,36 @@ export const FOOTER_NAV = NAV_LINKS
 export const META = {
   artists: {
     title: 'ARTISTS | KAMIKAZE',
-    description: 'Submit your music. Underground techno collective.',
+    description: 'Submit your demo. We listen to every SoundCloud link.',
   },
   about: {
     title: 'ABOUT | KAMIKAZE',
     description:
-      'We are not here to build idols. We are here to amplify sound. Underground techno events.',
+      'How KAMIKAZE started in Kerala — independent techno events built for the dancefloor.',
   },
   events: {
     title: 'EVENTS | KAMIKAZE',
-    description: 'Upcoming and past underground techno events from KAMIKAZE.',
+    description: 'Upcoming techno nights and past events from KAMIKAZE.',
   },
   contact: {
     title: 'CONTACT | KAMIKAZE',
-    description: 'Get in touch with KAMIKAZE — bookings, general inquiries, and more.',
+    description: 'Bookings, general inquiries, and demo follow-ups.',
   },
   merch: {
     title: 'MERCH | KAMIKAZE',
-    description: 'Official KAMIKAZE merchandise.',
+    description: 'Limited drops from KAMIKAZE. Join the waitlist.',
   },
 } as const
 
 export const HERO = {
-  tagline: 'UNDERGROUND WILL NEVER DIE',
-  valueProp: 'Underground techno events. Curated nights. No VIP. No idols.',
+  tagline: 'THE ROOM IS THE HEADLINER',
+  valueProp: 'Independent techno events. Artists we believe in. Everyone in the same room.',
   scrollCta: 'SCROLL TO EXPLORE',
 } as const
 
 export const EVENTS = {
   pageTitle: 'EVENTS',
-  tagline: 'Underground techno nights.',
+  tagline: 'Nights we\'re building. Past ones live in the archive.',
   upcoming: 'UPCOMING EVENTS',
   past: 'PAST EVENTS',
   viewDetails: 'VIEW DETAILS',
@@ -69,8 +69,10 @@ export const EVENTS = {
 
 export const ARTISTS = {
   pageTitle: 'ARTISTS',
-  subtitle: 'Submit your demo. We are always listening.',
-  divider: 'No headliners. Just the music.',
+  subtitle: 'Send us your best work. SoundCloud links only.',
+  divider: 'We review every demo. No guarantees — just an honest listen.',
+  footerNote:
+    'Keep it unreleased if you can. Tell us your city. If it fits a night we\'re building, we\'ll reach out.',
   uploadSection: 'SUBMIT YOUR MUSIC',
   uploadButton: 'UPLOAD DEMO',
   uploadSuccess: 'Demo received. We will be in touch.',
@@ -101,17 +103,66 @@ export const ARTIST_DETAIL = {
 
 export const ABOUT = {
   pageTitle: 'ABOUT',
-  subtitle: 'Who we are and what we stand for.',
-  clearance: 'Open to everyone',
-  ctaPrompt: 'Want to play with us?',
+  subtitle: 'How we started, and what we stand for.',
+  clearance: 'EST. 2026 · KERALA, INDIA',
+  ctaPrompt: 'Think you fit the room?',
   ctaButton: 'SUBMIT YOUR MUSIC',
   loading: 'Loading...',
+  attribution: '— KAMIKAZE COLLECTIVE // EST. 2026',
+  texturePhrase: 'SOUND FIRST',
 } as const
+
+export type StoryBlockType = 'heading' | 'body' | 'emphasis' | 'spacer'
+
+export interface StoryBlock {
+  type: StoryBlockType
+  text: string
+}
+
+export const ABOUT_STORY: StoryBlock[] = [
+  { type: 'heading', text: 'WE STARTED WITH A COMPLAINT.' },
+  { type: 'body', text: '' },
+  {
+    type: 'body',
+    text: 'KAMIKAZE began the way most underground scenes do — a few friends at the same parties, tired of the same problems. Bottle service creeping in. Lineups built for photos, not the floor. Nights that felt more like networking than dancing.',
+  },
+  {
+    type: 'body',
+    text: 'In 2026 we stopped waiting for someone else to fix it. We started throwing the rave we actually wanted to attend.',
+  },
+  { type: 'body', text: '' },
+  { type: 'heading', text: 'WHAT WE DO.' },
+  { type: 'body', text: '' },
+  {
+    type: 'body',
+    text: 'We produce independent techno events — rooted in Kerala, open to artists who match the energy. We book DJs we rate, not names we were paid to push. We take demos through the site and we listen.',
+  },
+  {
+    type: 'body',
+    text: 'Every night is curated, not crowded. Smaller rooms. Harder sound. A crowd that came to move.',
+  },
+  { type: 'body', text: '' },
+  { type: 'heading', text: 'WHAT WE WON\'T DO.' },
+  { type: 'body', text: '' },
+  {
+    type: 'body',
+    text: 'We don\'t run VIP tables or backstage hierarchies. One ticket gets you the same floor as everyone else. If you\'ve seen that warning in our footer — that\'s not marketing. That\'s the rule.',
+  },
+  { type: 'body', text: '' },
+  { type: 'emphasis', text: 'The underground was never about names.' },
+  { type: 'emphasis', text: 'It was always about what happens when the bass locks and the room becomes one thing.' },
+  { type: 'body', text: '' },
+  {
+    type: 'body',
+    text: 'We\'re not a label. We\'re not an agency. We\'re a crew that cares about the room — and we\'re just getting started.',
+  },
+]
 
 export const CONTACT = {
   pageTitle: 'CONTACT',
   pageTitleHover: 'REACH US',
   eyebrow: 'Get in touch',
+  intro: 'Bookings, questions, collabs — pick a channel below or send a message.',
   formSection: 'SEND A MESSAGE',
   statusOpen: 'Contact info below',
   statusHover: 'Connected',
@@ -171,14 +222,26 @@ export const EVENT_HINT = {
 
 export const ABOUT_HOME = {
   eyebrow: 'WHO WE ARE',
-  title: 'UNDERGROUND TECHNO COLLECTIVE',
-  body: 'KAMIKAZE curates raw, uncompromising nights — no VIP lists, no idols, no corporate gloss. We book artists we believe in, build community on the dancefloor, and keep the underground alive.',
+  title: 'WE THROW THE NIGHTS WE WISH EXISTED',
+  body: 'A small collective from Kerala building honest techno parties — fair doors, real lineups, and a dancefloor that matters more than the guest list.',
   pillars: [
-    { label: 'EVENTS', text: 'Curated raves with real lineups and fair access.' },
-    { label: 'ARTISTS', text: 'Open demos — we listen to everyone.' },
-    { label: 'CULTURE', text: 'One floor. One ticket. One congregation.' },
+    {
+      label: 'EVENTS',
+      text: 'Upcoming nights, lineups, and tickets.',
+      href: '/events',
+    },
+    {
+      label: 'ARTISTS',
+      text: 'Send a demo. We listen to every submission.',
+      href: '/artists',
+    },
+    {
+      label: 'OUR STORY',
+      text: 'How we started and what we refuse to compromise on.',
+      href: '/about',
+    },
   ],
-  cta: 'READ OUR FULL STORY',
+  cta: 'READ THE FULL STORY',
   ctaHref: '/about',
 } as const
 

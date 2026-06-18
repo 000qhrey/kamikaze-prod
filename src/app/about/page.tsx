@@ -13,7 +13,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen flex flex-col pt-24">
-      <ManifestoTexture phrase="NO IDOLS" parallaxSpeed={0.08} />
+      <ManifestoTexture phrase={ABOUT.texturePhrase} parallaxSpeed={0.08} />
 
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"

@@ -4,12 +4,13 @@ import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'KAMIKAZE | Underground Will Never Die',
-  description: 'We don\'t make music. We make ruptures. Underground techno events. The underground will never die.',
-  keywords: ['techno', 'rave', 'underground', 'electronic music', 'IN', 'events', 'kamikaze'],
+  title: 'KAMIKAZE | The Room Is The Headliner',
+  description:
+    'Independent techno events from Kerala. Curated lineups, fair access, one dancefloor.',
+  keywords: ['techno', 'rave', 'underground', 'electronic music', 'Kerala', 'India', 'events', 'kamikaze'],
   openGraph: {
     title: 'KAMIKAZE',
-    description: 'Underground. Uncompromising. Unrepeatable.',
+    description: 'Independent techno events. The room is the headliner.',
     type: 'website',
   },
   icons: {

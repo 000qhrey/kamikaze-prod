@@ -27,7 +27,7 @@ export function AboutSection() {
 
         <h2
           id="about-home-heading"
-          className="font-display text-3xl md:text-5xl tracking-wider text-white mb-6"
+          className="font-display text-2xl sm:text-3xl md:text-5xl tracking-wider text-white mb-6 leading-tight"
         >
           {ABOUT_HOME.title}
         </h2>
@@ -36,14 +36,17 @@ export function AboutSection() {
           {ABOUT_HOME.body}
         </p>
 
-        <ul className="space-y-4 mb-10">
+        <ul className="space-y-3 mb-10">
           {ABOUT_HOME.pillars.map((pillar) => (
-            <li
-              key={pillar.label}
-              className="flex gap-4 font-mono text-sm border-l-2 border-arterial/40 pl-4"
-            >
-              <span className="text-arterial shrink-0">{pillar.label}</span>
-              <span className="text-white/70">{pillar.text}</span>
+            <li key={pillar.label}>
+              <button
+                type="button"
+                onClick={() => navigateTo(pillar.href)}
+                className="w-full text-left flex gap-4 font-mono text-sm border border-white/10 hover:border-arterial/40 bg-white/[0.02] hover:bg-arterial/5 px-4 py-4 transition-colors"
+              >
+                <span className="text-arterial shrink-0 w-20">{pillar.label}</span>
+                <span className="text-white/70">{pillar.text}</span>
+              </button>
             </li>
           ))}
         </ul>

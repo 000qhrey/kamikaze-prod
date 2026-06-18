@@ -2,47 +2,15 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { ScrambleText } from '@/components/effects/ScrambleText'
-import { ABOUT } from '@/data/siteCopy'
+import { ABOUT, ABOUT_STORY, type StoryBlock } from '@/data/siteCopy'
 import clsx from 'clsx'
-
-interface ManifestoLine {
-  text: string
-  type: 'heading' | 'body' | 'emphasis'
-}
-
-const MANIFESTO_LINES: ManifestoLine[] = [
-  { text: 'WE ARE NOT HERE TO BUILD IDOLS.', type: 'heading' },
-  { text: 'WE ARE HERE TO AMPLIFY SOUND.', type: 'heading' },
-  { text: '', type: 'body' },
-  {
-    text: 'The underground was never about names—it was about energy.',
-    type: 'body',
-  },
-  {
-    text: 'Every bass drop is a demolition. Every beat is a heartbeat synchronized across hundreds of bodies.',
-    type: 'body',
-  },
-  { text: '', type: 'body' },
-  {
-    text: 'KAMIKAZE is not a label. It is a rupture in the membrane between noise and transcendence.',
-    type: 'emphasis',
-  },
-  { text: '', type: 'body' },
-  {
-    text: 'We curate moments of controlled collapse—events where the boundary between performer and audience dissolves into pure frequency.',
-    type: 'body',
-  },
-  { text: '', type: 'body' },
-  { text: 'This is not entertainment.', type: 'emphasis' },
-  { text: 'This is congregation.', type: 'emphasis' },
-]
 
 function ManifestoLine({
   line,
   index,
   isVisible,
 }: {
-  line: ManifestoLine
+  line: StoryBlock
   index: number
   isVisible: boolean
 }) {
@@ -60,9 +28,9 @@ function ManifestoLine({
       <h2
         className={clsx(
           baseClass,
-          'font-display text-3xl sm:text-4xl md:text-5xl tracking-wider mb-4'
+          'font-display text-2xl sm:text-3xl md:text-4xl tracking-wider mb-4 text-white'
         )}
-        style={{ transitionDelay: `${index * 100}ms` }}
+        style={{ transitionDelay: `${index * 80}ms` }}
       >
         <ScrambleText triggerOnView triggerOnHover={false} duration={600}>
           {line.text}
@@ -76,19 +44,11 @@ function ManifestoLine({
       <p
         className={clsx(
           baseClass,
-          'font-mono text-lg sm:text-xl text-arterial tracking-wide mb-4'
+          'font-mono text-base sm:text-lg text-arterial tracking-wide mb-4'
         )}
-        style={{ transitionDelay: `${index * 100}ms` }}
+        style={{ transitionDelay: `${index * 80}ms` }}
       >
-        <ScrambleText
-          triggerOnView
-          triggerOnHover={false}
-          duration={500}
-          resolveToColor="#cc0000"
-          finalColor="#cc0000"
-        >
-          {line.text}
-        </ScrambleText>
+        {line.text}
       </p>
     )
   }
@@ -97,13 +57,11 @@ function ManifestoLine({
     <p
       className={clsx(
         baseClass,
-        'font-mono text-sm sm:text-base text-white/70 leading-relaxed mb-4'
+        'font-mono text-sm sm:text-base text-white/75 leading-relaxed mb-4'
       )}
-      style={{ transitionDelay: `${index * 100}ms` }}
+      style={{ transitionDelay: `${index * 80}ms` }}
     >
-      <ScrambleText triggerOnView triggerOnHover={false} duration={400}>
-        {line.text}
-      </ScrambleText>
+      {line.text}
     </p>
   )
 }
@@ -130,23 +88,21 @@ export function ManifestoSection() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative py-24">
-      {/* Decryption indicator */}
+    <section ref={sectionRef} className="relative py-12 md:py-16">
       <div className="flex items-center gap-4 mb-12">
         <span className="font-mono text-xs text-arterial tracking-widest">
-          [{ABOUT.loading}]
+          [ORIGIN]
         </span>
-        <div className="flex-1 h-px bg-white/20/30" />
+        <div className="flex-1 h-px bg-white/20" />
         <span className="font-mono text-xs text-white/50">
-          {isVisible ? 'ACCESS_GRANTED' : 'LOCKED'}
+          {isVisible ? 'LOADED' : ABOUT.loading}
         </span>
       </div>
 
-      {/* Manifesto content */}
       <div className="max-w-3xl">
-        {MANIFESTO_LINES.map((line, index) => (
+        {ABOUT_STORY.map((line, index) => (
           <ManifestoLine
-            key={index}
+            key={`${line.type}-${index}`}
             line={line}
             index={index}
             isVisible={isVisible}
@@ -154,10 +110,9 @@ export function ManifestoSection() {
         ))}
       </div>
 
-      {/* Footer attribution */}
-      <div className="mt-16 pt-8 border-t border-white/30">
+      <div className="mt-16 pt-8 border-t border-white/20">
         <p className="font-mono text-xs text-white/50 tracking-widest">
-          — KAMIKAZE COLLECTIVE // EST. 2026
+          {ABOUT.attribution}
         </p>
       </div>
     </section>

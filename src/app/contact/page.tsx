@@ -90,6 +90,9 @@ export default function ContactPage() {
             >
               {displayText}
             </h1>
+            <p className="font-mono text-sm text-white/60 mt-4 max-w-lg mx-auto leading-relaxed">
+              {CONTACT.intro}
+            </p>
           </header>
 
           {/* Constellation */}

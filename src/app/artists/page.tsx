@@ -43,9 +43,7 @@ export default function ArtistsPage() {
 
         <div className="mt-16 py-8 border-y border-white/20">
           <p className="font-mono text-sm text-white/70 leading-relaxed max-w-2xl">
-            <span className="text-arterial">{'>'}</span> We are not here to
-            build idols. We are here to amplify sound. The underground was
-            never about names—it was about energy. Send us your best tracks.
+            <span className="text-arterial">{'>'}</span> {ARTISTS.footerNote}
           </p>
         </div>
       </div>

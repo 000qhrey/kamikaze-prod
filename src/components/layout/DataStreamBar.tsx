@@ -32,8 +32,8 @@ const STATIC_CODES = [
 
   // Identity/Protocol
   { key: 'ROUTING', value: 'IBLIIIZ_OTW', color: 'text-white' },
-  { key: 'PROTOCOL', value: 'UNDERGROUND', color: 'text-red-500' },
-  { key: 'ACCESS', value: 'NO_VIP', color: 'text-red-500' },
+  { key: 'PROTOCOL', value: 'INDEPENDENT', color: 'text-red-500' },
+  { key: 'ACCESS', value: 'ONE_FLOOR', color: 'text-green-400' },
 ] as const
 
 // 神風 takeover phrases - used during full 5-second takeover
