@@ -12,7 +12,7 @@ export const NAV_LINKS = [
   { href: '/contact', label: 'CONTACT' },
 ] as const
 
-export const FOOTER_NAV = NAV_LINKS.filter((link) => link.href !== '/')
+export const FOOTER_NAV = NAV_LINKS
 
 export const META = {
   artists: {

@@ -96,11 +96,15 @@ export function Hero() {
   const dissolveScale = 1 + heroProgress * 0.12
   const dissolveLift = heroProgress * -48
 
+  // On mobile: absolute (scrolls away). On desktop: fixed (depth dissolve).
+  const heroPosition = isMobile ? 'absolute' : 'fixed'
+  const mobileChromatic = isMobile ? 1 : chromaticOffset
+
   return (
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: isMobile ? '100vh' : '200vh' }}
+      style={{ height: isMobile ? '100svh' : '200vh' }}
     >
       {/* Glitch tear line */}
       <div className="glitch-tear" />
@@ -108,29 +112,34 @@ export function Hero() {
       {/* Fixed hero content */}
       <div
         className={clsx(
-          'fixed inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500',
-          isVisible && dissolveOpacity > 0.05 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          heroPosition,
+          'inset-0 z-20 flex flex-col items-center justify-center px-4 transition-opacity duration-500',
+          !isMobile && isVisible && dissolveOpacity > 0.05 ? 'opacity-100' : '',
+          !isMobile && (!isVisible || dissolveOpacity <= 0.05) ? 'opacity-0 pointer-events-none' : '',
+          isMobile ? 'opacity-100' : ''
         )}
       >
         <div
-          className="relative will-change-transform"
+          className="relative w-full max-w-lg mx-auto flex flex-col items-center text-center will-change-transform"
           style={{
-            transform: `scale(${dissolveScale}) translateY(${dissolveLift}px)`,
-            opacity: dissolveOpacity,
-            filter: `blur(${dissolveBlur}px)`,
+            transform: isMobile ? undefined : `scale(${dissolveScale}) translateY(${dissolveLift}px)`,
+            opacity: isMobile ? 1 : dissolveOpacity,
+            filter: isMobile ? undefined : `blur(${dissolveBlur}px)`,
           }}
         >
-          {/* Main title - dissolves on descend */}
           <h1
             ref={titleRef}
-            className="font-ritual text-6xl md:text-8xl lg:text-9xl text-white text-center tracking-wider relative inline-block text-jitter m-0"
+            className={clsx(
+              'font-ritual text-6xl md:text-8xl lg:text-9xl text-white tracking-wider relative m-0 w-full text-center',
+              !isMobile && 'text-jitter'
+            )}
             style={{
-              letterSpacing: `${heroProgress * 0.35}em`,
-              visibility: dissolveOpacity < 0.05 ? 'hidden' : 'visible',
+              letterSpacing: isMobile ? '0.08em' : `${heroProgress * 0.35}em`,
+              visibility: !isMobile && dissolveOpacity < 0.05 ? 'hidden' : 'visible',
               textShadow: `
-                  ${-chromaticOffset}px 0 0 rgba(255, 0, 0, ${0.7 * dissolveOpacity}),
-                  ${chromaticOffset}px 0 0 rgba(0, 255, 255, ${0.7 * dissolveOpacity}),
-                  0 0 ${20 + audioIntensity * 40}px rgba(204, 0, 0, ${(0.3 + audioIntensity * 0.5) * dissolveOpacity})
+                  ${-mobileChromatic}px 0 0 rgba(255, 0, 0, ${0.7 * (isMobile ? 1 : dissolveOpacity)}),
+                  ${mobileChromatic}px 0 0 rgba(0, 255, 255, ${0.7 * (isMobile ? 1 : dissolveOpacity)}),
+                  0 0 ${20 + audioIntensity * 40}px rgba(204, 0, 0, ${(0.3 + audioIntensity * 0.5) * (isMobile ? 1 : dissolveOpacity)})
                 `,
             }}
           >
@@ -138,11 +147,11 @@ export function Hero() {
           </h1>
 
           {/* Subtitle - Monospace */}
-          <p className="font-mono text-xs md:text-sm text-white/70 text-center mt-6 tracking-[0.2em] md:tracking-[0.3em] px-4">
+          <p className="font-mono text-xs md:text-sm text-white/70 mt-6 tracking-[0.2em] md:tracking-[0.3em] w-full">
             {HERO.tagline}
           </p>
 
-          <p className="font-mono text-sm md:text-base text-white/90 text-center mt-6 md:mt-8 max-w-md mx-auto leading-relaxed px-6">
+          <p className="font-mono text-sm md:text-base text-white/90 mt-6 md:mt-8 max-w-md leading-relaxed w-full">
             {HERO.valueProp}
           </p>
 
@@ -164,7 +173,7 @@ export function Hero() {
         </div>
 
         {/* Mobile quick nav — compact pill strip above audio bar */}
-        {isMobile && isVisible && (
+        {isMobile && (
           <div
             className="absolute left-0 right-0 z-30 px-4 pointer-events-none"
             style={{ bottom: 'calc(3.25rem + env(safe-area-inset-bottom, 0px))' }}
