@@ -6,6 +6,7 @@ import { TerminalButton } from '@/components/ui/TerminalButton'
 import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 import clsx from 'clsx'
+import { MERCH } from '@/data/siteCopy'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'already_bound' | 'error'
 
@@ -35,13 +36,13 @@ export function BindingForm() {
     // Basic client-side validation
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailPattern.test(email.trim())) {
-      setErrorMessage('INVALID FREQUENCY FORMAT // Expected: signal@domain.ext')
+      setErrorMessage(MERCH.invalidEmail)
       setFormState('error')
       return
     }
 
     if (!EDGE_FUNCTION_URL) {
-      setErrorMessage('UPLINK_OFFLINE // System not configured.')
+      setErrorMessage(MERCH.systemOffline)
       setFormState('error')
       return
     }
@@ -64,14 +65,14 @@ export function BindingForm() {
         setSerialKey(result.serialKey || null)
         setFormState('already_bound')
       } else if (result.message === 'INVALID_FREQUENCY_FORMAT') {
-        setErrorMessage('INVALID FREQUENCY FORMAT // Expected: signal@domain.ext')
+        setErrorMessage(MERCH.invalidEmail)
         setFormState('error')
       } else {
-        setErrorMessage('UPLINK_FAILED // Signal transmission error. Retry.')
+        setErrorMessage(MERCH.submitError)
         setFormState('error')
       }
     } catch {
-      setErrorMessage('TRANSMISSION_ERROR // Network failure. Retry.')
+      setErrorMessage(MERCH.submitError)
       setFormState('error')
     }
   }
@@ -83,7 +84,7 @@ export function BindingForm() {
         <div className="text-center py-8">
           <GlitchSlice>
             <div className="font-mono text-signal text-xl mb-2">
-              BINDING SEALED
+              ON THE LIST
             </div>
           </GlitchSlice>
 
@@ -92,9 +93,9 @@ export function BindingForm() {
           </div>
 
           <p className="font-mono text-sm text-white/60 leading-relaxed">
-            Your signal has been locked to this frequency.
+            {MERCH.waitlistSuccess}
             <br />
-            When the ritual completes, you will be summoned.
+            We will email you when the drop goes live.
           </p>
 
           <div className="mt-6 pt-4 border-t border-white/10">
@@ -113,7 +114,7 @@ export function BindingForm() {
       <CornerBrackets isActive={true} className="w-full max-w-md mx-auto">
         <div className="text-center py-8">
           <div className="font-mono text-arterial text-lg mb-2">
-            SIGNAL ALREADY BOUND
+            ALREADY ON THE LIST
           </div>
 
           <div className="font-display text-xl text-white mb-4">
@@ -121,9 +122,7 @@ export function BindingForm() {
           </div>
 
           <p className="font-mono text-sm text-white/60">
-            This frequency is already locked to the ritual.
-            <br />
-            Patience. The unveiling approaches.
+            This email is already registered for the waitlist.
           </p>
 
           <button
@@ -133,7 +132,7 @@ export function BindingForm() {
             }}
             className="mt-6 font-mono text-xs text-white/50 hover:text-arterial transition-colors"
           >
-            [BIND DIFFERENT SIGNAL]
+            [{MERCH.bindDifferent}]
           </button>
         </div>
       </CornerBrackets>
@@ -156,22 +155,20 @@ export function BindingForm() {
         {/* Header */}
         <div className="text-center mb-8">
           <h2 className="font-display text-2xl md:text-3xl text-arterial mb-2 tracking-wider">
-            {'>>>'} BIND YOUR SIGNAL
+            {'>>>'} {MERCH.waitlistTitle}
           </h2>
-          <p className="font-mono text-xs text-white/50 italic leading-relaxed">
-            &ldquo;Those who offer their coordinates
-            <br />
-            shall witness the unveiling first.&rdquo;
+          <p className="font-mono text-xs text-white/50 leading-relaxed">
+            {MERCH.waitlistSubtitle}
           </p>
         </div>
 
         {/* Email input */}
         <GlitchSlice delay={0}>
           <TornInput
-            label="INPUT:// FREQUENCY"
+            label={MERCH.emailLabel}
             name="email"
             type="email"
-            placeholder="your.signal@email.com"
+            placeholder={MERCH.emailPlaceholder}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value)

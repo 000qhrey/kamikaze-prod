@@ -18,6 +18,7 @@ import {
   clearSwitching,
   CHANNELS,
 } from '@/hooks/useAudioEngine'
+import { AUDIO } from '@/data/siteCopy'
 
 type PlayerMode = 'widget' | 'bar'
 
@@ -115,7 +116,7 @@ export function TerminalAudioPlayer() {
 
       widget.bind(SC.Widget.Events.READY, () => {
         setScReady(true)
-        setTrackTitle('READY // PRESS PLAY')
+        setTrackTitle(AUDIO.pressPlay)
         initSoundCloudWidget(iframeRef.current!)
 
         if (resumeAfterLoadRef.current) {
@@ -214,7 +215,7 @@ export function TerminalAudioPlayer() {
         auto_play: wasPlaying,
         callback: () => {
           setScReady(true)
-          setTrackTitle(wasPlaying ? 'SIGNAL_LOCKED' : 'READY // PRESS PLAY')
+          setTrackTitle(wasPlaying ? 'PLAYING' : AUDIO.pressPlay)
           widget.setVolume(wasPlaying ? 0 : savedVolumeRef.current)
 
           if (!wasPlaying) return
@@ -308,7 +309,7 @@ export function TerminalAudioPlayer() {
               <span className={clsx('text-[8px]', state.isPlaying ? 'text-arterial animate-pulse' : 'text-white/50')}>
                 {state.isPlaying ? '[LIVE]' : '[IDLE]'}
               </span>
-              <span className="text-white/70">SIGNAL_TAP</span>
+              <span className="text-white/70">{AUDIO.playerLabel}</span>
             </div>
             <span className="text-white/50 hover:text-arterial">[-]</span>
           </div>
@@ -483,7 +484,7 @@ export function TerminalAudioPlayer() {
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-arterial/30">
-              <span className="text-arterial tracking-wider text-sm">SIGNAL_ACQUISITION</span>
+              <span className="text-arterial tracking-wider text-sm">NOW PLAYING</span>
               <button
                 onClick={() => setShowChannelSelector(false)}
                 className="text-white/70 hover:text-arterial transition-colors text-lg"
@@ -522,7 +523,7 @@ export function TerminalAudioPlayer() {
 
             {/* Footer */}
             <div className="mt-4 pt-2 border-t border-arterial/20 text-[8px] text-white/50">
-              SELECT FREQUENCY TO TAP INTO SIGNAL
+              {AUDIO.selectChannel}
             </div>
           </div>
         </div>

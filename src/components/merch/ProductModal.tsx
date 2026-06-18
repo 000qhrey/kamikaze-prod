@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { MerchItem } from '@/data/merch'
+import { MERCH } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface ProductModalProps {
@@ -190,7 +191,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
               <div className="absolute inset-0 flex items-center justify-center bg-black/90 z-20">
                 <div className="text-center">
                   <span className="font-mono text-lg text-signal animate-pulse block">
-                    [ITEM_LOCKED_IN_BUFFER]
+                    [{MERCH.addedToCart}]
                   </span>
                   <span className="font-mono text-xs text-white/50 mt-2 block">
                     REDIRECTING_TO_CART...
@@ -239,7 +240,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
                     </div>
                   )}
                   <div>
-                    <span className="text-white/50 block">SIGNAL_RATING:</span>
+                    <span className="text-white/50 block">{MERCH.rating}:</span>
                     <span className="text-arterial">{item.signal}/10</span>
                   </div>
                   <div>
@@ -251,7 +252,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
 
               {/* Size selector */}
               <div className="mb-6">
-                <h4 className="font-mono text-xs text-white/50 mb-3">SELECT_SIZE:</h4>
+                <h4 className="font-mono text-xs text-white/50 mb-3">{MERCH.selectSize}</h4>
                 <div className="flex flex-wrap gap-2">
                   {item.sizes.map((size) => (
                     <button
@@ -272,7 +273,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
 
               {/* Size guide link */}
               <button className="font-mono text-[10px] text-white/50 hover:text-white/70 mb-8 underline underline-offset-2">
-                [VIEW_SIZE_BLUEPRINT]
+                [{MERCH.sizeGuide}]
               </button>
 
               {/* Acquire button */}
@@ -286,12 +287,12 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
                     : 'border-arterial text-arterial hover:bg-arterial hover:text-black'
                 )}
               >
-                {item.stock === 'DEPLETED' ? '[ STOCK_DEPLETED ]' : '[ ACQUIRE_ASSET ]'}
+                {item.stock === 'DEPLETED' ? `[ ${MERCH.soldOut} ]` : `[ ${MERCH.addToCart} ]`}
               </button>
 
               {/* Warning */}
               <p className="font-mono text-[9px] text-white/50 text-center mt-4">
-                FINAL_SALE // NO_RETURNS // SIGNAL_PERMANENT
+                {MERCH.finalSaleNote}
               </p>
             </div>
           </div>

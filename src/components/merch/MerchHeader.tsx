@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from 'react'
 
-const SCROLL_TEXT = 'LIMITED_DROP_01 // NO_RESTOCKS // NO_MERCY // UNDERGROUND_ONLY // '
+import { MERCH } from '@/data/siteCopy'
+
+const SCROLL_TEXT = 'LIMITED DROP // NO RESTOCKS // UNDERGROUND ONLY // '
 
 export function MerchHeader() {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -44,13 +46,13 @@ export function MerchHeader() {
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         <div className="flex items-start gap-4 mb-4">
           <span className="font-mono text-xs text-arterial tracking-widest">
-            [CAPITAL_EQUIPMENT]
+            {MERCH.pageTitle}
           </span>
           <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>
 
         <h1 className="font-display text-5xl md:text-7xl tracking-wider mb-4">
-          ASSET_ACQUISITION
+          {MERCH.pageTitle}
         </h1>
 
         <div className="flex flex-wrap gap-6 font-mono text-xs text-white/70">
@@ -73,7 +75,7 @@ export function MerchHeader() {
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs text-arterial animate-pulse">[!]</span>
             <p className="font-mono text-xs text-white/70">
-              ALL ITEMS FINAL SALE. NO REFUNDS. NO EXCHANGES. SIGNALS CANNOT BE RETURNED.
+              {MERCH.finalSale}
             </p>
           </div>
         </div>

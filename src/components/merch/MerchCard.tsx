@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { MerchItem } from '@/data/merch'
+import { MERCH } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface MerchCardProps {
@@ -194,7 +195,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
               </div>
             )}
             <div>
-              <span className="text-white/50 block">SIGNAL</span>
+              <span className="text-white/50 block">{MERCH.rating}</span>
               <span className="text-arterial">{item.signal}/10</span>
             </div>
           </div>
@@ -204,7 +205,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
         {showAcquired && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20">
             <span className="font-mono text-sm text-signal animate-pulse">
-              [ITEM_LOCKED_IN_BUFFER]
+              [{MERCH.addedToCart}]
             </span>
           </div>
         )}
@@ -271,7 +272,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
               : 'border-white/30/50 text-white hover:border-arterial hover:text-arterial hover:bg-arterial/5'
           )}
         >
-          {item.stock === 'DEPLETED' ? '[ DEPLETED ]' : '[ ACQUIRE ]'}
+          {item.stock === 'DEPLETED' ? `[ ${MERCH.soldOut} ]` : `[ ${MERCH.addToCart} ]`}
         </button>
       </div>
     </div>

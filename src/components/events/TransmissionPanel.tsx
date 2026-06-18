@@ -9,11 +9,10 @@ import {
   FRAGMENT_01_DISMISSED_KEY,
   FRAGMENT_01_SEEN_KEY,
   MASKED_TIMESTAMP,
-  TRANSMISSION_PROGRESS,
-  getProgressBar,
 } from '@/data/transmission'
+import { EVENT_HINT } from '@/data/siteCopy'
 
-const TOTAL_STEPS = 7
+const TOTAL_STEPS = 6
 const SCROLL_TRIGGER_PX = 8
 
 export function TransmissionPanel() {
@@ -108,7 +107,7 @@ export function TransmissionPanel() {
             : 'opacity-0 translate-x-8 translate-y-4 pointer-events-none'
         )}
         role="dialog"
-        aria-label="Recovered transmission fragment"
+        aria-label="Upcoming event hint"
       >
         <div className="relative border border-arterial/40 bg-void/95 backdrop-blur-md glass-card">
           <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-arterial/60" />
@@ -117,34 +116,25 @@ export function TransmissionPanel() {
           <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-arterial/60" />
 
           <div className="flex items-center justify-between px-4 py-2 border-b border-arterial/20 bg-arterial/5">
-            <span className="font-mono text-[10px] text-arterial tracking-widest animate-pulse">
-              DATA_RECOVERY // FRAGMENT_01
+            <span className="font-mono text-[10px] text-arterial tracking-widest">
+              {EVENT_HINT.panelTitle}
             </span>
             <button
               onClick={dismiss}
               className="font-mono text-[10px] text-white/50 hover:text-arterial transition-colors tracking-wider"
             >
-              [DISMISS]
+              [{EVENT_HINT.dismiss}]
             </button>
           </div>
 
           <div className="px-5 py-4 font-mono text-xs leading-relaxed space-y-2">
             <p
               className={clsx(
-                'text-[10px] text-white/40 tracking-wider transition-opacity duration-300',
+                'text-white/70 transition-opacity duration-300',
                 show(1) ? 'opacity-100' : 'opacity-0'
               )}
             >
-              {getProgressBar(TRANSMISSION_PROGRESS.FRAGMENT_01)}
-            </p>
-
-            <p
-              className={clsx(
-                'text-arterial tracking-widest text-[10px] transition-opacity duration-300',
-                show(2) ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              TRANSMISSION // FRAGMENT_01
+              We have an upcoming event — details are still being confirmed.
             </p>
 
             <p
@@ -153,62 +143,43 @@ export function TransmissionPanel() {
                 show(2) ? 'opacity-100' : 'opacity-0'
               )}
             >
-              TIMESTAMP:// {MASKED_TIMESTAMP}
+              Date: {MASKED_TIMESTAMP.replace('XX.', '').replace('.', ' ')} (month confirmed)
             </p>
-
-            <div
-              className={clsx(
-                'space-y-1 transition-opacity duration-300',
-                show(3) ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <p className="text-white/70">The signal reaches the subcontinent.</p>
-              <p className="text-signal">Month recovered.</p>
-              <p className="text-signal">Year recovered.</p>
-              <p className="text-white/50">Location data remains encrypted.</p>
-            </div>
-
-            <div
-              className={clsx(
-                'space-y-1 border-l-2 border-arterial/30 pl-3 transition-opacity duration-300',
-                show(4) ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              <p className="text-white/60">&gt;&gt;&gt; EVENTS_NODE contains additional fragments.</p>
-              <p className="text-white/60">&gt;&gt;&gt; Decrypt remaining payload to recover coordinates.</p>
-            </div>
 
             <p
               className={clsx(
-                'text-red-bright text-[10px] tracking-wider animate-pulse transition-opacity duration-300',
-                show(5) ? 'opacity-100' : 'opacity-0'
+                'text-signal transition-opacity duration-300',
+                show(3) ? 'opacity-100' : 'opacity-0'
               )}
             >
-              CAREFUL — YOU ARE BEING WATCHED!
+              {EVENT_HINT.monthFound}
+            </p>
+
+            <p
+              className={clsx(
+                'text-white/50 transition-opacity duration-300',
+                show(3) ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              {EVENT_HINT.locationHidden}
             </p>
 
             <div
               className={clsx(
                 'flex flex-col gap-2 pt-2 transition-opacity duration-300',
-                show(6) ? 'opacity-100' : 'opacity-0'
+                show(4) ? 'opacity-100' : 'opacity-0'
               )}
             >
               <button
                 onClick={continueToEvents}
                 className="font-mono text-[10px] tracking-widest text-left text-arterial hover:text-white border border-arterial/40 hover:border-arterial px-3 py-2 transition-colors"
               >
-                [ ACCESS FRAGMENT_02 → ]
+                [ {EVENT_HINT.cta} → ]
               </button>
               <p className="text-[10px] text-white/30">
-                SIGNAL_INTEGRITY: {TRANSMISSION_PROGRESS.FRAGMENT_01}% // RECONSTRUCTION INCOMPLETE
+                {EVENT_HINT.footer}
               </p>
             </div>
-
-            {show(7) && (
-              <p className="text-[10px] text-white/20 pt-1">
-                ROUTE: EVENTS://KAMIKAZE_OVERRIDE
-              </p>
-            )}
           </div>
         </div>
       </div>

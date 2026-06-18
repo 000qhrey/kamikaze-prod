@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Artist } from '@/data/artists'
+import { ARTIST_DETAIL } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface ArtistPageContentProps {
@@ -102,7 +103,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
         <section className="mb-24">
           <div className="flex items-start gap-4 mb-8">
             <span className="font-mono text-xs text-arterial tracking-widest">
-              [TRANSMISSIONS]
+              [{ARTIST_DETAIL.mixes}]
             </span>
             <div className="flex-1 h-px bg-white/20/30 mt-2" />
           </div>
@@ -157,7 +158,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                       </div>
                       <div>
                         <span className="text-white/50">STATUS:</span>
-                        <span className="text-signal ml-2">DECRYPTED</span>
+                        <span className="text-signal ml-2">{ARTIST_DETAIL.available}</span>
                       </div>
                     </div>
 
@@ -189,7 +190,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
       <section>
         <div className="flex items-start gap-4 mb-8">
           <span className="font-mono text-xs text-arterial tracking-widest">
-            [UPLINK]
+            [{ARTIST_DETAIL.links}]
           </span>
           <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>

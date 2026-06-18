@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { contactInfo } from '@/data/moto'
 import { CyberSigil } from './CyberSigil'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { CONTACT } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface ContactItem {
@@ -133,7 +134,7 @@ export function ContactConstellation() {
             'font-mono text-xs tracking-[0.3em]',
             isSigilHovered ? 'text-signal' : 'text-white/70'
           )}>
-            {isSigilHovered ? 'UPLINK_ACTIVE' : 'SIGNAL_PATH_OPEN'}
+            {isSigilHovered ? CONTACT.statusHover : CONTACT.statusOpen}
           </span>
         </div>
 
@@ -313,7 +314,7 @@ export function ContactConstellation() {
             'font-mono text-xs tracking-[0.3em]',
             isSigilHovered ? 'text-signal' : 'text-white/70'
           )}>
-            {isSigilHovered ? 'UPLINK_ACTIVE' : 'SIGNAL_PATH_OPEN'}
+            {isSigilHovered ? CONTACT.statusHover : CONTACT.statusOpen}
           </span>
         </div>
       </div>

@@ -25,6 +25,7 @@ import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
 import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
+import { SIGIL_SCENE_LINKS } from '@/data/navigation'
 
 // Configure drei's useGLTF to use local Draco decoder (faster than CDN)
 const dracoLoader = new DRACOLoader()
@@ -34,14 +35,7 @@ dracoLoader.preload()
 // Set up the GLTF loader with Draco support
 useGLTF.setDecoderPath(getAssetPath('/draco/'))
 
-// Navigation labels that float around the sigil
-const NAV_ITEMS = [
-  { label: 'EVENTS', href: '/events', angle: -45, distance: 4.5 },
-  { label: 'SIGNALS', href: '/artists', angle: 0, distance: 4.5 },
-  { label: 'MANIFESTO', href: '/about', angle: 45, distance: 4.5 },
-  { label: 'MERCH', href: '/merch', angle: 135, distance: 4.5 },
-  { label: 'CONTACT', href: '/contact', angle: 225, distance: 4.5 },
-]
+const NAV_ITEMS = SIGIL_SCENE_LINKS
 
 function NavLabel({ label, href, angle, distance, hoveredNav, setHoveredNav }: {
   label: string

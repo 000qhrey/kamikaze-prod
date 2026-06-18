@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Signal, Genre, getSignals } from '@/data/signals'
 import { SignalEntry } from './SignalEntry'
+import { ARTISTS } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface SignalFeedProps {
@@ -34,7 +35,7 @@ export function SignalFeed({ genreFilter }: SignalFeedProps = {}) {
       {/* Terminal header */}
       <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/30">
         <span className="font-mono text-xs text-arterial tracking-widest">
-          [ACTIVE_SIGNALS]
+          [{ARTISTS.activeList}]
         </span>
         <div className="flex-1 h-px bg-white/10" />
         <span className="font-mono text-xs text-white/50">
@@ -60,7 +61,7 @@ export function SignalFeed({ genreFilter }: SignalFeedProps = {}) {
           <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
           <div className="w-2 h-2 rounded-full bg-signal/40" />
           <span className="ml-4 font-mono text-xs text-white/50 tracking-wider">
-            SIGNAL_FEED_v1.0.3 // LIVE
+            {ARTISTS.feedLabel}
           </span>
         </div>
 
@@ -68,7 +69,7 @@ export function SignalFeed({ genreFilter }: SignalFeedProps = {}) {
         {isLoading && (
           <div className="py-12 text-center">
             <div className="font-mono text-sm text-white/70 animate-pulse">
-              {'>'} ESTABLISHING_CONNECTION...
+              {'>'} {ARTISTS.loadingConnection}
             </div>
           </div>
         )}
@@ -82,7 +83,7 @@ export function SignalFeed({ genreFilter }: SignalFeedProps = {}) {
               ))
             ) : (
               <div className="py-8 text-center font-mono text-sm text-white/50">
-                NO_SIGNALS_ON_FREQUENCY
+                {ARTISTS.noResults}
               </div>
             )}
           </div>
@@ -91,7 +92,7 @@ export function SignalFeed({ genreFilter }: SignalFeedProps = {}) {
         {/* Terminal prompt at bottom */}
         <div className="px-4 py-3 bg-white/5 border-t border-white/20">
           <div className="font-mono text-xs text-white/50">
-            <span className="text-signal">{'>'}</span> AWAITING_NEW_SIGNALS...
+            <span className="text-signal">{'>'}</span> {ARTISTS.awaiting}
             <span className="animate-pulse">_</span>
           </div>
         </div>

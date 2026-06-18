@@ -7,7 +7,17 @@ import { TerminalButton } from '@/components/ui/TerminalButton'
 import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 
+import { CONTACT } from '@/data/siteCopy'
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+function formatContactError(message: string) {
+  if (message === 'SYSTEM_NOT_CONFIGURED') return CONTACT.systemOffline
+  if (message === 'TRANSMISSION_FAILED' || message === 'TRANSMISSION_ERROR') {
+    return CONTACT.sendFailed
+  }
+  return message
+}
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,7 +59,7 @@ export function ContactForm() {
 
       setIsSubmitted(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'TRANSMISSION_ERROR')
+      setError(formatContactError(err instanceof Error ? err.message : CONTACT.sendFailed))
     } finally {
       setIsSubmitting(false)
     }
@@ -61,10 +71,10 @@ export function ContactForm() {
         <div className="text-center py-12">
           <GlitchSlice>
             <div className="font-mono text-signal text-xl mb-4">
-              SIGNAL_SENT <span className="text-white"></span>
+              MESSAGE SENT
             </div>
             <p className="font-mono text-white/70 text-sm">
-              Your transmission has been received. We will respond.
+              {CONTACT.messageSentBody}
             </p>
           </GlitchSlice>
         </div>

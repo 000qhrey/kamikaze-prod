@@ -6,16 +6,8 @@ import { useTransition } from '@/providers/TransitionProvider'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { MobileNav } from './MobileNav'
 import { playHoverSound } from '@/hooks/useSonicFeedback'
+import { NAV_LINKS } from '@/data/navigation'
 import clsx from 'clsx'
-
-const NAV_LINKS = [
-  { href: '/', label: 'HOME' },
-  { href: '/events', label: 'EVENTS' },
-  { href: '/artists', label: 'SIGNALS' },
-  { href: '/about', label: 'MANIFESTO' },
-  { href: '/merch', label: 'ARTIFACTS' },
-  { href: '/contact', label: 'CONTACT' },
-]
 
 const GLITCH_CHARS = '▓▒░█▄▀■□●○◆◇▲△▼▽◀▶◁▷★☆⬛⬜'
 const KANJI_TEXT = '神風'

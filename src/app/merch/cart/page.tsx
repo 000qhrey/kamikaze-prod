@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { CartItem, merchItems } from '@/data/merch'
 import { useTransition } from '@/providers/TransitionProvider'
+import { MERCH } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 export default function CartPage() {
@@ -218,7 +219,7 @@ export default function CartPage() {
                   <span className="text-white/70">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">TRANSMISSION_FEE:</span>
+                  <span className="text-white/50">{MERCH.shippingFee}</span>
                   <span className={shipping === 0 ? 'text-signal' : 'text-white/70'}>
                     {shipping === 0 ? 'WAIVED (ORDER > €100)' : `€${shipping.toFixed(2)}`}
                   </span>
@@ -236,11 +237,11 @@ export default function CartPage() {
                   'border-arterial text-arterial hover:bg-arterial hover:text-black'
                 )}
               >
-                [ EXECUTE_ORDER ]
+                [{MERCH.checkout}]
               </button>
 
               <p className="font-mono text-[10px] text-white/50 text-center mt-4">
-                SECURE_TRANSMISSION // STRIPE_ENCRYPTED // ALL_SALES_FINAL
+                {MERCH.secureCheckout}
               </p>
             </div>
           </div>

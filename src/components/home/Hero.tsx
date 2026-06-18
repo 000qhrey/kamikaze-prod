@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 import { getBass } from '@/hooks/useAudioEngine'
 import { useTransition } from '@/providers/TransitionProvider'
 import clsx from 'clsx'
+import { HERO } from '@/data/siteCopy'
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -137,11 +138,11 @@ export function Hero() {
               textShadow: audioIntensity > 0.3 ? '0 0 10px rgba(204, 0, 0, 0.5)' : 'none',
             }}
           >
-            UNDERGROUND WILL NEVER DIE
+            {HERO.tagline}
           </p>
 
           <p className="font-mono text-sm md:text-base text-white/90 text-center mt-8 max-w-md mx-auto leading-relaxed px-4">
-            Underground techno events. Curated ruptures. No VIP. No idols.
+            {HERO.valueProp}
           </p>
 
           {/* Audio level indicator */}
@@ -195,7 +196,7 @@ export function Hero() {
             className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-auto"
           >
             <span className="font-mono text-sm text-white tracking-[0.2em] border border-white/40 px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors">
-              SCROLL TO EXPLORE
+              {HERO.scrollCta}
             </span>
             <div className="w-px h-12 bg-white/60 relative overflow-hidden">
               <div

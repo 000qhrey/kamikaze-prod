@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react'
 import { ScrambleText } from '@/components/effects/ScrambleText'
+import { ABOUT } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface ManifestoLine {
@@ -133,7 +134,7 @@ export function ManifestoSection() {
       {/* Decryption indicator */}
       <div className="flex items-center gap-4 mb-12">
         <span className="font-mono text-xs text-arterial tracking-widest">
-          [DECRYPTING_MANIFESTO]
+          [{ABOUT.loading}]
         </span>
         <div className="flex-1 h-px bg-white/20/30" />
         <span className="font-mono text-xs text-white/50">

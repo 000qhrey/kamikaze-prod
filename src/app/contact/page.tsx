@@ -5,14 +5,15 @@ import { ContactConstellation } from '@/components/contact/ContactConstellation'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import clsx from 'clsx'
+import { CONTACT } from '@/data/siteCopy'
 
-const DEFAULT_TEXT = '[SIGNAL_PATH]'
-const HINT_TEXT = '[ACTIVATE_SIGIL]'
+const DEFAULT_TEXT = CONTACT.pageTitle
+const HINT_TEXT = CONTACT.pageTitleHover
 const GLITCH_CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`0123456789'
 
 export default function ContactPage() {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [displayText, setDisplayText] = useState(DEFAULT_TEXT)
+  const [displayText, setDisplayText] = useState<string>(DEFAULT_TEXT)
   const [isHovered, setIsHovered] = useState(false)
 
   // Entry delay effect
@@ -77,7 +78,7 @@ export default function ContactPage() {
           {/* Header */}
           <header className="mb-8 text-center">
             <span className="font-mono text-xs text-arterial/60 tracking-[0.4em] block mb-2">
-              {'>>>'} ESTABLISH CONNECTION
+              {CONTACT.eyebrow}
             </span>
             <h1
               className={clsx(
@@ -97,7 +98,7 @@ export default function ContactPage() {
           {/* Form Section */}
           <section className="mt-24">
             <h2 className="font-mono text-sm text-white/60 uppercase tracking-widest mb-8 text-center">
-              DIRECT TRANSMISSION
+              {CONTACT.formSection}
             </h2>
             <div className="max-w-md mx-auto">
               <ContactForm />

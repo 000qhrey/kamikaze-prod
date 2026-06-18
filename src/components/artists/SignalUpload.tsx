@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useEffect } from 'react'
 import clsx from 'clsx'
+import { ARTISTS } from '@/data/siteCopy'
 
 type UploadState = 'idle' | 'uploading' | 'success'
 
@@ -18,11 +19,11 @@ export function SignalUpload() {
   const [currentLogIndex, setCurrentLogIndex] = useState(0)
 
   const uploadLogs: LogEntry[] = [
-    { text: 'INITIALIZING_UPLOAD_PROTOCOL...', type: 'info' },
-    { text: 'VALIDATING_SOUNDCLOUD_ENDPOINT...', type: 'info' },
-    { text: 'PACKET_RECEIVED.', type: 'success' },
-    { text: 'SIGNAL_INTEGRATED_INTO_FUTURE_OPERATIONS.', type: 'success' },
-    { text: 'KAMIKAZE_MAY_ACTIVATE_IN_YOUR_CITY.', type: 'data' },
+    { text: 'Uploading your demo...', type: 'info' },
+    { text: 'Checking SoundCloud link...', type: 'info' },
+    { text: 'Received.', type: 'success' },
+    { text: 'Added to our review queue.', type: 'success' },
+    { text: 'We may reach out about future events.', type: 'data' },
   ]
 
   // Animate logs one by one
@@ -64,11 +65,11 @@ export function SignalUpload() {
       {/* Section header */}
       <div className="flex items-center gap-4 mb-6 pb-4 border-b border-white/30">
         <span className="font-mono text-xs text-arterial tracking-widest">
-          [SYSTEM_UPLOAD]
+          {ARTISTS.uploadSection}
         </span>
         <div className="flex-1 h-px bg-white/10" />
         <span className="font-mono text-xs text-white/50">
-          SUBMIT_SIGNAL
+          SoundCloud demo
         </span>
       </div>
 
@@ -90,7 +91,7 @@ export function SignalUpload() {
               {/* SoundCloud Link Input */}
               <div>
                 <label className="block font-mono text-xs text-white/70 mb-2">
-                  <span className="text-arterial">INPUT://</span> SOUNDCLOUD_LINK
+                  <span className="text-arterial">Link:</span> SoundCloud URL
                 </label>
                 <input
                   type="url"
@@ -110,7 +111,7 @@ export function SignalUpload() {
               {/* Artist Alias Input */}
               <div>
                 <label className="block font-mono text-xs text-white/70 mb-2">
-                  <span className="text-arterial">INPUT://</span> ARTIST_ALIAS{' '}
+                  <span className="text-arterial">Name:</span> Artist name{' '}
                   <span className="text-white/50">(OPTIONAL)</span>
                 </label>
                 <input
@@ -144,15 +145,15 @@ export function SignalUpload() {
                   className="absolute inset-0 flex items-center justify-center text-cyan-400/30 opacity-0 group-hover:opacity-100"
                   style={{ transform: 'translate(-2px, -1px)' }}
                 >
-                  [ UPLOAD SIGNAL ]
+                  [ {ARTISTS.uploadButton} ]
                 </span>
                 <span
                   className="absolute inset-0 flex items-center justify-center text-red-500/30 opacity-0 group-hover:opacity-100"
                   style={{ transform: 'translate(2px, 1px)' }}
                 >
-                  [ UPLOAD SIGNAL ]
+                  [ {ARTISTS.uploadButton} ]
                 </span>
-                <span className="relative">[ UPLOAD SIGNAL ]</span>
+                <span className="relative">[ {ARTISTS.uploadButton} ]</span>
               </button>
             </form>
           )}
@@ -221,8 +222,8 @@ export function SignalUpload() {
 
       {/* Disclaimer */}
       <p className="mt-4 font-mono text-xs text-white/50 leading-relaxed">
-        BY UPLOADING, YOU ACKNOWLEDGE THAT KAMIKAZE MAY FEATURE YOUR SIGNAL IN
-        FUTURE BROADCASTS. NO GUARANTEES. NO PROMISES. JUST SOUND.
+        By uploading, you agree that KAMIKAZE may review and feature your music.
+        No guarantees — we listen to everything.
       </p>
     </section>
   )

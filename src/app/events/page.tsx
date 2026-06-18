@@ -5,10 +5,11 @@ import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { DeadSignalsEmpty } from '@/components/events/DeadSignalsEmpty'
+import { EVENTS, META } from '@/data/siteCopy'
 
 export const metadata = {
-  title: 'EVENTS | KAMIKAZE',
-  description: 'Upcoming and past events from KAMIKAZE collective.',
+  title: META.events.title,
+  description: META.events.description,
 }
 
 export default function EventsPage() {
@@ -39,10 +40,10 @@ export default function EventsPage() {
             resolveToColor="#CC0000"
             finalColor="#EFEFEF"
           >
-            EVENTS
+            {EVENTS.pageTitle}
           </ScrambleText>
           <p className="font-mono text-white/70">
-            Every event is a controlled collapse.
+            {EVENTS.tagline}
           </p>
         </header>
 
@@ -50,7 +51,7 @@ export default function EventsPage() {
         {upcomingEvents.length > 0 && (
           <section className="mb-32">
             <h2 className="font-mono text-xs text-arterial uppercase tracking-[0.5em] mb-12 -skew-x-6">
-              {'>>>'} INCOMING TRANSMISSIONS
+              {'>>>'} {EVENTS.upcoming}
             </h2>
             <div className="space-y-12">
               {upcomingEvents.map((event, index) => (
@@ -63,7 +64,7 @@ export default function EventsPage() {
         {/* Past Events / Dead Signals */}
         <section>
           <h2 className="font-mono text-xs text-white/50 uppercase tracking-[0.5em] mb-12 skew-x-3">
-            [ARCHIVE] DEAD SIGNALS
+            [ {EVENTS.past} ]
           </h2>
           {pastEvents.length > 0 ? (
             <div className="space-y-4">

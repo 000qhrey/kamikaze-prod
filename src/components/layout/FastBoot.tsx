@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import clsx from 'clsx'
+import { BOOT } from '@/data/siteCopy'
 
 interface FastBootProps {
   onComplete: () => void
@@ -74,7 +75,7 @@ export function FastBoot({ onComplete }: FastBootProps) {
                 glitchFrame % 4 === 0 ? '2px 0 #00ffff, -2px 0 #ff00ff' : 'none',
             }}
           >
-            [ SIGNAL_RECOGNIZED // RESUME_UPLINK ]
+            [ {BOOT.fastResume} ]
           </div>
           <div
             className={clsx(
@@ -88,7 +89,7 @@ export function FastBoot({ onComplete }: FastBootProps) {
 
       {phase === 'welcome' && (
         <div className="font-mono text-sm text-white tracking-widest animate-pulse">
-          [ WELCOME BACK, OPERATIVE ]
+          [ WELCOME BACK ]
         </div>
       )}
 
@@ -96,7 +97,7 @@ export function FastBoot({ onComplete }: FastBootProps) {
         [FAST_BOOT]
       </div>
       <div className="absolute top-4 right-4 font-mono text-[10px] text-arterial/50">
-        RETURNING_SIGNAL
+        {BOOT.fastCorner}
       </div>
     </div>
   )

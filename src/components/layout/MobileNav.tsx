@@ -7,7 +7,7 @@ import clsx from 'clsx'
 interface MobileNavProps {
   isOpen: boolean
   onClose: () => void
-  links: { href: string; label: string }[]
+  links: readonly { href: string; label: string }[]
   currentPath: string
   onNavigate: (href: string) => void
 }

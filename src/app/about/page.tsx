@@ -3,20 +3,18 @@ import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { ClientNavButton } from '@/components/layout/ClientNavButton'
+import { ABOUT, META } from '@/data/siteCopy'
 
 export const metadata = {
-  title: 'MANIFESTO | KAMIKAZE',
-  description:
-    'We are not here to build idols. We are here to amplify sound. The underground was never about names—it was about energy.',
+  title: META.about.title,
+  description: META.about.description,
 }
 
 export default function AboutPage() {
   return (
     <div className="relative min-h-screen flex flex-col pt-24">
-      {/* Background texture */}
       <ManifestoTexture phrase="NO IDOLS" parallaxSpeed={0.08} />
 
-      {/* Noise overlay */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.03] z-0"
         style={{
@@ -24,7 +22,6 @@ export default function AboutPage() {
         }}
       />
 
-      {/* Vignette overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -34,56 +31,43 @@ export default function AboutPage() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 flex-grow pb-16">
-        {/* Header */}
         <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-4">
-            <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
-              [FILE://
-            </span>
-            <ScrambleText
-              className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl tracking-wider break-words"
-              triggerOnView
-              triggerOnHover={false}
-              duration={600}
-              resolveToColor="#CC0000"
-              finalColor="#EFEFEF"
-            >
-              MAIN_MANIFESTO
-            </ScrambleText>
-            <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
-              ]
-            </span>
-          </div>
+          <ScrambleText
+            className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl tracking-wider break-words mb-4 block"
+            triggerOnView
+            triggerOnHover={false}
+            duration={600}
+            resolveToColor="#CC0000"
+            finalColor="#EFEFEF"
+          >
+            {ABOUT.pageTitle}
+          </ScrambleText>
 
-          <p className="font-mono text-white/50 text-xs tracking-wide">
-            CLASSIFIED_DOCUMENT // INTERNAL_USE_ONLY // LEAK_STATUS:
-            INTENTIONAL
+          <p className="font-mono text-white/60 text-sm tracking-wide">
+            {ABOUT.subtitle}
           </p>
         </header>
 
-        {/* Decorative header line */}
         <div className="flex items-center gap-4 mb-16">
           <div className="h-px flex-1 bg-gradient-to-r from-arterial/50 to-transparent" />
           <span className="font-mono text-xs text-white/50 tracking-widest">
-            CLEARANCE_LEVEL: NONE_REQUIRED
+            {ABOUT.clearance}
           </span>
           <div className="h-px flex-1 bg-gradient-to-l from-arterial/50 to-transparent" />
         </div>
 
-        {/* Manifesto */}
         <ManifestoSection />
 
-        {/* Call to action */}
         <section className="mt-24 py-12 border-y border-white/20">
           <div className="text-center">
             <p className="font-mono text-sm text-white/70 mb-6">
-              {'>'} READY_TO_TRANSMIT?
+              {ABOUT.ctaPrompt}
             </p>
             <ClientNavButton
               href="/artists"
               className="inline-flex items-center justify-center px-8 py-4 min-h-[48px] border border-arterial/50 bg-arterial/10 font-mono text-sm tracking-widest text-arterial hover:bg-arterial/20 hover:border-arterial transition-all duration-200 focus:ring-2 focus:ring-arterial focus:outline-none disabled:opacity-50"
             >
-              [ SUBMIT_YOUR_SIGNAL ]
+              [ {ABOUT.ctaButton} ]
             </ClientNavButton>
           </div>
         </section>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ARTISTS } from '@/data/siteCopy'
 import { Genre } from '@/data/signals'
 import { SignalFeed } from './SignalFeed'
 import { SignalUpload } from './SignalUpload'
@@ -24,7 +25,7 @@ export function SignalNetworkContent() {
               [SYS://
             </span>
             <h1 className="font-display text-4xl sm:text-5xl md:text-7xl tracking-wider">
-              OPEN_SIGNAL_NETWORK
+              {ARTISTS.networkTitle}
             </h1>
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
               ]
@@ -32,14 +33,14 @@ export function SignalNetworkContent() {
           </div>
 
           <p className="font-mono text-white/70 text-sm md:text-base tracking-wide">
-            Transmission is open. Hierarchy is terminated.
+            {ARTISTS.networkSubtitle}
           </p>
 
           {/* Decorative line */}
           <div className="mt-8 flex items-center gap-4">
             <div className="h-px flex-1 bg-gradient-to-r from-arterial/50 to-transparent" />
             <span className="font-mono text-[10px] text-white/50 tracking-widest">
-              NO_IDOLS // ONLY_FREQUENCY
+              {ARTISTS.networkDivider}
             </span>
             <div className="h-px flex-1 bg-gradient-to-l from-arterial/50 to-transparent" />
           </div>

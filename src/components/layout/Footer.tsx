@@ -7,15 +7,9 @@ import { DataStreamBar } from './DataStreamBar'
 import { AscendButton } from './AscendButton'
 import { MarqueeGlitch } from '@/components/effects/MarqueeGlitch'
 import { useTransition } from '@/providers/TransitionProvider'
+import { FOOTER_NAV } from '@/data/navigation'
 
-// Footer navigation links - easy access without hunting for menu
-const FOOTER_NAV = [
-  { href: '/events', label: 'EVENTS' },
-  { href: '/artists', label: 'SIGNALS' },
-  { href: '/merch', label: 'MERCH' },
-  { href: '/about', label: 'MANIFESTO' },
-  { href: '/contact', label: 'CONTACT' },
-]
+// Footer navigation links
 
 const GLITCH_CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`'
 

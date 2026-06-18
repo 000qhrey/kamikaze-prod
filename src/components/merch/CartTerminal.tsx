@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CartItem } from '@/data/merch'
+import { MERCH } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface CartTerminalProps {
@@ -188,7 +189,7 @@ export function CartTerminal({
                   <span className="text-white/70">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/50">TRANSMISSION_FEE:</span>
+                  <span className="text-white/50">{MERCH.shippingFee}</span>
                   <span className={shipping === 0 ? 'text-signal' : 'text-white/70'}>
                     {shipping === 0 ? 'WAIVED' : `€${shipping.toFixed(2)}`}
                   </span>
@@ -211,7 +212,7 @@ export function CartTerminal({
               </button>
 
               <p className="font-mono text-[9px] text-white/50 text-center">
-                SECURE_TRANSMISSION // STRIPE_ENCRYPTED
+                {MERCH.secureCheckout}
               </p>
             </div>
           )}

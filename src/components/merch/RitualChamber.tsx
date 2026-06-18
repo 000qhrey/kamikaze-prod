@@ -9,6 +9,7 @@ import { ArtifactTeaser } from './ArtifactTeaser'
 import { EmberParticles } from './EmberParticles'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
+import { MERCH } from '@/data/siteCopy'
 
 export function RitualChamber() {
   const countdown = useCountdown()
@@ -33,7 +34,7 @@ export function RitualChamber() {
       }}
     >
       {/* Manifesto texture - huge scrolling text */}
-      <ManifestoTexture phrase="BIND YOUR SIGNAL" parallaxSpeed={0.12} />
+      <ManifestoTexture phrase="LIMITED DROP" parallaxSpeed={0.12} />
 
       {/* Chromatic diagonal streaks */}
       <div
@@ -81,10 +82,10 @@ export function RitualChamber() {
         {/* Terminal header */}
         <div className="w-full text-center mb-8 pt-16">
           <div className="font-mono text-xs text-arterial/70 tracking-[0.3em] mb-2">
-            [SYSTEM] ACCESSING RESTRICTED SECTOR...
+            Next drop loading...
           </div>
           <div className="font-mono text-[10px] text-white/40 tracking-wider">
-            CLEARANCE: <span className="text-arterial">PENDING</span>
+            Join the waitlist below
           </div>
         </div>
 
@@ -100,12 +101,12 @@ export function RitualChamber() {
               resolveToColor="#CC0000"
               finalColor="#EFEFEF"
             >
-              ARTIFACTS
+              {MERCH.vaultTitle}
             </ScrambleText>
             <span className="font-mono text-sm md:text-base text-arterial tracking-wider">]</span>
           </div>
           <p className="font-mono text-xs text-white/40 mt-4 tracking-[0.2em] text-center">
-            THE RITUAL COMPLETES WHEN THE SIGIL AWAKENS
+            {MERCH.vaultSubtitle}
           </p>
         </div>
 
@@ -145,9 +146,9 @@ export function RitualChamber() {
         {/* Footer warning */}
         <div className="w-full text-center pb-8">
           <div className="font-mono text-[10px] text-white/30 tracking-wider space-y-1">
-            <p>ALL ARTIFACTS FINAL SALE // NO RETURNS // NO REFUNDS</p>
+            <p>{MERCH.finalSale}</p>
             <p className="text-arterial/50">
-              THOSE WHO BIND THEIR SIGNAL WILL RECEIVE PRIORITY ACCESS
+              {MERCH.priorityNote}
             </p>
           </div>
         </div>

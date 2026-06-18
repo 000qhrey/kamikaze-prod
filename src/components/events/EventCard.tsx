@@ -12,6 +12,7 @@ import { TerminalButton } from '@/components/ui/TerminalButton'
 import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
 import { playErrorSound, playSubmitSound, playHoverSound } from '@/hooks/useSonicFeedback'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { EVENTS } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 const GLITCH_CHARS = '█▓▒░╔╗╚╝│─┌┐└┘?#@$%&*'
@@ -176,8 +177,8 @@ export function EventCard({ event, index }: EventCardProps) {
     : TRANSMISSION_PROGRESS.FRAGMENT_01
 
   const expandLabel = isSecretLocation
-    ? (isExpanded ? 'COLLAPSE' : 'DECRYPT TRANSMISSION')
-    : (isExpanded ? 'COLLAPSE' : 'EXPAND')
+    ? (isExpanded ? EVENTS.close : EVENTS.viewDetails)
+    : (isExpanded ? EVENTS.close : EVENTS.viewDetails)
 
   const formatLineup = (lineup: string[]) =>
     lineup.map(a => a === 'TBA' ? 'More artists TBA' : a).join(' × ')
@@ -294,8 +295,8 @@ export function EventCard({ event, index }: EventCardProps) {
             <div className="font-mono text-[10px] text-white/40 tracking-wider mb-3">
               {getProgressBar(transmissionProgress)}
               <span className="block mt-1 text-white/50">
-                TRANSMISSION RECOVERED: {transmissionProgress}%
-                {isRevealed && ' // CITY VECTOR UNLOCKED'}
+                {EVENTS.detailsUnlocked(transmissionProgress)}
+                {isRevealed && ' — city found'}
               </span>
             </div>
           )}
@@ -313,32 +314,32 @@ export function EventCard({ event, index }: EventCardProps) {
           {isFullyRedacted ? (
             <div className="space-y-1">
               <div className="font-mono text-sm">
-                <span className="text-white/50">LOC://</span>
-                <span className="text-white/70 ml-2">UNKNOWN</span>
+                <span className="text-white/50">{EVENTS.location}:</span>
+                <span className="text-white/70 ml-2">TBA</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-white/50">STATUS://</span>
-                <span className="text-arterial ml-2">RESTRICTED</span>
+                <span className="text-white/50">Status:</span>
+                <span className="text-arterial ml-2">More info soon</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-white/50">ACCESS://</span>
-                <span className="text-red-bright ml-2">DENIED</span>
+                <span className="text-white/50">Tickets:</span>
+                <span className="text-red-bright ml-2">{EVENTS.accessDenied}</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-white/50">SIGNAL://</span>
-                <span className="text-white/70 ml-2">ENCRYPTED</span>
+                <span className="text-white/50">Details:</span>
+                <span className="text-white/70 ml-2">Tap to view</span>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="font-mono text-sm">
-                <span className="text-white/50">LOC://</span>
+                <span className="text-white/50">{EVENTS.location}:</span>
                 <span className={clsx('ml-2', isRevealed ? 'text-signal' : 'text-white/80')}>
                   {isRevealed ? event.city : event.venue}
                 </span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-white/50">SET://</span>
+                <span className="text-white/50">{EVENTS.lineup}:</span>
                 <span className="text-white/60 ml-2">{formatLineup(event.lineup)}</span>
               </div>
             </div>
@@ -389,21 +390,21 @@ export function EventCard({ event, index }: EventCardProps) {
                   <TerminalButton onClick={() => {
                     if (event.ticketUrl) window.open(event.ticketUrl, '_blank')
                   }}>
-                    ACQUIRE_ACCESS
+                    {EVENTS.getTickets}
                   </TerminalButton>
                 </div>
               ) : isProcessing ? (
                 <span className="font-mono text-xs text-signal tracking-widest animate-pulse">
-                  DECRYPTING...
+                  {EVENTS.loadingDetails}
                 </span>
               ) : null
             ) : isSoldOut ? (
               <span className="font-mono text-white/50 line-through tracking-widest">
-                [VOID] NO ENTRY
+                [ {EVENTS.accessDenied} ]
               </span>
             ) : (
               <button onClick={(e) => { e.stopPropagation(); handleNormalAccess(e) }} className="inline-block">
-                <TerminalButton>ACQUIRE_ACCESS</TerminalButton>
+                <TerminalButton>{EVENTS.getTickets}</TerminalButton>
               </button>
             )}
           </div>

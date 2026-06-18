@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { EVENTS } from '@/data/siteCopy'
 
 const GLITCH_CHARS = '神風死暴走地下▓▒░█カミカゼ'
 
 const TERMINAL_LINES = [
-  { prefix: 'SIGNAL://', text: 'SEARCHING_FREQUENCIES...' },
-  { prefix: 'STATUS://', text: 'NO_ARCHIVED_TRANSMISSIONS' },
-  { prefix: 'ROUTE://', text: '████████████' },
-  { prefix: 'MSG://', text: '消せない // CANNOT_BE_ERASED' },
+  { prefix: 'Archive:', text: EVENTS.emptySearching },
+  { prefix: 'Status:', text: EVENTS.emptyStatus },
 ]
 
 function GlitchTypeLine({
@@ -84,7 +83,7 @@ export function DeadSignalsEmpty() {
           <div className="w-2 h-2 rounded-full bg-white/20" />
         </div>
         <span className="font-mono text-[10px] text-white/40 ml-2">
-          DEAD_SIGNALS // ARCHIVE_TERMINAL v0.1
+          {EVENTS.past}
         </span>
       </div>
 
@@ -103,11 +102,11 @@ export function DeadSignalsEmpty() {
           <div className="flex flex-col gap-2 font-mono text-xs mt-4 pt-4 border-t border-white/10">
             <div className="flex items-center gap-2">
               <span className="text-white/30">&gt;</span>
-              <span className="text-white/50">AWAITING_FIRST_TRANSMISSION</span>
+              <span className="text-white/50">{EVENTS.emptyPrompt}</span>
               <span className="text-arterial animate-pulse">_</span>
             </div>
             <p className="text-white/40 text-[10px] pl-4">
-              Past events will appear here after transmission.
+              {EVENTS.emptyMessage}
             </p>
           </div>
         )}

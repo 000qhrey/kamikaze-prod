@@ -9,13 +9,12 @@ interface BootSequenceProps {
 
 const BOOT_LINES = [
   { text: 'KAMIKAZE_SYSTEM v2.0.26', delay: 0 },
-  { text: '> ESTABLISHING_UPLINK...', delay: 200 },
-  { text: '> FREQUENCY_LOCK: 140BPM', delay: 600 },
-  { text: '> AUDIO_CORE: STANDBY', delay: 900 },
-  { text: '> SIGIL_MATRIX: LOADED', delay: 1200 },
-  { text: '> VISUAL_SYNC: ENABLED', delay: 1500 },
-  { text: '', delay: 1800 },
-  { text: '[SYSTEM_READY]', delay: 2000 },
+  { text: '> Connecting...', delay: 200 },
+  { text: '> Loading visuals...', delay: 600 },
+  { text: '> Audio: standby (press play later)', delay: 900 },
+  { text: '> Almost ready...', delay: 1200 },
+  { text: '', delay: 1500 },
+  { text: '[SYSTEM_READY]', delay: 1800 },
 ]
 
 export function BootSequence({ onComplete }: BootSequenceProps) {
@@ -127,7 +126,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
 
         <div className="flex justify-between items-center mt-2 font-mono text-[10px] text-white/50">
           <span>SYS_STATUS: {isReady ? 'READY' : 'LOADING'}</span>
-          <span>AUDIO_CTX: DEFERRED</span>
+          <span>AUDIO: OFF UNTIL YOU PRESS PLAY</span>
         </div>
       </div>
 
@@ -141,7 +140,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
         THE UNDERGROUND WILL NEVER DIE
       </div>
       <div className="absolute bottom-4 right-4 font-mono text-[10px] text-white/50">
-        {isReady ? '[UPLINKING...]' : '[LOADING...]'}
+        {isReady ? '[CONNECTING...]' : '[LOADING...]'}
       </div>
     </div>
   )

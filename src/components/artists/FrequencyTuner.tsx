@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
 import { setActiveFrequency } from '@/components/canvas/NeuralVoid'
 import { playChannelSwitch, playHoverSound } from '@/hooks/useSonicFeedback'
+import { ARTISTS } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface FrequencyTunerProps {
@@ -98,7 +99,7 @@ export function FrequencyTuner({ selectedGenre, onGenreChange }: FrequencyTunerP
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <span className="font-mono text-xs text-arterial tracking-widest">
-          [FREQUENCY_TUNER]
+          [{ARTISTS.filterTitle}]
         </span>
         <div className="flex-1 h-px bg-white/20" />
         <button
@@ -219,7 +220,7 @@ export function FrequencyTuner({ selectedGenre, onGenreChange }: FrequencyTunerP
         {/* Current frequency display */}
         <div className="flex-1">
           <div className="font-mono text-xs text-white/50 mb-2">
-            CURRENT_FREQUENCY:
+            {ARTISTS.currentFilter}
           </div>
           <div
             className={clsx(
@@ -231,7 +232,7 @@ export function FrequencyTuner({ selectedGenre, onGenreChange }: FrequencyTunerP
               textShadow: genreConfig ? `0 0 10px ${genreConfig.color}40` : 'none',
             }}
           >
-            {currentGenre ? currentGenre.replace(/_/g, ' ') : '[ ALL_SIGNALS ]'}
+            {currentGenre ? currentGenre.replace(/_/g, ' ') : `[ ${ARTISTS.allGenres} ]`}
           </div>
 
           {/* Frequency stats */}
@@ -253,7 +254,7 @@ export function FrequencyTuner({ selectedGenre, onGenreChange }: FrequencyTunerP
 
       {/* Instruction */}
       <p className="mt-4 font-mono text-xs text-white/50">
-        DRAG_TO_TUNE // FILTER_SIGNALS_BY_FREQUENCY
+        {ARTISTS.filterHint}
       </p>
     </div>
   )

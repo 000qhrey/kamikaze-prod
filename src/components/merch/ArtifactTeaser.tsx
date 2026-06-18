@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { MerchItem } from '@/data/merch'
+import { MERCH } from '@/data/siteCopy'
 import clsx from 'clsx'
 
 interface ArtifactTeaserProps {
@@ -98,7 +99,7 @@ function ArtifactCard({
         {isHovered && progress < 0.9 && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60">
             <span className="font-mono text-xs text-arterial animate-pulse tracking-wider">
-              INSUFFICIENT SIGNAL
+              {MERCH.comingSoonHover}
             </span>
           </div>
         )}
@@ -118,7 +119,7 @@ function ArtifactCard({
       {/* Label */}
       <div className="mt-3 text-center">
         <div className="font-mono text-[10px] text-white/50 tracking-[0.2em]">
-          ARTIFACT_{String(index + 1).padStart(3, '0')}
+          {MERCH.itemLabel(index)}
         </div>
         <div className="font-mono text-xs text-white/30 mt-1">
           {`// ${ARTIFACT_NAMES[item.category] || 'RELIC'}`}
@@ -145,7 +146,7 @@ export function ArtifactTeaser({ items, progress, className }: ArtifactTeaserPro
       {/* Section header */}
       <div className="text-center mb-8">
         <div className="font-mono text-xs text-arterial tracking-[0.3em] mb-2">
-          {'>'} ARTIFACTS MATERIALIZING {'<'}
+          {'>'} COMING SOON {'<'}
         </div>
         <div className="font-mono text-[10px] text-white/30">
           {Math.round(progress * 100)}% DECODED
@@ -167,7 +168,7 @@ export function ArtifactTeaser({ items, progress, className }: ArtifactTeaserPro
       {/* More artifacts indicator */}
       {items.length > 4 && (
         <div className="text-center mt-6 font-mono text-xs text-white/30">
-          +{items.length - 4} MORE ARTIFACTS SEALED
+          +{items.length - 4} MORE ITEMS COMING
         </div>
       )}
     </div>
