@@ -12,7 +12,7 @@ export function AboutSection() {
   return (
     <section
       ref={ref}
-      className="relative py-24 md:py-32 px-6 border-t border-white/10 bg-void"
+      className="relative py-20 md:py-32 px-4 sm:px-6 border-t border-white/10 bg-void"
       aria-labelledby="about-home-heading"
     >
       <div

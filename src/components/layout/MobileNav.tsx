@@ -49,19 +49,19 @@ export function MobileNav({
       )}
       onClick={onClose}
     >
-      <div className="h-full flex flex-col items-center justify-center gap-8 p-8">
+      <div
+        className="h-full flex flex-col items-stretch justify-center gap-2 p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))] max-w-md mx-auto w-full"
+        onClick={(e) => e.stopPropagation()}
+      >
         {links.map((link, index) => (
-          <GlitchSlice key={link.href} delay={index * 0.15}>
+          <GlitchSlice key={link.href} delay={index * 0.08}>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleLinkClick(link.href)
-              }}
+              onClick={() => handleLinkClick(link.href)}
               className={clsx(
-                'font-mono text-3xl sm:text-5xl tracking-wider transition-colors',
+                'w-full text-left font-mono text-2xl sm:text-3xl tracking-wider py-4 px-4 min-h-[52px] border-b border-white/10 transition-colors',
                 currentPath === link.href
-                  ? 'text-red-bright'
-                  : 'text-white hover:text-red-bright'
+                  ? 'text-arterial'
+                  : 'text-white hover:text-arterial'
               )}
             >
               {link.label}
@@ -71,9 +71,9 @@ export function MobileNav({
       </div>
 
       {/* Close hint */}
-      <div className="absolute bottom-8 left-0 right-0 text-center">
-        <span className="font-mono text-xs text-white/85">
-          TAP ANYWHERE TO CLOSE
+      <div className="absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-0 right-0 text-center pointer-events-none">
+        <span className="font-mono text-xs text-white/60">
+          Tap outside to close
         </span>
       </div>
     </div>

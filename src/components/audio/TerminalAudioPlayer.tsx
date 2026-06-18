@@ -19,6 +19,7 @@ import {
   CHANNELS,
 } from '@/hooks/useAudioEngine'
 import { AUDIO } from '@/data/siteCopy'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 type PlayerMode = 'widget' | 'bar'
 
@@ -41,12 +42,13 @@ function playWidgetWithRetries(widget: any) {
 }
 
 export function TerminalAudioPlayer() {
+  const isMobile = useIsMobile()
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
   const playerRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useState(getAudioState)
-  const [mode, setMode] = useState<PlayerMode>('widget') // widget = floating, bar = attached to footer
-  const [isManuallyMinimized, setIsManuallyMinimized] = useState(false)
+  const [mode, setMode] = useState<PlayerMode>('bar')
+  const [isManuallyMinimized, setIsManuallyMinimized] = useState(true)
   const [showChannelSelector, setShowChannelSelector] = useState(false)
   const [bars, setBars] = useState<number[]>(new Array(16).fill(0.1))
   const [trackTitle, setTrackTitle] = useState('INITIALIZING...')
@@ -57,8 +59,21 @@ export function TerminalAudioPlayer() {
   const resumeAfterLoadRef = useRef(false)
   const animationRef = useRef<number>(0)
 
-  // Scroll detection - switch to bar mode when near footer
+  // Desktop: start expanded widget; mobile stays minimized bar
   useEffect(() => {
+    if (isMobile) {
+      setMode('bar')
+      setIsManuallyMinimized(true)
+    } else {
+      setMode('widget')
+      setIsManuallyMinimized(false)
+    }
+  }, [isMobile])
+
+  // Scroll detection - switch to bar mode when near footer (desktop only)
+  useEffect(() => {
+    if (isMobile) return
+
     const handleScroll = () => {
       if (isManuallyMinimized) return // User manually minimized, don't auto-switch
 
@@ -77,7 +92,7 @@ export function TerminalAudioPlayer() {
     handleScroll() // Check initial position
 
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [isManuallyMinimized])
+  }, [isManuallyMinimized, isMobile])
 
   // Load SoundCloud Widget API script
   useEffect(() => {
@@ -156,8 +171,13 @@ export function TerminalAudioPlayer() {
     return () => { unsubscribe() }
   }, [])
 
-  // Animate frequency bars
+  // Animate frequency bars — only while playing (saves mobile CPU)
   useEffect(() => {
+    if (!state.isPlaying) {
+      setBars(new Array(16).fill(0.1))
+      return
+    }
+
     const updateBars = () => {
       const freqData = getFrequencyData()
       const newBars: number[] = []
@@ -178,7 +198,7 @@ export function TerminalAudioPlayer() {
 
     updateBars()
     return () => cancelAnimationFrame(animationRef.current)
-  }, [])
+  }, [state.isPlaying])
 
   const handlePlayPause = useCallback(() => {
     if (!getAudioState().isInitialized) {
@@ -297,8 +317,11 @@ export function TerminalAudioPlayer() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed bottom-4 left-4 z-[110] w-72 border border-arterial/30 bg-void/95 font-mono"
-            style={{ fontSize: '10px' }}
+            className="fixed left-4 z-[110] w-72 max-w-[calc(100vw-2rem)] border border-arterial/30 bg-void/95 font-mono"
+            style={{
+              bottom: 'calc(3rem + env(safe-area-inset-bottom, 0px))',
+              fontSize: '10px',
+            }}
           >
           {/* Terminal header */}
           <div
@@ -409,16 +432,17 @@ export function TerminalAudioPlayer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed bottom-0 left-0 right-0 z-[110] h-10 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono"
+            className="fixed bottom-0 left-0 right-0 z-[110] h-11 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono pb-[env(safe-area-inset-bottom,0px)]"
             style={{ fontSize: '10px' }}
           >
-          <div className="h-full flex items-center px-4 gap-4">
+          <div className="h-11 flex items-center px-3 sm:px-4 gap-2 sm:gap-4">
             {/* Expand button */}
             <button
               onClick={handleExpand}
-              className="text-white/70 hover:text-arterial transition-colors shrink-0"
+              className="text-white/70 hover:text-arterial transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Expand music player"
             >
-              [+]
+              <span className="text-xs">MUSIC</span>
             </button>
 
             {/* Play/Pause */}

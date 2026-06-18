@@ -2,9 +2,9 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { getBass } from '@/hooks/useAudioEngine'
-import { useTransition } from '@/providers/TransitionProvider'
 import clsx from 'clsx'
 import { HERO } from '@/data/siteCopy'
+import { MobileQuickNav } from '@/components/layout/MobileQuickNav'
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -14,7 +14,6 @@ export function Hero() {
   const [mouseDistance, setMouseDistance] = useState(0)
   const [audioIntensity, setAudioIntensity] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
-  const { navigateTo } = useTransition()
 
   // Detect mobile to disable depth scrolling
   useEffect(() => {
@@ -24,20 +23,23 @@ export function Hero() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Track scroll through the hero section (not whole page — that kept progress near 0%)
+  // Track scroll — depth dissolve on desktop only; mobile uses native scroll
   useEffect(() => {
     const handleScroll = () => {
       const section = sectionRef.current
       if (!section) return
 
       const rect = section.getBoundingClientRect()
+      setIsVisible(rect.bottom > 0)
+
+      if (isMobile) return
+
       const scrollable = section.offsetHeight - window.innerHeight
       const progress = scrollable > 0
         ? Math.max(0, Math.min(1, -rect.top / scrollable))
         : 0
 
-      setHeroProgress(isMobile ? 0 : progress)
-      setIsVisible(rect.bottom > 0)
+      setHeroProgress(progress)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -65,12 +67,16 @@ export function Hero() {
   }, [])
 
   useEffect(() => {
+    if (isMobile) return
+
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [handleMouseMove])
+  }, [handleMouseMove, isMobile])
 
-  // Audio reactive updates
+  // Audio reactive visuals — desktop only
   useEffect(() => {
+    if (isMobile) return
+
     let animFrame: number
 
     const updateAudio = () => {
@@ -81,7 +87,7 @@ export function Hero() {
 
     updateAudio()
     return () => cancelAnimationFrame(animFrame)
-  }, [])
+  }, [isMobile])
 
   // Chromatic aberration intensity based on mouse distance and audio
   const chromaticOffset = 2 + mouseDistance * 6 + audioIntensity * 8
@@ -132,16 +138,11 @@ export function Hero() {
           </h1>
 
           {/* Subtitle - Monospace */}
-          <p
-            className="font-mono text-xs md:text-sm text-white/70 text-center mt-6 tracking-[0.3em] transition-all duration-75"
-            style={{
-              textShadow: audioIntensity > 0.3 ? '0 0 10px rgba(204, 0, 0, 0.5)' : 'none',
-            }}
-          >
+          <p className="font-mono text-xs md:text-sm text-white/70 text-center mt-6 tracking-[0.2em] md:tracking-[0.3em] px-4">
             {HERO.tagline}
           </p>
 
-          <p className="font-mono text-sm md:text-base text-white/90 text-center mt-8 max-w-md mx-auto leading-relaxed px-4">
+          <p className="font-mono text-sm md:text-base text-white/90 text-center mt-6 md:mt-8 max-w-md mx-auto leading-relaxed px-6">
             {HERO.valueProp}
           </p>
 
@@ -162,29 +163,13 @@ export function Hero() {
           )}
         </div>
 
-        {/* Mobile Quick Access CTAs - thumb zone positioning */}
+        {/* Mobile quick nav — compact pill strip above audio bar */}
         {isMobile && isVisible && (
-          <div className="absolute bottom-28 left-0 right-0 px-6 flex justify-center gap-6 pointer-events-auto">
-            {/* Primary CTA - Events (filled style) */}
-            <button
-              onClick={() => navigateTo('/events')}
-              className="font-mono text-sm tracking-widest bg-arterial/20 border border-arterial px-6 py-4 min-h-[44px] hover:bg-arterial/30 active:scale-95 active:bg-arterial/40 transition-all"
-              style={{
-                boxShadow: `0 0 ${15 + audioIntensity * 20}px rgba(204, 0, 0, ${0.3 + audioIntensity * 0.3})`,
-              }}
-            >
-              [ EVENTS ]
-            </button>
-            {/* Secondary CTA - Merch (ghost style) */}
-            <button
-              onClick={() => navigateTo('/merch')}
-              className="font-mono text-sm tracking-widest bg-black/70 border border-arterial/50 px-6 py-4 min-h-[44px] hover:border-arterial hover:bg-arterial/10 active:scale-95 active:bg-arterial/20 transition-all"
-              style={{
-                boxShadow: `0 0 ${10 + audioIntensity * 15}px rgba(204, 0, 0, ${0.2 + audioIntensity * 0.2})`,
-              }}
-            >
-              [ MERCH ]
-            </button>
+          <div
+            className="absolute left-0 right-0 z-30 px-4 pointer-events-none"
+            style={{ bottom: 'calc(3.25rem + env(safe-area-inset-bottom, 0px))' }}
+          >
+            <MobileQuickNav className="pointer-events-auto" />
           </div>
         )}
 

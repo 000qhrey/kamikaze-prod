@@ -7,6 +7,7 @@ import { ScrambleText } from '@/components/effects/ScrambleText'
 import { MobileNav } from './MobileNav'
 import { playHoverSound } from '@/hooks/useSonicFeedback'
 import { NAV_LINKS } from '@/data/navigation'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import clsx from 'clsx'
 
 const GLITCH_CHARS = '▓▒░█▄▀■□●○◆◇▲△▼▽◀▶◁▷★☆⬛⬜'
@@ -19,6 +20,7 @@ type HoverPhase = 'kanji' | 'battery' | 'full'
 export function Navigation() {
   const pathname = usePathname()
   const { navigateTo } = useTransition()
+  const isMobile = useIsMobile()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [hoverPhase, setHoverPhase] = useState<HoverPhase>('kanji')
   const [displayText, setDisplayText] = useState(KANJI_TEXT)
@@ -122,28 +124,34 @@ export function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Morphing Logo */}
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 py-3 sm:py-4 bg-black/85 backdrop-blur-md border-b border-white/10 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          {/* Logo — wordmark on mobile, morphing kanji on desktop */}
           <button
             onClick={() => handleNavClick('/')}
-            onMouseEnter={handleLogoMouseEnter}
-            onMouseLeave={handleLogoMouseLeave}
-            className="relative flex items-center"
+            onMouseEnter={isMobile ? undefined : handleLogoMouseEnter}
+            onMouseLeave={isMobile ? undefined : handleLogoMouseLeave}
+            className="relative flex items-center shrink-0"
             aria-label="Home"
           >
-            <span
-              className={clsx(
-                'font-mono text-sm tracking-wider transition-all duration-300',
-                hoverPhase !== 'kanji' ? 'text-white' : 'text-white/80'
-              )}
-              style={{
-                textShadow: hoverPhase !== 'kanji' ? '0 0 20px rgba(204, 0, 0, 0.6)' : 'none',
-                minWidth: hoverPhase === 'full' ? '220px' : '80px',
-              }}
-            >
-              {displayText}
-            </span>
+            {isMobile ? (
+              <span className="font-display text-lg text-white tracking-wider">
+                KAMIKAZE
+              </span>
+            ) : (
+              <span
+                className={clsx(
+                  'font-mono text-sm tracking-wider transition-all duration-300',
+                  hoverPhase !== 'kanji' ? 'text-white' : 'text-white/80'
+                )}
+                style={{
+                  textShadow: hoverPhase !== 'kanji' ? '0 0 20px rgba(204, 0, 0, 0.6)' : 'none',
+                  minWidth: hoverPhase === 'full' ? '220px' : '80px',
+                }}
+              >
+                {displayText}
+              </span>
+            )}
           </button>
 
           {/* Desktop Nav Links */}
@@ -188,13 +196,18 @@ export function Navigation() {
             })}
           </div>
 
-          {/* Mobile Menu Button - Enhanced visibility */}
+          {/* Mobile menu */}
           <button
             onClick={() => setIsMobileOpen(true)}
-            className="md:hidden font-mono text-sm text-white tracking-wider px-4 py-3 min-h-[44px] border border-arterial/60 bg-black/60 hover:bg-arterial/20 hover:border-arterial active:scale-95 active:bg-arterial/30 focus-visible:ring-2 focus-visible:ring-arterial focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-all menu-pulse"
+            className="md:hidden flex items-center gap-2.5 font-mono text-sm text-white tracking-wide px-3 py-2 min-h-[44px] min-w-[44px] border border-white/25 bg-white/5 hover:bg-white/10 hover:border-arterial/60 active:scale-95 transition-all"
             aria-label="Open menu"
           >
-            [MENU]
+            <span className="flex flex-col justify-center gap-1 w-4" aria-hidden="true">
+              <span className="block h-0.5 w-full bg-arterial" />
+              <span className="block h-0.5 w-3/4 bg-white/80" />
+              <span className="block h-0.5 w-full bg-arterial" />
+            </span>
+            <span>Menu</span>
           </button>
         </div>
       </nav>
@@ -212,19 +225,6 @@ export function Navigation() {
         @keyframes drip-pulse {
           0%, 100% { height: 12px; }
           50% { height: 16px; }
-        }
-        @keyframes menu-pulse {
-          0%, 100% { box-shadow: 0 0 15px rgba(204, 0, 0, 0.4); }
-          50% { box-shadow: 0 0 25px rgba(204, 0, 0, 0.6); }
-        }
-        .menu-pulse {
-          animation: menu-pulse 2s ease-in-out infinite;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .menu-pulse {
-            animation: none;
-            box-shadow: 0 0 20px rgba(204, 0, 0, 0.5);
-          }
         }
       `}</style>
     </>

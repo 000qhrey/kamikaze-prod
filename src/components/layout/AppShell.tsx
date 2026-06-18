@@ -106,7 +106,7 @@ export function AppShell({ children }: AppShellProps) {
         <CursorProvider>
           <TransitionProvider>
             <Navigation />
-            <main className="relative z-10">{children}</main>
+            <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</main>
             <Footer />
             <DepthLayers />
             {hasBooted && <TerminalAudioPlayer />}

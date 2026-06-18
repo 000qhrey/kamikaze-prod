@@ -445,7 +445,7 @@ export default function SigilScene3D() {
   }
 
   // Mobile: lower DPR, no antialiasing | Desktop: full quality
-  const dpr: [number, number] = isMobile ? [1, 1.5] : [1, 2]
+  const dpr: [number, number] = isMobile ? [1, 1] : [1, 2]
 
   return (
     <div className="fixed inset-0 -z-10 bg-[#050505]">
