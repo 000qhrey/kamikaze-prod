@@ -157,12 +157,29 @@ export const AUDIO = {
 } as const
 
 export const EVENT_HINT = {
-  panelTitle: 'UPCOMING EVENT',
+  panelTitle: 'INCOMING CLUE',
   dismiss: 'CLOSE',
-  monthFound: 'Date found: September 2026',
-  locationHidden: 'Venue not announced yet.',
-  cta: 'VIEW EVENT DETAILS',
-  footer: 'More details on the Events page',
+  riddle1: 'They built a convention dome where the Arabian Sea meets the Western Ghats.',
+  riddle2: 'The city wears a longer name — locals shorten it to three syllables.',
+  riddle3: 'Month locked: IX · Year: MMXXVI · Day: still sealed.',
+  riddle4: 'Venue coordinates remain redacted until T−48.',
+  monthFound: 'Fragment recovered: September 2026',
+  locationHidden: 'City name encrypted on the Events page.',
+  cta: 'DECRYPT ON EVENTS PAGE',
+  footer: 'Tap KAMIKAZE OVERRIDE and view details to unlock the city.',
+} as const
+
+export const ABOUT_HOME = {
+  eyebrow: 'WHO WE ARE',
+  title: 'UNDERGROUND TECHNO COLLECTIVE',
+  body: 'KAMIKAZE curates raw, uncompromising nights — no VIP lists, no idols, no corporate gloss. We book artists we believe in, build community on the dancefloor, and keep the underground alive.',
+  pillars: [
+    { label: 'EVENTS', text: 'Curated raves with real lineups and fair access.' },
+    { label: 'ARTISTS', text: 'Open demos — we listen to everyone.' },
+    { label: 'CULTURE', text: 'One floor. One ticket. One congregation.' },
+  ],
+  cta: 'READ OUR FULL STORY',
+  ctaHref: '/about',
 } as const
 
 export const BOOT = {

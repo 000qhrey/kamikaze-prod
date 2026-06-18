@@ -103,7 +103,7 @@ export function Hero() {
       <div
         className={clsx(
           'fixed inset-0 z-20 flex flex-col items-center justify-center transition-opacity duration-500',
-          isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          isVisible && dissolveOpacity > 0.05 ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
       >
         <div

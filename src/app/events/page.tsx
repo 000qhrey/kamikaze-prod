@@ -5,6 +5,7 @@ import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { DeadSignalsEmpty } from '@/components/events/DeadSignalsEmpty'
+import { EventsHashHandler } from '@/components/events/EventsHashHandler'
 import { EVENTS, META } from '@/data/siteCopy'
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function EventsPage() {
 
   return (
     <div className="relative min-h-screen flex flex-col pt-24">
+      <EventsHashHandler />
       {/* Manifesto texture - huge scrolling text */}
       <ManifestoTexture phrase="CONTROLLED COLLAPSE" parallaxSpeed={0.12} />
 

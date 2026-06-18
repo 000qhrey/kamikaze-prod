@@ -53,26 +53,44 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
   }, [])
 
   const navigateTo = useCallback(async (href: string) => {
-    if (isTransitioning || href === pathname) return
+    const [path, hash = ''] = href.split('#')
 
-    // Play navigation click sound
+    // Same-page hash navigation (e.g. /events#kamikaze-override while already on /events)
+    if (path === pathname || href.startsWith(`${pathname}#`)) {
+      if (hash) {
+        playClickSound()
+        window.location.hash = hash
+        requestAnimationFrame(() => {
+          document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
+      return
+    }
+
+    if (isTransitioning) return
+
     playClickSound()
-
     setIsTransitioning(true)
 
     const transition = transitionRef.current
 
     if (transition) {
-      // Start navigation immediately (runs in parallel with animation)
       router.push(href)
-
-      // Chromatic aberration flash out (covers navigation time)
       await transition.glitchOut(180)
-
-      // Chromatic aberration flash in (reveals new page)
       await transition.glitchIn(120)
+
+      if (hash) {
+        requestAnimationFrame(() => {
+          document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
     } else {
       router.push(href)
+      if (hash) {
+        requestAnimationFrame(() => {
+          document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
     }
 
     setIsTransitioning(false)

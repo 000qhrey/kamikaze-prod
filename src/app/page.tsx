@@ -1,5 +1,5 @@
 import { Hero } from '@/components/home/Hero'
-import { Manifesto } from '@/components/home/Manifesto'
+import { AboutSection } from '@/components/home/AboutSection'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { TransmissionPanel } from '@/components/events/TransmissionPanel'
 
@@ -9,7 +9,7 @@ export default function HomePage() {
       <div className="flex-grow">
         <Hero />
         <TransmissionPanel />
-        <Manifesto />
+        <AboutSection />
       </div>
       <PerspectiveGrid />
     </div>

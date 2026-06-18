@@ -7,6 +7,8 @@ import {
   MASKED_TIMESTAMP,
   TRANSMISSION_PROGRESS,
   getProgressBar,
+  isCityRevealed,
+  markCityRevealed,
 } from '@/data/transmission'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
@@ -104,6 +106,7 @@ export function EventCard({ event, index }: EventCardProps) {
             setDisplayCity(cityUpper)
             setStatusMessage('')
             setIsProcessing(false)
+            markCityRevealed()
             playSubmitSound()
           }, 1500)
         }
@@ -112,23 +115,38 @@ export function EventCard({ event, index }: EventCardProps) {
   }, [event.city, hackStatus])
 
   useEffect(() => {
-    if (isSecretLocation) {
-      setFragmentHint(sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1')
+    if (!isSecretLocation) return
 
-      if (
-        sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1' &&
-        window.location.hash === `#${event.id}`
-      ) {
-        setIsExpanded(true)
-        requestAnimationFrame(() => runDecryptSequence())
-      }
+    setFragmentHint(sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1')
+
+    if (isCityRevealed()) {
+      setHackStatus('partial')
+      setDisplayCity(event.city.toUpperCase())
+      decryptStartedRef.current = true
+      return
     }
+
+    if (window.location.hash === `#${event.id}`) {
+      setIsExpanded(true)
+      requestAnimationFrame(() => runDecryptSequence())
+    }
+
+    const onHashChange = () => {
+      if (window.location.hash !== `#${event.id}`) return
+      if (isCityRevealed() || decryptStartedRef.current) return
+      setIsExpanded(true)
+      requestAnimationFrame(() => runDecryptSequence())
+    }
+
+    window.addEventListener('hashchange', onHashChange)
+
     return () => {
+      window.removeEventListener('hashchange', onHashChange)
       if (hackTimeoutRef.current) {
         clearTimeout(hackTimeoutRef.current)
       }
     }
-  }, [event.id, isSecretLocation, runDecryptSequence])
+  }, [event.id, event.city, isSecretLocation, runDecryptSequence])
 
   const getDisplayDate = () => {
     if (isFullyRedacted) return '??.??.????'
@@ -147,6 +165,9 @@ export function EventCard({ event, index }: EventCardProps) {
       if (hackStatus === 'idle' && !isProcessing) {
         runDecryptSequence()
         return
+      }
+      if (hackStatus !== 'partial') {
+        decryptStartedRef.current = false
       }
       setIsExpanded(false)
       return
@@ -281,12 +302,14 @@ export function EventCard({ event, index }: EventCardProps) {
             <span className={clsx(isRevealed && 'text-signal')}>{getDisplayDate()}</span>
             {' // '}
             <span className={clsx(
-              'transition-colors',
+              'transition-colors font-medium',
               isProcessing ? 'text-signal animate-pulse' :
               hackStatus === 'compromised' ? 'text-red-bright animate-pulse' :
               isRevealed ? 'text-signal' :
               'text-arterial'
-            )}>
+            )}
+            style={isRevealed ? { textShadow: '0 0 12px rgba(0, 255, 65, 0.45)' } : undefined}
+            >
               {displayCity || (isSecretLocation ? '█'.repeat(event.city.length) : event.city.toUpperCase())}
             </span>
           </div>
@@ -334,7 +357,12 @@ export function EventCard({ event, index }: EventCardProps) {
             <div className="space-y-2">
               <div className="font-mono text-sm">
                 <span className="text-white/50">{EVENTS.location}:</span>
-                <span className={clsx('ml-2', isRevealed ? 'text-signal' : 'text-white/80')}>
+                <span className={clsx(
+                  'ml-2 font-medium',
+                  isRevealed ? 'text-signal' : 'text-white/80'
+                )}
+                style={isRevealed ? { textShadow: '0 0 10px rgba(0, 255, 65, 0.35)' } : undefined}
+                >
                   {isRevealed ? event.city : event.venue}
                 </span>
               </div>
@@ -370,7 +398,9 @@ export function EventCard({ event, index }: EventCardProps) {
             {isRevealed && isSecretLocation && (
               <div className="font-mono text-xs space-y-1.5 mb-6 border-t border-white/10 pt-4">
                 <p className="text-signal">✓ Date: {formatEventDate(event.date)}</p>
-                <p className="text-signal">✓ City: {event.city}</p>
+                <p className="text-signal font-medium" style={{ textShadow: '0 0 8px rgba(0, 255, 65, 0.35)' }}>
+                  ✓ City: {event.city}
+                </p>
                 {event.tbdFields?.includes('venue') && (
                   <p className="text-white/50">○ Venue: Not announced yet</p>
                 )}

@@ -12,8 +12,8 @@ import {
 } from '@/data/transmission'
 import { EVENT_HINT } from '@/data/siteCopy'
 
-const TOTAL_STEPS = 6
-const SCROLL_TRIGGER_PX = 8
+const TOTAL_STEPS = 7
+const SCROLL_TRIGGER_PX = 120
 
 export function TransmissionPanel() {
   const { navigateTo } = useTransition()
@@ -78,7 +78,7 @@ export function TransmissionPanel() {
       if (step >= TOTAL_STEPS) {
         clearInterval(interval)
       }
-    }, 180)
+    }, 220)
 
     return () => clearInterval(interval)
   }, [isOpen])
@@ -107,7 +107,7 @@ export function TransmissionPanel() {
             : 'opacity-0 translate-x-8 translate-y-4 pointer-events-none'
         )}
         role="dialog"
-        aria-label="Upcoming event hint"
+        aria-label="Event riddle"
       >
         <div className="relative border border-arterial/40 bg-void/95 backdrop-blur-md glass-card">
           <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-arterial/60" />
@@ -127,32 +127,23 @@ export function TransmissionPanel() {
             </button>
           </div>
 
-          <div className="px-5 py-4 font-mono text-xs leading-relaxed space-y-2">
+          <div className="px-5 py-4 font-mono text-xs leading-relaxed space-y-2.5">
             <p
               className={clsx(
                 'text-white/70 transition-opacity duration-300',
                 show(1) ? 'opacity-100' : 'opacity-0'
               )}
             >
-              We have an upcoming event — details are still being confirmed.
+              {'>'} {EVENT_HINT.riddle1}
             </p>
 
             <p
               className={clsx(
-                'text-white/70 transition-opacity duration-300',
+                'text-white/60 transition-opacity duration-300',
                 show(2) ? 'opacity-100' : 'opacity-0'
               )}
             >
-              Date: {MASKED_TIMESTAMP.replace('XX.', '').replace('.', ' ')} (month confirmed)
-            </p>
-
-            <p
-              className={clsx(
-                'text-signal transition-opacity duration-300',
-                show(3) ? 'opacity-100' : 'opacity-0'
-              )}
-            >
-              {EVENT_HINT.monthFound}
+              {'>'} {EVENT_HINT.riddle2}
             </p>
 
             <p
@@ -161,13 +152,49 @@ export function TransmissionPanel() {
                 show(3) ? 'opacity-100' : 'opacity-0'
               )}
             >
+              {'>'} {EVENT_HINT.riddle3}
+            </p>
+
+            <p
+              className={clsx(
+                'text-signal transition-opacity duration-300',
+                show(4) ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              {EVENT_HINT.monthFound}
+            </p>
+
+            <p
+              className={clsx(
+                'text-white/50 transition-opacity duration-300',
+                show(5) ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              {EVENT_HINT.riddle4}
+            </p>
+
+            <p
+              className={clsx(
+                'text-white/40 transition-opacity duration-300',
+                show(5) ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              Timestamp fragment: {MASKED_TIMESTAMP}
+            </p>
+
+            <p
+              className={clsx(
+                'text-white/50 transition-opacity duration-300',
+                show(6) ? 'opacity-100' : 'opacity-0'
+              )}
+            >
               {EVENT_HINT.locationHidden}
             </p>
 
             <div
               className={clsx(
                 'flex flex-col gap-2 pt-2 transition-opacity duration-300',
-                show(4) ? 'opacity-100' : 'opacity-0'
+                show(7) ? 'opacity-100' : 'opacity-0'
               )}
             >
               <button
