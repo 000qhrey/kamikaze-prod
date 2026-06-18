@@ -4,12 +4,12 @@ import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'KAMIKAZE | The Room Is The Headliner',
+  title: 'Kamikaze | The Room Is The Headliner',
   description:
-    'Independent techno events from Kerala. Curated lineups, fair access, one dancefloor.',
-  keywords: ['techno', 'rave', 'underground', 'electronic music', 'Kerala', 'India', 'events', 'kamikaze'],
+    'Independent techno events. Curated lineups, fair access, one dancefloor.',
+  keywords: ['techno', 'rave', 'underground', 'electronic music', 'events', 'kamikaze'],
   openGraph: {
-    title: 'KAMIKAZE',
+    title: 'Kamikaze',
     description: 'Independent techno events. The room is the headliner.',
     type: 'website',
   },

@@ -11,10 +11,7 @@ import { usePageVisible } from '@/hooks/usePageVisible'
 // Configure Draco decoder (local for faster loading)
 useGLTF.setDecoderPath(getAssetPath('/draco/'))
 
-// Cached colors to avoid creating new objects every frame
 const ARTERIAL_RED = new Color('#CC0000')
-const SIGNAL_GREEN = new Color('#00ff41')
-const TEMP_COLOR = new Color()
 
 interface CyberFanModelProps {
   progress: number // 0-1 countdown progress
@@ -87,19 +84,15 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
     const pulseSpeed = 1 + smoothProgress.current * 2
     const pulse = Math.sin(t * pulseSpeed) * 0.5 + 0.5
 
-    // Emissive intensity increases with progress
-    const baseEmissive = 0.2 + smoothProgress.current * 0.8
-    const targetEmissive = baseEmissive + pulse * smoothProgress.current * 0.5
+    // Emissive stays red — pulse intensity only, no color shift
+    const baseEmissive = 0.25 + smoothProgress.current * 0.55
+    const targetEmissive = baseEmissive + pulse * smoothProgress.current * 0.35
     smoothEmissive.current = MathUtils.lerp(smoothEmissive.current, targetEmissive, 0.1)
-
-    // Update materials - shift toward signal green as progress approaches 1
-    // Use cached colors to avoid GC pressure
-    TEMP_COLOR.copy(ARTERIAL_RED).lerp(SIGNAL_GREEN, smoothProgress.current * 0.3)
 
     meshesRef.current.forEach((mesh) => {
       const mat = mesh.material as MeshStandardMaterial
       mat.emissiveIntensity = smoothEmissive.current
-      mat.emissive.lerp(TEMP_COLOR, 0.02)
+      mat.emissive.copy(ARTERIAL_RED)
     })
   })
 

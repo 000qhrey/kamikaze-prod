@@ -136,7 +136,7 @@ export function Navigation() {
           >
             {isMobile ? (
               <span className="font-display text-lg text-white tracking-wider">
-                KAMIKAZE
+                Kamikaze
               </span>
             ) : (
               <span

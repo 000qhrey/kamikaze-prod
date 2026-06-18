@@ -120,21 +120,21 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Network Links - Socials */}
+          {/* Social links */}
           <div className="mb-8">
             <span className="font-mono text-[10px] text-white/40 tracking-[0.3em] block mb-4">
-              [ NETWORK ]
+              [ FOLLOW ]
             </span>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-8">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-8 gap-y-3">
                 <SignalStrengthLink
                   href={contactInfo.instagramUrl}
-                  label="IG"
+                  label="Instagram"
                   strength={3}
                 />
                 <SignalStrengthLink
                   href="https://soundcloud.com/k-a-m-i-k-a-z-e-6-6-6"
-                  label="SC"
+                  label="SoundCloud"
                   strength={7}
                 />
               </div>
@@ -151,7 +151,7 @@ export function Footer() {
           {/* Bottom Row: Copyright & Location */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#9f9fa9]/10">
             <div className="font-mono text-[10px] text-[#9f9fa9] tracking-wider flex flex-wrap items-center justify-center sm:justify-start gap-x-1">
-              <span>&copy; {new Date().getFullYear()} KAMIKAZE</span>
+              <span>&copy; {new Date().getFullYear()} Kamikaze</span>
               <span className="text-[#9f9fa9]/40">{'//'}</span>
               <span>GLOBAL</span>
               <span className="text-[#9f9fa9]/40">{'//'}</span>

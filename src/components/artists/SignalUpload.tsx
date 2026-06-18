@@ -229,7 +229,7 @@ export function SignalUpload() {
       </div>
 
       <p className="mt-4 font-mono text-xs text-white/50 leading-relaxed">
-        Demos go straight to the KAMIKAZE team inbox for review. By uploading, you agree we may
+        Demos go straight to the Kamikaze team inbox for review. By uploading, you agree we may
         listen and contact you about future events. No guarantees — we listen to everything.
       </p>
     </section>

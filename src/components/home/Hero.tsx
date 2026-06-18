@@ -120,7 +120,7 @@ export function Hero() {
         )}
       >
         <div
-          className="relative w-full max-w-lg mx-auto flex flex-col items-center text-center will-change-transform"
+          className="relative w-full mx-auto flex flex-col items-center justify-center text-center will-change-transform px-2"
           style={{
             transform: isMobile ? undefined : `scale(${dissolveScale}) translateY(${dissolveLift}px)`,
             opacity: isMobile ? 1 : dissolveOpacity,
@@ -130,11 +130,11 @@ export function Hero() {
           <h1
             ref={titleRef}
             className={clsx(
-              'font-ritual text-6xl md:text-8xl lg:text-9xl text-white tracking-wider relative m-0 w-full text-center',
-              !isMobile && 'text-jitter'
+              'font-ritual text-6xl md:text-8xl lg:text-9xl text-white relative m-0 text-center normal-case inline-block',
+              !isMobile && mouseDistance > 0.15 && 'text-jitter'
             )}
             style={{
-              letterSpacing: isMobile ? '0.08em' : `${heroProgress * 0.35}em`,
+              letterSpacing: '0.06em',
               visibility: !isMobile && dissolveOpacity < 0.05 ? 'hidden' : 'visible',
               textShadow: `
                   ${-mobileChromatic}px 0 0 rgba(255, 0, 0, ${0.7 * (isMobile ? 1 : dissolveOpacity)}),
@@ -143,15 +143,15 @@ export function Hero() {
                 `,
             }}
           >
-            KAMIKAZE
+            Kamikaze
           </h1>
 
           {/* Subtitle - Monospace */}
-          <p className="font-mono text-xs md:text-sm text-white/70 mt-6 tracking-[0.2em] md:tracking-[0.3em] w-full">
+          <p className="font-mono text-xs md:text-sm text-white/70 mt-6 tracking-[0.2em] md:tracking-[0.3em] max-w-md">
             {HERO.tagline}
           </p>
 
-          <p className="font-mono text-sm md:text-base text-white/90 mt-6 md:mt-8 max-w-md leading-relaxed w-full">
+          <p className="font-mono text-sm md:text-base text-white/90 mt-6 md:mt-8 max-w-md leading-relaxed">
             {HERO.valueProp}
           </p>
 

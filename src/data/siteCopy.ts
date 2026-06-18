@@ -16,25 +16,25 @@ export const FOOTER_NAV = NAV_LINKS
 
 export const META = {
   artists: {
-    title: 'ARTISTS | KAMIKAZE',
+    title: 'ARTISTS | Kamikaze',
     description: 'Submit your demo. We listen to every SoundCloud link.',
   },
   about: {
-    title: 'ABOUT | KAMIKAZE',
+    title: 'ABOUT | Kamikaze',
     description:
-      'How KAMIKAZE started in Kerala — independent techno events built for the dancefloor.',
+      'How Kamikaze started — independent techno events built for the dancefloor.',
   },
   events: {
-    title: 'EVENTS | KAMIKAZE',
-    description: 'Upcoming techno nights and past events from KAMIKAZE.',
+    title: 'EVENTS | Kamikaze',
+    description: 'Upcoming techno nights and past events from Kamikaze.',
   },
   contact: {
-    title: 'CONTACT | KAMIKAZE',
+    title: 'CONTACT | Kamikaze',
     description: 'Bookings, general inquiries, and demo follow-ups.',
   },
   merch: {
-    title: 'MERCH | KAMIKAZE',
-    description: 'Limited drops from KAMIKAZE. Join the waitlist.',
+    title: 'MERCH | Kamikaze',
+    description: 'Limited drops from Kamikaze. Join the waitlist.',
   },
 } as const
 
@@ -108,11 +108,11 @@ export const ARTIST_DETAIL = {
 export const ABOUT = {
   pageTitle: 'ABOUT',
   subtitle: 'How we started, and what we stand for.',
-  clearance: 'EST. 2026 · KERALA, INDIA',
+  clearance: 'EST. 2026',
   ctaPrompt: 'Think you fit the room?',
   ctaButton: 'SUBMIT YOUR MUSIC',
   loading: 'Loading...',
-  attribution: '— KAMIKAZE COLLECTIVE // EST. 2026',
+  attribution: '— Kamikaze Collective // EST. 2026',
   texturePhrase: 'SOUND FIRST',
 } as const
 
@@ -128,37 +128,43 @@ export const ABOUT_STORY: StoryBlock[] = [
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'KAMIKAZE began the way most underground scenes do — a few friends at the same parties, tired of the same problems. Bottle service creeping in. Lineups built for photos, not the floor. Nights that felt more like networking than dancing.',
+    text: 'Kamikaze began the way most underground scenes do — a few people at the same parties, tired of the same problems. Bottle service creeping in. Lineups built for photos, not the floor. Nights that felt more like networking than dancing.',
   },
   {
     type: 'body',
-    text: 'In 2026 we stopped waiting for someone else to fix it. We started throwing the rave we actually wanted to attend.',
+    text: 'In 2026 we stopped waiting for someone else to fix it and started running the room we wanted to be in.',
   },
   { type: 'body', text: '' },
   { type: 'heading', text: 'WHAT WE DO.' },
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We produce independent techno events — rooted in Kerala, open to artists who match the energy. We book DJs we rate, not names we were paid to push. We take demos through the site and we listen.',
+    text: 'We produce independent techno events — focused rooms, intentional programming, and sound treated as the priority. We book on merit, take demos through the site, and keep lineups tight enough that the floor can actually move.',
   },
   {
     type: 'body',
-    text: 'Every night is curated, not crowded. Smaller rooms. Harder sound. A crowd that came to move.',
+    text: 'Curation over scale. Smaller capacity. Proper monitoring. A crowd that came to listen, not to be seen.',
   },
   { type: 'body', text: '' },
   { type: 'heading', text: 'WHAT WE WON\'T DO.' },
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We don\'t run VIP tables or backstage hierarchies. One ticket gets you the same floor as everyone else. If you\'ve seen that warning in our footer — that\'s not marketing. That\'s the rule.',
+    text: 'We don\'t sell hierarchy at the door. No VIP tables, no bottle-service tiers, no second-class access to the room you already paid for. One ticket means one floor — it\'s in the footer because it\'s the rule, not a slogan.',
+  },
+  {
+    type: 'body',
+    text: 'We don\'t pad lineups for reach or take sponsorship that changes how the night runs. We won\'t trade the energy of the room for content angles or guest-list politics.',
   },
   { type: 'body', text: '' },
-  { type: 'emphasis', text: 'The underground was never about names.' },
-  { type: 'emphasis', text: 'It was always about what happens when the bass locks and the room becomes one thing.' },
+  {
+    type: 'emphasis',
+    text: 'Underground isn\'t an aesthetic. It\'s how people are treated once they\'re inside.',
+  },
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We\'re not a label. We\'re not an agency. We\'re a crew that cares about the room — and we\'re just getting started.',
+    text: 'We\'re not a label or an agency. We\'re a collective that throws parties we\'d show up to ourselves.',
   },
 ]
 
@@ -221,13 +227,13 @@ export const EVENT_HINT = {
   monthFound: 'Fragment recovered: September 2026',
   locationHidden: 'City name encrypted on the Events page.',
   cta: 'DECRYPT ON EVENTS PAGE',
-  footer: 'Tap KAMIKAZE OVERRIDE and view details to unlock the city.',
+  footer: 'Tap Kamikaze Override and view details to unlock the city.',
 } as const
 
 export const ABOUT_HOME = {
   eyebrow: 'WHO WE ARE',
   title: 'WE THROW THE NIGHTS WE WISH EXISTED',
-  body: 'A small collective from Kerala building honest techno parties — fair doors, real lineups, and a dancefloor that matters more than the guest list.',
+  body: 'A small collective building honest techno parties — fair doors, real lineups, and a dancefloor that matters more than the guest list.',
   pillars: [
     {
       label: 'EVENTS',
