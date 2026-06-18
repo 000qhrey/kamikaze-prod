@@ -1,5 +1,5 @@
 import { SignalUpload } from '@/components/artists/SignalUpload'
-import { AsciiSigilBackground } from '@/components/canvas/AsciiSigil'
+import { ArtistsBackground } from '@/components/artists/ArtistsBackground'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { ARTISTS, META } from '@/data/siteCopy'
 
@@ -11,7 +11,7 @@ export const metadata = {
 export default function ArtistsPage() {
   return (
     <div className="relative pt-24 pb-16">
-      <AsciiSigilBackground />
+      <ArtistsBackground />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6">
         <header className="mb-16">

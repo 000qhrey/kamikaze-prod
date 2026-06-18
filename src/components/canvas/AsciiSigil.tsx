@@ -407,50 +407,7 @@ export function AsciiSigilBackground() {
   // Subscribe to genre hover changes
   const { genre, isHovering } = useActiveFrequency()
 
-  // Auto-cycle sigils when not hovering on a specific genre
-  useEffect(() => {
-    if (!mounted || lite) return
-
-    const triggerAutoCycle = () => {
-      // Only auto-cycle if not hovering on a genre
-      if (!isHovering) {
-        // Pick a different random sigil
-        let newSigilIndex = currentSigilIndexRef.current
-        while (newSigilIndex === currentSigilIndexRef.current && ALL_SIGILS.length > 1) {
-          newSigilIndex = Math.floor(Math.random() * ALL_SIGILS.length)
-        }
-        currentSigilIndexRef.current = newSigilIndex
-        targetSigilRef.current = ALL_SIGILS[newSigilIndex]
-
-        // Pick a different random color
-        let newColorIndex = currentColorIndexRef.current
-        while (newColorIndex === currentColorIndexRef.current && SIGIL_COLORS.length > 1) {
-          newColorIndex = Math.floor(Math.random() * SIGIL_COLORS.length)
-        }
-        currentColorIndexRef.current = newColorIndex
-        const newColor = SIGIL_COLORS[newColorIndex]
-        setCurrentColor(newColor.color)
-        setGlowColor(newColor.glow)
-
-        // Trigger heavy shatter transition
-        transitionRef.current = 1.0
-      }
-
-      // Schedule next cycle
-      const nextDelay =
-        PERF.asciiAutoCycleMinMs + Math.random() * PERF.asciiAutoCycleRangeMs
-      autoCycleTimerRef.current = setTimeout(triggerAutoCycle, nextDelay)
-    }
-
-    const initialDelay = PERF.asciiAutoCycleMinMs
-    autoCycleTimerRef.current = setTimeout(triggerAutoCycle, initialDelay)
-
-    return () => {
-      if (autoCycleTimerRef.current) {
-        clearTimeout(autoCycleTimerRef.current)
-      }
-    }
-  }, [mounted, isHovering, lite])
+  // Auto-cycle disabled — swapping multi-KB sigils with glitch was freezing scroll
 
   // Update sigil and colors when genre changes
   useEffect(() => {
@@ -481,49 +438,68 @@ export function AsciiSigilBackground() {
     setMounted(true)
   }, [])
 
-  // Animation loop — throttled, pauses when tab hidden or idle
+  // Animation loop — only runs while audio, hover, or transition is active
   useEffect(() => {
     if (!mounted || lite) return
 
+    let running = true
+
     const animate = (time: number) => {
-      const delta = time - lastUpdateRef.current
+      if (!running) return
+
       const isActive =
         pageVisible &&
         (isHovering ||
           transitionRef.current > 0 ||
           getAudioState().isPlaying)
 
-      if (isActive && delta > PERF.asciiFpsIntervalMs) {
-        lastUpdateRef.current = time
-
-        const bass = getBass()
-        const mids = getMids()
-
-        const bassScale = 1 + bass * 0.08
-        setScale(bassScale)
-
-        let intensity = 0.01
-        intensity += bass * 0.15
-        intensity += mids * 0.05
-
-        if (transitionRef.current > 0) {
-          intensity += transitionRef.current * 0.3
-          transitionRef.current = Math.max(0, transitionRef.current - 0.05)
-
-          if (transitionRef.current < 0.5 && currentSigilRef.current !== targetSigilRef.current) {
-            currentSigilRef.current = targetSigilRef.current
-          }
-        }
-
-        setGlitchIntensity(intensity)
-        setDisplayText(glitchSigil(currentSigilRef.current, intensity))
+      if (!isActive) {
+        frameRef.current = 0
+        return
       }
 
       frameRef.current = requestAnimationFrame(animate)
+
+      const delta = time - lastUpdateRef.current
+      if (delta <= PERF.asciiFpsIntervalMs) return
+
+      lastUpdateRef.current = time
+
+      const bass = getBass()
+      const mids = getMids()
+
+      const bassScale = 1 + bass * 0.08
+      setScale(bassScale)
+
+      let intensity = 0.01
+      intensity += bass * 0.15
+      intensity += mids * 0.05
+
+      if (transitionRef.current > 0) {
+        intensity += transitionRef.current * 0.3
+        transitionRef.current = Math.max(0, transitionRef.current - 0.05)
+
+        if (transitionRef.current < 0.5 && currentSigilRef.current !== targetSigilRef.current) {
+          currentSigilRef.current = targetSigilRef.current
+        }
+      }
+
+      setGlitchIntensity(intensity)
+      setDisplayText(glitchSigil(currentSigilRef.current, intensity))
     }
 
-    frameRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(frameRef.current)
+    const startLoop = () => {
+      if (frameRef.current) return
+      frameRef.current = requestAnimationFrame(animate)
+    }
+
+    startLoop()
+
+    return () => {
+      running = false
+      if (frameRef.current) cancelAnimationFrame(frameRef.current)
+      frameRef.current = 0
+    }
   }, [mounted, lite, pageVisible, isHovering])
 
   if (!mounted) return null
