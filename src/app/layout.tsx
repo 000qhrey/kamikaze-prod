@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: 'Kamikaze | The Room Is The Headliner',
@@ -35,6 +36,24 @@ export default function RootLayout({
         {/* Preload 3D assets for faster loading */}
         <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossOrigin="anonymous" />
         <link rel="preload" href="/logo.glb" as="fetch" crossOrigin="anonymous" />
+        <Script
+        id="meta-pixel"
+        strategy="afterInteractive"
+      >
+        {`
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '2234042430703510');
+          fbq('track', 'PageView');
+        `}
+      </Script>
+
       </head>
       <body className="bg-void text-white min-h-screen overflow-x-hidden">
         <AppShell>{children}</AppShell>
