@@ -3,14 +3,24 @@
 /**
  * Quiet sitewide menu — KAMIKAZE · MENU topbar + side overlay.
  * Shared by the poster homepage and interior routes.
+ *
+ * Open/close uses Framer Motion (AnimatePresence + motion) for enter/exit.
+ * prefers-reduced-motion collapses to a near-instant opacity fade.
  */
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from 'framer-motion'
 import { NAV_LINKS } from '@/data/navigation'
 import { HOME_COPY } from '@/components/home/homeCopy'
 import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
+
+const EASE = [0.16, 1, 0.3, 1] as const
 
 function isNavLinkActive(pathname: string, href: string): boolean {
   return pathname === href || (href !== '/' && pathname.startsWith(href))
@@ -25,6 +35,11 @@ function MenuOverlay({
   onClose: () => void
   pathname: string
 }) {
+  const reduced = useReducedMotion()
+  const dur = reduced ? 0.01 : 0.28
+  const panelDur = reduced ? 0.01 : 0.34
+  const exitDur = reduced ? 0.01 : 0.2
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -39,53 +54,95 @@ function MenuOverlay({
     }
   }, [open, onClose])
 
-  if (!open) return null
-
   return (
-    <div className="k-site-menu-overlay" role="dialog" aria-modal="true" aria-label="Menu">
-      <div className="k-site-menu-backdrop" onClick={onClose} aria-hidden />
-      <div className="k-site-menu-panel">
-        <header className="k-site-menu-head">
-          <span className="k-site-menu-brand-mark">KAMIKAZE</span>
-          <button type="button" className="k-site-menu-close" onClick={onClose}>
-            {HOME_COPY.topbar.menuClose}
-            <span aria-hidden>×</span>
-          </button>
-        </header>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="site-menu"
+          className="k-site-menu-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: open ? dur : exitDur, ease: EASE }}
+        >
+          <motion.div
+            className="k-site-menu-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: dur, ease: EASE }}
+            onClick={onClose}
+            aria-hidden
+          />
+          <motion.div
+            className="k-site-menu-panel"
+            initial={
+              reduced ? { opacity: 0 } : { opacity: 0, x: 32, scale: 0.985 }
+            }
+            animate={reduced ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
+            exit={
+              reduced ? { opacity: 0 } : { opacity: 0, x: 16, scale: 0.99 }
+            }
+            transition={{ duration: panelDur, ease: EASE }}
+          >
+            <header className="k-site-menu-head">
+              <span className="k-site-menu-brand-mark">KAMIKAZE</span>
+              <button type="button" className="k-site-menu-close" onClick={onClose}>
+                {HOME_COPY.topbar.menuClose}
+                <span aria-hidden>×</span>
+              </button>
+            </header>
 
-        <nav className="k-site-menu-nav" aria-label="Site">
-          {NAV_LINKS.map((link, i) => {
-            const isActive = isNavLinkActive(pathname, link.href)
-            return (
-              // Hard <a> + getAssetPath: full page load with correct staging
-              // (/kamikaze/…) vs production (/…) prefix. Avoids Next <Link>
-              // soft-nav edge cases on static GitHub Pages exports.
-              <a
-                key={link.href}
-                href={getAssetPath(link.href)}
-                className={clsx('k-site-menu-link', isActive && 'k-site-menu-link--active')}
-                aria-current={isActive ? 'page' : undefined}
-                onClick={onClose}
-              >
-                <span className="k-site-menu-idx">{String(i + 1).padStart(2, '0')}</span>
-                <span className="k-site-menu-label">{link.label}</span>
-                <span className="k-site-menu-arrow" aria-hidden>
-                  →
-                </span>
-              </a>
-            )
-          })}
-        </nav>
+            <nav className="k-site-menu-nav" aria-label="Site">
+              {NAV_LINKS.map((link, i) => {
+                const isActive = isNavLinkActive(pathname, link.href)
+                return (
+                  // Hard <a> + getAssetPath: full page load with correct staging
+                  // (/kamikaze/…) vs production (/…) prefix. Avoids Next <Link>
+                  // soft-nav edge cases on static GitHub Pages exports.
+                  <motion.a
+                    key={link.href}
+                    href={getAssetPath(link.href)}
+                    className={clsx(
+                      'k-site-menu-link',
+                      isActive && 'k-site-menu-link--active',
+                    )}
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={onClose}
+                    initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                    animate={reduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                    transition={{
+                      duration: reduced ? 0.01 : 0.28,
+                      ease: EASE,
+                      delay: reduced ? 0 : 0.08 + i * 0.04,
+                    }}
+                  >
+                    <span className="k-site-menu-idx">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="k-site-menu-label">{link.label}</span>
+                    <span className="k-site-menu-arrow" aria-hidden>
+                      →
+                    </span>
+                  </motion.a>
+                )
+              })}
+            </nav>
 
-        <footer className="k-site-menu-foot">
-          <span>TECHNO COLLECTIVE</span>
-          <span aria-hidden>·</span>
-          <span>UNDERGROUND</span>
-          <span aria-hidden>·</span>
-          <span>EST. MMXXVI</span>
-        </footer>
-      </div>
-    </div>
+            <footer className="k-site-menu-foot">
+              <span>TECHNO COLLECTIVE</span>
+              <span aria-hidden>·</span>
+              <span>UNDERGROUND</span>
+              <span aria-hidden>·</span>
+              <span>EST. MMXXVI</span>
+            </footer>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -123,7 +180,7 @@ export function SiteMenu() {
 
       <style jsx global>{`
         .k-site-topbar {
-          --k-menu-void: #050505;
+          --k-menu-void: #0a0a0a;
           --k-menu-bone: #f1ede4;
           --k-menu-bone-2: rgba(241, 237, 228, 0.7);
           --k-menu-bone-3: rgba(241, 237, 228, 0.45);
@@ -148,9 +205,9 @@ export function SiteMenu() {
           pointer-events: none;
           background: linear-gradient(
             to bottom,
-            rgba(5, 5, 5, 0.72) 0%,
-            rgba(5, 5, 5, 0.35) 55%,
-            rgba(5, 5, 5, 0) 100%
+            rgba(10, 10, 10, 0.72) 0%,
+            rgba(10, 10, 10, 0.35) 55%,
+            rgba(10, 10, 10, 0) 100%
           );
         }
         .k-site-topbar--home {
@@ -189,7 +246,7 @@ export function SiteMenu() {
         }
 
         .k-site-menu-overlay {
-          --k-menu-void: #050505;
+          --k-menu-void: #0a0a0a;
           --k-menu-bone: #f1ede4;
           --k-menu-bone-2: rgba(241, 237, 228, 0.7);
           --k-menu-bone-3: rgba(241, 237, 228, 0.45);
@@ -214,6 +271,8 @@ export function SiteMenu() {
           flex-direction: column;
           padding: clamp(24px, 4vw, 48px);
           box-shadow: -24px 0 80px rgba(0, 0, 0, 0.55);
+          transform-origin: 100% 50%;
+          will-change: transform, opacity;
         }
         .k-site-menu-head {
           display: flex;
@@ -268,19 +327,20 @@ export function SiteMenu() {
           text-decoration: none;
           transition:
             color 200ms ease,
-            padding-left 200ms ease,
-            opacity 200ms ease;
+            padding-left 200ms ease;
         }
-        .k-site-menu-link:not(.k-site-menu-link--active) {
-          opacity: 0.5;
+        /* Inactive dimming — keep separate from Framer enter opacity */
+        .k-site-menu-link:not(.k-site-menu-link--active) .k-site-menu-label {
+          color: var(--k-menu-bone-3);
         }
         .k-site-menu-link:not(.k-site-menu-link--active):hover {
-          opacity: 1;
           color: var(--k-menu-red);
           padding-left: 20px;
         }
+        .k-site-menu-link:not(.k-site-menu-link--active):hover .k-site-menu-label {
+          color: var(--k-menu-red);
+        }
         .k-site-menu-link--active {
-          opacity: 1;
           padding-left: 20px;
         }
         .k-site-menu-link--active::before {
@@ -318,9 +378,6 @@ export function SiteMenu() {
           text-transform: uppercase;
           line-height: 1;
           transition: color 200ms ease;
-        }
-        .k-site-menu-link:not(.k-site-menu-link--active) .k-site-menu-label {
-          color: var(--k-menu-bone-3);
         }
         .k-site-menu-arrow {
           font-family: 'IBM Plex Mono', monospace;

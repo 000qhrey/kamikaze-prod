@@ -7,6 +7,7 @@ import { LenisProvider } from '@/providers/LenisProvider'
 import { CursorProvider } from '@/providers/CursorProvider'
 import { TransitionProvider } from '@/providers/TransitionProvider'
 import { SiteMenu } from '@/components/layout/SiteMenu'
+import { PageTransition } from '@/components/layout/PageTransition'
 import { Footer } from '@/components/layout/Footer'
 import { ScrollTracker } from '@/components/layout/ScrollTracker'
 import { BootSequence } from '@/components/layout/BootSequence'
@@ -102,7 +103,7 @@ export function AppShell({ children }: AppShellProps) {
         <FontLoader />
         <SiteMenu />
         <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
-          {children}
+          <PageTransition>{children}</PageTransition>
         </main>
         {hasBooted && <TerminalAudioPlayer />}
       </>
@@ -133,7 +134,7 @@ export function AppShell({ children }: AppShellProps) {
           <TransitionProvider>
             <SiteMenu />
             <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
-              {children}
+              <PageTransition>{children}</PageTransition>
             </main>
             <Footer />
             <DepthLayers />

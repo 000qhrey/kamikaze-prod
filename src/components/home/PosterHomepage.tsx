@@ -311,10 +311,10 @@ function PortraitSilhouette({ variant }: { variant: number }) {
       <rect width="200" height="260" fill={`url(#bg-${fid})`} />
 
       <g transform={`${c.flip ? 'translate(200 0) scale(-1 1)' : ''} rotate(${c.tilt} 100 130)`}>
-        <path d={c.shoulders} fill="#050505" />
-        <path d={c.neck} fill="#0a0908" />
-        <path d={c.profile} fill="#0a0908" />
-        <path d={c.hair} fill="#020202" />
+        <path d={c.shoulders} fill="#0a0a0a" />
+        <path d={c.neck} fill="#0e0c0c" />
+        <path d={c.profile} fill="#0e0c0c" />
+        <path d={c.hair} fill="#050505" />
 
         <g clipPath={`url(#head-${fid})`}>
           <rect width="200" height="260" fill="rgba(30,26,22,0.65)" />
@@ -359,8 +359,114 @@ function PortraitSilhouette({ variant }: { variant: number }) {
 
 const WORDMARK_KAMI = 'KAMI'
 const WORDMARK_KAMI_GLITCH = 'K∆MI'
+const WORDMARK_KAMI_JP = '神'
 const WORDMARK_KAZE = 'KAZE'
 const WORDMARK_KAZE_JP = '風'
+
+function WordmarkKamiSwap({ reduced }: { reduced: boolean }) {
+  const [jp, setJp] = useState(false)
+  const [swapGlitching, setSwapGlitching] = useState(false)
+  const [ambientGlitching, setAmbientGlitching] = useState(false)
+  const [kamiText, setKamiText] = useState(WORDMARK_KAMI)
+  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const ambientTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTimers = useCallback(() => {
+    if (swapTimerRef.current) clearTimeout(swapTimerRef.current)
+    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+  }, [])
+
+  const resetAmbient = useCallback(() => {
+    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
+    setKamiText(WORDMARK_KAMI)
+    setAmbientGlitching(false)
+  }, [])
+
+  const triggerSwapGlitch = useCallback(() => {
+    if (reduced) return
+    if (swapTimerRef.current) clearTimeout(swapTimerRef.current)
+    setSwapGlitching(true)
+    swapTimerRef.current = setTimeout(() => setSwapGlitching(false), 220)
+  }, [reduced])
+
+  const showJp = useCallback(() => {
+    resetAmbient()
+    triggerSwapGlitch()
+    setJp(true)
+  }, [resetAmbient, triggerSwapGlitch])
+
+  const showEn = useCallback(() => {
+    triggerSwapGlitch()
+    setJp(false)
+  }, [triggerSwapGlitch])
+
+  const triggerAmbient = useCallback(() => {
+    if (reduced || jp) return
+    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
+    setKamiText(WORDMARK_KAMI_GLITCH)
+    setAmbientGlitching(true)
+    ambientTimerRef.current = setTimeout(() => {
+      setKamiText(WORDMARK_KAMI)
+      setAmbientGlitching(false)
+    }, 220)
+  }, [jp, reduced])
+
+  const onTouchStart = useCallback(() => {
+    showJp()
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchTimerRef.current = setTimeout(showEn, 700)
+  }, [showEn, showJp])
+
+  useEffect(() => clearTimers, [clearTimers])
+
+  useEffect(() => {
+    if (reduced || jp) return
+    const i = setInterval(() => {
+      if (Math.random() < 0.22) triggerAmbient()
+    }, 9_000)
+    return () => clearInterval(i)
+  }, [jp, reduced, triggerAmbient])
+
+  return (
+    <span
+      className={[
+        'k-hero-wordmark-kami',
+        jp ? 'k-hero-wordmark-kami--jp' : '',
+        swapGlitching ? 'k-hero-wordmark-kami--glitch' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onMouseEnter={showJp}
+      onMouseLeave={showEn}
+      onTouchStart={onTouchStart}
+      aria-label={jp ? WORDMARK_KAMI_JP : WORDMARK_KAMI}
+    >
+      <span className="k-hero-wordmark-kami-en" aria-hidden={jp}>
+        {kamiText.split('').map((ch, i) => (
+          <span
+            key={i}
+            className="k-hero-wordmark-glyph"
+            style={{
+              transition: ambientGlitching
+                ? 'transform 50ms linear'
+                : 'transform 320ms ease-out',
+              transform: ambientGlitching
+                ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
+                : 'none',
+            }}
+          >
+            {ch}
+          </span>
+        ))}
+      </span>
+      <span className="k-hero-wordmark-kami-jp" aria-hidden={!jp}>
+        {WORDMARK_KAMI_JP}
+      </span>
+    </span>
+  )
+}
 
 function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
   const [jp, setJp] = useState(false)
@@ -427,49 +533,9 @@ function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
 }
 
 function EnglishWordmark({ reduced }: { reduced: boolean }) {
-  const [kamiText, setKamiText] = useState(WORDMARK_KAMI)
-  const [glitching, setGlitching] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const trigger = useCallback(() => {
-    if (reduced) return
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setKamiText(WORDMARK_KAMI_GLITCH)
-    setGlitching(true)
-    timerRef.current = setTimeout(() => {
-      setKamiText(WORDMARK_KAMI)
-      setGlitching(false)
-    }, 220)
-  }, [reduced])
-
-  useEffect(() => {
-    if (reduced) return
-    const i = setInterval(() => {
-      if (Math.random() < 0.22) trigger()
-    }, 9_000)
-    return () => clearInterval(i)
-  }, [reduced, trigger])
-
   return (
     <span className="k-hero-wordmark" aria-label="KAMIKAZE">
-      <span className="k-hero-wordmark-kami">
-        {kamiText.split('').map((ch, i) => (
-          <span
-            key={i}
-            className="k-hero-wordmark-glyph"
-            style={{
-              transition: glitching
-                ? 'transform 50ms linear'
-                : 'transform 320ms ease-out',
-              transform: glitching
-                ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
-                : 'none',
-            }}
-          >
-            {ch}
-          </span>
-        ))}
-      </span>
+      <WordmarkKamiSwap reduced={reduced} />
       <WordmarkKazeSwap reduced={reduced} />
     </span>
   )
@@ -903,10 +969,10 @@ const PAPER_STYLE: CSSProperties = {
   inset: 0,
   pointerEvents: 'none',
   zIndex: 21,
-  opacity: 0.06,
+  opacity: 0.045,
   mixBlendMode: 'soft-light',
   background:
-    'radial-gradient(ellipse 90% 70% at 50% 40%, rgba(241,237,228,0.18) 0%, transparent 70%), #0a0908',
+    'radial-gradient(ellipse 90% 70% at 50% 40%, rgba(241,237,228,0.12) 0%, transparent 70%), #0a0a0a',
 }
 
 const GRAIN_STYLE: CSSProperties = {
@@ -914,11 +980,11 @@ const GRAIN_STYLE: CSSProperties = {
   inset: 0,
   pointerEvents: 'none',
   zIndex: 25,
-  opacity: 0.07,
+  opacity: 0.04,
   mixBlendMode: 'overlay',
   backgroundImage:
-    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.55' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0'/></filter><rect width='320' height='320' filter='url(%23n)'/></svg>\")",
-  backgroundSize: '280px 280px',
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0'/></filter><rect width='320' height='320' filter='url(%23n)'/></svg>\")",
+  backgroundSize: '256px 256px',
 }
 
 const DUST_STYLE: CSSProperties = {
@@ -950,9 +1016,8 @@ const VIGNETTE_STYLE: CSSProperties = {
   pointerEvents: 'none',
   zIndex: 26,
   background:
-    'radial-gradient(ellipse 115% 85% at 50% 45%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)',
-  mixBlendMode: 'multiply',
-  opacity: 0.85,
+    'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)',
+  opacity: 1,
 }
 
 function PosterTextures() {
@@ -1006,23 +1071,11 @@ export default PosterHomepage
 function PosterStyles() {
   return (
     <style jsx global>{`
-      :root {
-        --k-void: #050505;
-        --k-warm: #0d0b0a;
-        --k-bone: #f1ede4;
-        --k-bone-print: #e4dfd4;
-        --k-bone-2: rgba(241, 237, 228, 0.7);
-        --k-bone-3: rgba(241, 237, 228, 0.45);
-        --k-red: #b30e12;
-        --k-red-deep: #8c1114;
-        --k-red-hanko: #a61216;
-        --k-hair: rgba(241, 237, 228, 0.1);
-        --k-waveform: rgba(241, 237, 228, 0.35);
-      }
+      /* Tokens live in globals.css (:root) so homepage shares --void family */
 
       body.k-home-body {
         cursor: auto !important;
-        background: var(--k-void);
+        background: var(--void);
         color: var(--k-bone);
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
         overflow-x: hidden;
@@ -1045,7 +1098,7 @@ function PosterStyles() {
         position: relative;
         min-height: 100vh;
         min-height: 100dvh;
-        background: var(--k-void);
+        background: var(--void);
         color: var(--k-bone);
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
         font-size: 15px;
@@ -1078,6 +1131,7 @@ function PosterStyles() {
       }
 
       .k-panel--void { background: var(--k-void); }
+      /* Warm = ash-adjacent lift — same family as interior --ash, not cream */
       .k-panel--warm { background: var(--k-warm); }
 
       .k-panel > * {
@@ -1404,10 +1458,75 @@ function PosterStyles() {
         pointer-events: auto;
       }
 
-      /* KAZE segment — hover/touch EN ↔ 風 (grid stack, sigil pattern) */
+      /* KAMI segment — hover/touch EN ↔ 神 (grid stack, sigil pattern) */
       .k-hero-wordmark-kami {
+        position: relative;
+        display: inline-grid;
+        cursor: default;
+        isolation: isolate;
+        vertical-align: baseline;
+      }
+      .k-hero-wordmark-kami-en,
+      .k-hero-wordmark-kami-jp {
+        grid-area: 1 / 1;
+        transition: opacity 90ms ease;
+      }
+      .k-hero-wordmark-kami-en {
         display: inline;
       }
+      .k-hero-wordmark-kami-jp {
+        opacity: 0;
+        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+        font-weight: 900;
+        text-transform: none;
+        letter-spacing: -0.06em;
+        font-stretch: normal;
+        font-size: 2.35em;
+        line-height: 0.86;
+        place-self: center;
+        pointer-events: none;
+      }
+      .k-hero-wordmark-kami--jp .k-hero-wordmark-kami-en {
+        opacity: 0;
+      }
+      .k-hero-wordmark-kami--jp .k-hero-wordmark-kami-jp {
+        opacity: 1;
+      }
+      .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-en,
+      .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-jp {
+        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      }
+      .k-hero-wordmark-kami--glitch::after {
+        content: '';
+        position: absolute;
+        inset: -4% -2%;
+        pointer-events: none;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.22) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: k-sigil-dark-scan 220ms steps(2);
+      }
+      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-en,
+      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-jp {
+        animation: none;
+      }
+      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch::after {
+        display: none;
+      }
+      @media (hover: none) {
+        .k-hero-wordmark-kami:active .k-hero-wordmark-kami-en {
+          opacity: 0;
+        }
+        .k-hero-wordmark-kami:active .k-hero-wordmark-kami-jp {
+          opacity: 1;
+        }
+      }
+
+      /* KAZE segment — hover/touch EN ↔ 風 (grid stack, sigil pattern) */
       .k-hero-wordmark-kaze {
         position: relative;
         display: inline-grid;
@@ -1661,7 +1780,7 @@ function PosterStyles() {
         flex: 1 1 auto;
         min-height: 240px;
         outline: 1px solid var(--k-hair);
-        background: #050505;
+        background: var(--k-void);
         overflow: hidden;
         filter: contrast(1.05) grayscale(0.85);
       }
@@ -1732,8 +1851,8 @@ function PosterStyles() {
         flex: 1 1 auto;
         min-height: 260px;
         background:
-          radial-gradient(ellipse 90% 90% at 50% 50%, rgba(30, 5, 5, 0.75) 0%, rgba(5, 5, 5, 1) 70%),
-          #050505;
+          radial-gradient(ellipse 90% 90% at 50% 50%, rgba(30, 5, 5, 0.75) 0%, rgba(10, 10, 10, 1) 70%),
+          var(--k-void);
         outline: 1px solid var(--k-hair);
         display: grid;
         place-items: center;
@@ -1789,7 +1908,7 @@ function PosterStyles() {
       .k-resident-portrait {
         position: relative;
         aspect-ratio: 3 / 4;
-        background: #050505;
+        background: var(--k-void);
         outline: 1px solid var(--k-hair);
         overflow: hidden;
         filter: contrast(1.15) grayscale(1) brightness(0.95);

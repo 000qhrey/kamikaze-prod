@@ -37,6 +37,19 @@
   --grey-mid: #555555;
   --ash: #1a1818;
 
+  /* Poster / homepage — same black family as interiors */
+  --k-void: #0a0a0a;
+  --k-warm: #121010;
+  --k-bone: #f1ede4;
+  --k-bone-print: #e4dfd4;
+  --k-bone-2: rgba(241, 237, 228, 0.7);
+  --k-bone-3: rgba(241, 237, 228, 0.45);
+  --k-red: #b30e12;
+  --k-red-deep: #8c1114;
+  --k-red-hanko: #a61216;
+  --k-hair: rgba(241, 237, 228, 0.1);
+  --k-waveform: rgba(241, 237, 228, 0.35);
+
   /* Accent - blood */
   --blood: #8B0000;
   --arterial: #CC0000;

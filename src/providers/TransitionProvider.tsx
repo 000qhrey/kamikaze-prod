@@ -1,9 +1,16 @@
 'use client'
 
+/**
+ * Soft-nav transitions for interior ClientNavButton / navigateTo calls.
+ * Content enter/exit fade lives in PageTransition (Framer Motion).
+ * This provider keeps the short canvas glitch overlay for cyberpunk feel.
+ */
+
 import { createContext, useContext, useState, useCallback, useRef, ReactNode, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { GlitchTransition } from '@/lib/canvas/glitchTransition'
 import { playClickSound } from '@/hooks/useSonicFeedback'
+import { checkLiteMode } from '@/hooks/useLiteMode'
 
 interface TransitionContextValue {
   isTransitioning: boolean
@@ -73,11 +80,13 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
     setIsTransitioning(true)
 
     const transition = transitionRef.current
+    const lite = checkLiteMode()
 
-    if (transition) {
+    if (transition && !lite) {
       router.push(href)
-      await transition.glitchOut(180)
-      await transition.glitchIn(120)
+      // Keep glitch short so it pairs with PageTransition’s 300ms fade
+      await transition.glitchOut(160)
+      await transition.glitchIn(100)
 
       if (hash) {
         requestAnimationFrame(() => {
