@@ -56,28 +56,22 @@ export function TerminalAudioPlayer() {
   const [scApiLoaded, setScApiLoaded] = useState(false)
   const [scReady, setScReady] = useState(false)
   const [currentUrl, setCurrentUrl] = useState(CHANNELS[0].url)
-  const savedVolumeRef = useRef(70) // Store volume during fade
+  const [isMuted, setIsMuted] = useState(false)
+  const savedVolumeRef = useRef(70) // Store volume during fade / mute
   const resumeAfterLoadRef = useRef(false)
   const animationRef = useRef<number>(0)
 
-  // Desktop: start expanded widget; mobile stays minimized bar
+  // Always start minimized (footer bar). Expand is opt-in via MUSIC.
   useEffect(() => {
-    if (isMobile) {
-      setMode('bar')
-      setIsManuallyMinimized(true)
-    } else {
-      setMode('widget')
-      setIsManuallyMinimized(false)
-    }
+    setMode('bar')
+    setIsManuallyMinimized(true)
   }, [isMobile])
 
-  // Scroll detection - switch to bar mode when near footer (desktop only)
+  // Scroll detection — if user expanded the widget, collapse to bar near footer
   useEffect(() => {
-    if (isMobile) return
+    if (isMobile || isManuallyMinimized) return
 
     const handleScroll = () => {
-      if (isManuallyMinimized) return // User manually minimized, don't auto-switch
-
       const scrollBottom = window.scrollY + window.innerHeight
       const docHeight = document.documentElement.scrollHeight
       const footerThreshold = 200 // pixels from bottom to trigger bar mode
@@ -90,10 +84,23 @@ export function TerminalAudioPlayer() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // Check initial position
+    handleScroll()
 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isManuallyMinimized, isMobile])
+
+  const handleMuteToggle = useCallback(() => {
+    if (isMuted) {
+      const restore = savedVolumeRef.current / 100
+      setVolume(restore > 0 ? restore : 0.7)
+      setIsMuted(false)
+      return
+    }
+
+    savedVolumeRef.current = Math.round(state.volume * 100) || savedVolumeRef.current
+    setVolume(0)
+    setIsMuted(true)
+  }, [isMuted, state.volume])
 
   // Load SoundCloud Widget API script
   useEffect(() => {
@@ -411,7 +418,11 @@ export function TerminalAudioPlayer() {
                 {[...Array(10)].map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setVolume((i + 1) / 10)}
+                    onClick={() => {
+                      setIsMuted(false)
+                      setVolume((i + 1) / 10)
+                      savedVolumeRef.current = (i + 1) * 10
+                    }}
                     className={clsx(
                       'flex-1 h-2 transition-colors',
                       i < state.volume * 10 ? 'bg-arterial/70 hover:bg-arterial' : 'bg-white/20/30 hover:bg-white/20/50'
@@ -451,8 +462,8 @@ export function TerminalAudioPlayer() {
             className="fixed bottom-0 left-0 right-0 z-[110] h-11 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono pb-[env(safe-area-inset-bottom,0px)]"
             style={{ fontSize: '10px' }}
           >
-          <div className="h-11 flex items-center px-3 sm:px-4 gap-2 sm:gap-4">
-            {/* Expand button */}
+          <div className="h-11 flex items-center px-3 sm:px-4 gap-2 sm:gap-3">
+            {/* Expand for full controls */}
             <button
               onClick={handleExpand}
               className="text-white/70 hover:text-arterial transition-colors shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -470,12 +481,27 @@ export function TerminalAudioPlayer() {
                   ? 'border-arterial text-arterial'
                   : 'border-white/30 text-white/70 hover:border-arterial hover:text-arterial'
               )}
+              aria-label={state.isPlaying ? 'Pause' : 'Play'}
             >
               {state.isPlaying ? '||' : '▶'}
             </button>
 
+            {/* Mute */}
+            <button
+              onClick={handleMuteToggle}
+              className={clsx(
+                'shrink-0 px-1.5 py-0.5 border transition-colors text-[9px]',
+                isMuted || state.volume === 0
+                  ? 'border-arterial/60 text-arterial'
+                  : 'border-white/30 text-white/70 hover:border-arterial hover:text-arterial'
+              )}
+              aria-label={isMuted || state.volume === 0 ? 'Unmute' : 'Mute'}
+            >
+              {isMuted || state.volume === 0 ? 'MUTE' : 'VOL'}
+            </button>
+
             {/* Signal bars */}
-            <div className="flex-1 flex items-center h-6 gap-px overflow-hidden">
+            <div className="flex-1 flex items-center h-6 gap-px overflow-hidden min-w-0">
               {bars.map((height, i) => (
                 <div
                   key={i}
@@ -486,7 +512,7 @@ export function TerminalAudioPlayer() {
             </div>
 
             {/* Track info */}
-            <div className="shrink-0 text-right max-w-[200px] truncate hidden sm:block">
+            <div className="shrink-0 text-right max-w-[160px] truncate hidden sm:block">
               <span className="text-white/70">{trackTitle.slice(0, 25)}</span>
             </div>
 
@@ -494,13 +520,14 @@ export function TerminalAudioPlayer() {
             <button
               onClick={() => setShowChannelSelector(true)}
               className="shrink-0 flex items-center gap-1 hover:text-arterial transition-colors"
+              aria-label="Select channel"
             >
               <span className="w-2 h-4 inline-block" style={{ backgroundColor: channel.color }} />
               <span className="text-white/50">[{channel.code}]</span>
             </button>
 
             {/* SPM */}
-            <span className="shrink-0 text-arterial">{state.spm} SPM</span>
+            <span className="shrink-0 text-arterial hidden sm:inline">{state.spm} SPM</span>
           </div>
         </motion.div>
         )}

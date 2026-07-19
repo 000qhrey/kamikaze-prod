@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "bun run build && gh-pages -d out -t true"
+    "build:pages": "NEXT_PUBLIC_BASE_PATH=/kamikaze next build",
+    "deploy": "bun run build:pages && gh-pages -d out -t true"
   },
   "dependencies": {
     "@react-email/components": "^1.0.11",

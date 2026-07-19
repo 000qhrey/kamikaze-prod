@@ -166,13 +166,24 @@ export function DataStreamBar() {
   const [corruptedIndex, setCorruptedIndex] = useState<number | null>(null)
   const [systemLogGlitch, setSystemLogGlitch] = useState(false)
   const [crtFlicker, setCrtFlicker] = useState(false)
+  // Stable SSR defaults — randomize only after mount to avoid hydration mismatch.
   const [dynamicValues, setDynamicValues] = useState({
-    bass: generateBassBar(),
-    bpm: generateBPM(),
-    capacity: generateCapacity(),
-    temp: generateTemp(),
-    db: generateDB(),
+    bass: '████░░░░',
+    bpm: '144',
+    capacity: '82%',
+    temp: '31°C',
+    db: '-3.2',
   })
+
+  useEffect(() => {
+    setDynamicValues({
+      bass: generateBassBar(),
+      bpm: generateBPM(),
+      capacity: generateCapacity(),
+      temp: generateTemp(),
+      db: generateDB(),
+    })
+  }, [])
 
   // Update uptime every second
   useEffect(() => {

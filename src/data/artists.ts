@@ -4,6 +4,8 @@ export interface Artist {
   slug: string
   photo: string
   bio: string
+  tagline: string
+  taglineJa?: string
   location: string
   socials: {
     instagram?: string
@@ -25,11 +27,9 @@ export const artists: Artist[] = [
     slug: 'ibliiiz',
     photo: '/artists/ibliiiz.png',
     location: 'Underground',
-    bio: `The architect of sonic destruction. ibliiiz emerged from the depths of the underground scene with a singular mission—to dismantle the boundary between noise and transcendence.
-
-Every set is a ritual. Every track, an incantation. The room doesn't move to the music—it surrenders to it.
-
-"I don't play for the crowd. I play through them."`,
+    bio: `Driven by a lifelong passion for music, our resident artist ibliiiz has been immersed in sound at every stage of life. Constantly evolving while staying true to one thing—'speed'—they embody the true meaning of Kamikaze: an all-out assault on sound. Through carefully selected elements, relentless energy, and uncompromising pace, they deliver the signature Kamikaze experience—explosive, immersive, and built to leave a lasting impact.`,
+    tagline: 'this for the ones who never belonged',
+    taglineJa: '属せなかった者たちへ',
     socials: {
       instagram: 'https://instagram.com/ibliiiz',
       soundcloud: 'https://soundcloud.com/ibliiiz',

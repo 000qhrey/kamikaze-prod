@@ -25,7 +25,7 @@ import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { usePageVisible } from '@/hooks/usePageVisible'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
-import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
+import { getBass, getMids, getHighs, getIsSwitching, getChannelTint } from '@/hooks/useAudioEngine'
 import { SIGIL_SCENE_LINKS } from '@/data/navigation'
 
 // Configure drei's useGLTF to use local Draco decoder (faster than CDN)
@@ -103,6 +103,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
   const smoothMouse = useRef({ x: 0, y: 0 })
   const smoothBass = useRef(0)
   const smoothEmissive = useRef(0)
+  const channelTintColor = useRef(new Color())
 
   // Create materials for different states
   const redChrome = useMemo(() => new MeshStandardMaterial({
@@ -221,19 +222,26 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
       group.current.position.z *= 0.9
     }
 
-    // Material: color shift + audio-reactive emissive
-    const channel = getCurrentChannel()
+    // Material: channel-tint flash (~2.8s) + audio-reactive emissive
+    const tint = getChannelTint()
     const targetMaterial = section === 'contact' ? silverChrome : redChrome
-    const targetEmissive = isSwitching ? 3 : 0.5 + smoothedBass * 2 // Flash bright on switch
+    const targetEmissive =
+      tint.strength > 0
+        ? 0.6 + tint.strength * 2.4 + smoothedBass * 1.5
+        : 0.5 + smoothedBass * 2
 
-    smoothEmissive.current = MathUtils.lerp(smoothEmissive.current, targetEmissive, isSwitching ? 0.5 : 0.2)
+    smoothEmissive.current = MathUtils.lerp(
+      smoothEmissive.current,
+      targetEmissive,
+      tint.strength > 0.5 ? 0.45 : 0.2,
+    )
 
     meshesRef.current.forEach((mesh) => {
       const mat = mesh.material as MeshStandardMaterial
-      if (isSwitching) {
-        // Flash channel color during switch
-        const channelColor = new Color(channel.color)
-        mat.emissive.lerp(channelColor, 0.3)
+      if (tint.strength > 0) {
+        channelTintColor.current.set(tint.color)
+        mat.color.lerp(channelTintColor.current, 0.08 + tint.strength * 0.25)
+        mat.emissive.lerp(channelTintColor.current, 0.12 + tint.strength * 0.35)
         mat.emissiveIntensity = smoothEmissive.current
       } else {
         mat.color.lerp(targetMaterial.color, 0.02)

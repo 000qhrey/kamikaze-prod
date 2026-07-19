@@ -70,6 +70,10 @@ const state: AudioEngineState = {
   frequencyData: new Uint8Array(128) as Uint8Array<ArrayBuffer>,
 }
 
+/** How long sigils hold/ease the channel accent after a switch */
+export const CHANNEL_TINT_MS = 2800
+const CHANNEL_TINT_HOLD_MS = 450
+
 // Pending play flag - set when play() is called before widget is ready
 let pendingPlay = false
 
@@ -79,6 +83,8 @@ let lastBeatTime = 0
 let scWidget: any = null
 let scIframe: HTMLIFrameElement | null = null
 let playRequestId = 0
+/** performance.now() when the last channel switch started a sigil tint */
+let channelTintStartedAt = 0
 
 // ============================================
 // INITIALIZATION
@@ -147,8 +153,9 @@ export function switchChannel(channelId: number): string {
   state.isSwitching = true
   state.currentChannel = channelId
   state.spm = CHANNELS[channelId].spm
+  channelTintStartedAt = typeof performance !== 'undefined' ? performance.now() : Date.now()
 
-  // Notify listeners for glitch effect
+  // Notify listeners for glitch effect + sigil tint
   notifyListeners()
 
   // Return the new playlist URL for the iframe to reload
@@ -157,6 +164,32 @@ export function switchChannel(channelId: number): string {
 
 export function getCurrentChannel() {
   return CHANNELS[state.currentChannel]
+}
+
+/**
+ * Channel-accent tint for sigils after a genre/signal switch.
+ * strength: 1 during a short hold, then eases to 0 over CHANNEL_TINT_MS.
+ */
+export function getChannelTint(): { color: string; strength: number } {
+  const channel = CHANNELS[state.currentChannel]
+  if (!channelTintStartedAt) {
+    return { color: channel.color, strength: 0 }
+  }
+
+  const now = typeof performance !== 'undefined' ? performance.now() : Date.now()
+  const elapsed = now - channelTintStartedAt
+  if (elapsed >= CHANNEL_TINT_MS) {
+    return { color: channel.color, strength: 0 }
+  }
+
+  if (elapsed < CHANNEL_TINT_HOLD_MS) {
+    return { color: channel.color, strength: 1 }
+  }
+
+  const t = (elapsed - CHANNEL_TINT_HOLD_MS) / (CHANNEL_TINT_MS - CHANNEL_TINT_HOLD_MS)
+  // smoothstep ease-out
+  const strength = 1 - t * t * (3 - 2 * t)
+  return { color: channel.color, strength }
 }
 
 // ============================================

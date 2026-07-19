@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 import { LenisProvider } from '@/providers/LenisProvider'
 import { CursorProvider } from '@/providers/CursorProvider'
 import { TransitionProvider } from '@/providers/TransitionProvider'
-import { Navigation } from '@/components/layout/Navigation'
+import { SiteMenu } from '@/components/layout/SiteMenu'
 import { Footer } from '@/components/layout/Footer'
 import { ScrollTracker } from '@/components/layout/ScrollTracker'
 import { BootSequence } from '@/components/layout/BootSequence'
@@ -49,8 +49,8 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname()
-  // Homepage runs its own composition. Skip the cyberpunk chrome, boot
-  // sequence, sigil, cursor override, nav + footer, etc. on `/` only.
+  // Homepage runs its own composition. Skip cyberpunk chrome (boot, sigil,
+  // cursor, footer) on `/` only. SiteMenu mounts on every route.
   const isHome = pathname === '/'
 
   const [hasBooted, setHasBooted] = useState(false)
@@ -94,13 +94,17 @@ export function AppShell({ children }: AppShellProps) {
     setBootMode('none')
   }
 
-  // Homepage: intentionally stripped-down. Just render the poster.
-  // Interior routes keep the cyberpunk chrome intact.
+  // Homepage: stripped cyberpunk chrome (boot/cursor/sigil/footer), but
+  // shares SiteMenu + minimized music bar with every other route.
   if (isHome) {
     return (
       <>
         <FontLoader />
-        <main className="relative z-10">{children}</main>
+        <SiteMenu />
+        <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
+          {children}
+        </main>
+        {hasBooted && <TerminalAudioPlayer />}
       </>
     )
   }
@@ -127,8 +131,10 @@ export function AppShell({ children }: AppShellProps) {
       <LenisProvider>
         <CursorProvider>
           <TransitionProvider>
-            <Navigation />
-            <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</main>
+            <SiteMenu />
+            <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
+              {children}
+            </main>
             <Footer />
             <DepthLayers />
             {hasBooted && <TerminalAudioPlayer />}

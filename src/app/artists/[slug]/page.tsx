@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: ArtistPageProps) {
 
   return {
     title: `${artist.name} | KAMIKAZE`,
-    description: artist.bio.split('\n')[0],
+    description: artist.tagline || artist.bio.split('\n')[0],
   }
 }
 

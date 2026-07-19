@@ -1,18 +1,11 @@
 'use client'
 
 /**
- * Kamikaze — Japanese-first poster homepage.
+ * Kamikaze — dark poster homepage.
  *
- * Hero is the 2nd (dark) reference: massive red rising-sun disc, brutalist
- * white "KAMIKAZE" wordmark, and a black brush 神風 kanji overlaid on the
- * disc. Grain + fold + soft red bleed textures on top.
- *
- * Scroll sections come from the JP landing concept: 01 集団について (About),
- * 02 次のイベント (Next Event), 03 レジデント (Residents), 04 印 (Sigil).
- *
- * Language is controlled by the FLAVOUR (JP ⇄ EN) toggle in the footer;
- * Japanese is the default. Latin brand words (KAMIKAZE, SHADOW CIRCUIT,
- * resident names) never translate — see `homeCopy.ts`.
+ * Scroll: Hero → Residents → Sigil → old footer.
+ * KILL SWITCH flips only the hero title (EN KAMIKAZE ↔ JP 神風).
+ * Hover on 神風 reveals KAMIKAZE. Rest of the page stays English.
  */
 
 import {
@@ -22,9 +15,17 @@ import {
   useState,
   type CSSProperties,
 } from 'react'
-import { FlavourProvider, useFlavour } from '@/providers/FlavourProvider'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import { getArtistBySlug } from '@/data/artists'
+import { getAssetPath } from '@/lib/basePath'
 import { HOME_COPY, CONSTANT } from './homeCopy'
 import { HomeFooter } from './HomeFooter'
+
+const SunLogo3D = dynamic(
+  () => import('./SunLogo3D').then((m) => m.SunLogo3D),
+  { ssr: false },
+)
 
 // ─── shared meta / hooks ────────────────────────────────────────────────────
 
@@ -171,8 +172,12 @@ function ScrollWaveform({ reduced, variant = 'page' }: { reduced: boolean; varia
     )
   }
 
+  // Sit just above the fixed music bar so scroll waveform stays visible.
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-10">
+    <div
+      className="pointer-events-none fixed inset-x-0 z-30 h-10"
+      style={{ bottom: 'calc(2.75rem + env(safe-area-inset-bottom, 0px))' }}
+    >
       <svg
         viewBox="0 0 1600 40"
         preserveAspectRatio="none"
@@ -350,166 +355,89 @@ function PortraitSilhouette({ variant }: { variant: number }) {
   )
 }
 
-// ─── warehouse-crowd placeholder (used behind about + next-event) ──────────
+// ─── hero title — EN wordmark or JP 神風 (hover → KAMIKAZE) ────────────────
 
-function RoomPhoto({ tone = 'warm' }: { tone?: 'warm' | 'cold' }) {
-  const isCold = tone === 'cold'
+const WORDMARK_KAMI = 'KAMI'
+const WORDMARK_KAMI_GLITCH = 'K∆MI'
+const WORDMARK_KAZE = 'KAZE'
+const WORDMARK_KAZE_JP = '風'
+
+function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
+  const [jp, setJp] = useState(false)
+  const [glitching, setGlitching] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+  }, [])
+
+  const triggerGlitch = useCallback(() => {
+    if (reduced) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setGlitching(true)
+    timerRef.current = setTimeout(() => setGlitching(false), 220)
+  }, [reduced])
+
+  const showJp = useCallback(() => {
+    triggerGlitch()
+    setJp(true)
+  }, [triggerGlitch])
+
+  const showEn = useCallback(() => {
+    triggerGlitch()
+    setJp(false)
+  }, [triggerGlitch])
+
+  const onTouchStart = useCallback(() => {
+    showJp()
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchTimerRef.current = setTimeout(showEn, 700)
+  }, [showEn, showJp])
+
+  useEffect(() => clearTimers, [clearTimers])
+
   return (
-    <svg
-      viewBox="0 0 600 320"
-      preserveAspectRatio="xMidYMid slice"
-      style={{ width: '100%', height: '100%', display: 'block' }}
+    <span
+      className={[
+        'k-hero-wordmark-kaze',
+        jp ? 'k-hero-wordmark-kaze--jp' : '',
+        glitching ? 'k-hero-wordmark-kaze--glitch' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onMouseEnter={showJp}
+      onMouseLeave={showEn}
+      onTouchStart={onTouchStart}
+      aria-label={jp ? WORDMARK_KAZE_JP : WORDMARK_KAZE}
     >
-      <defs>
-        <radialGradient id={`room-bg-${tone}`} cx="50%" cy="30%" r="80%">
-          <stop offset="0%" stopColor={isCold ? '#0e1113' : '#1a1613'} />
-          <stop offset="100%" stopColor="#020202" />
-        </radialGradient>
-        <radialGradient id={`room-lamp-${tone}`} cx="52%" cy="14%" r="45%">
-          <stop offset="0%" stopColor={isCold ? 'rgba(220,230,240,0.6)' : 'rgba(241,237,228,0.55)'} />
-          <stop offset="40%" stopColor={isCold ? 'rgba(220,230,240,0.14)' : 'rgba(241,237,228,0.12)'} />
-          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-        </radialGradient>
-        <radialGradient id={`room-red-${tone}`} cx="80%" cy="80%" r="60%">
-          <stop offset="0%" stopColor="rgba(224,26,23,0.18)" />
-          <stop offset="100%" stopColor="rgba(224,26,23,0)" />
-        </radialGradient>
-        <filter id={`room-grain-${tone}`}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed={isCold ? 12 : 8} />
-          <feColorMatrix values="0 0 0 0 1 0 0 0 0 0.98 0 0 0 0 0.95 0 0 0 0.4 0" />
-        </filter>
-      </defs>
-
-      <rect width="600" height="320" fill={`url(#room-bg-${tone})`} />
-      <rect width="600" height="320" fill={`url(#room-lamp-${tone})`} />
-      <rect width="600" height="320" fill={`url(#room-red-${tone})`} />
-
-      <g fill="#000">
-        <ellipse cx="80" cy="240" rx="55" ry="90" />
-        <ellipse cx="170" cy="230" rx="60" ry="100" />
-        <ellipse cx="260" cy="245" rx="50" ry="90" />
-        <ellipse cx="340" cy="228" rx="55" ry="102" />
-        <ellipse cx="420" cy="240" rx="45" ry="88" />
-        <ellipse cx="500" cy="232" rx="60" ry="98" />
-        <ellipse cx="575" cy="248" rx="50" ry="85" />
-      </g>
-      <g fill="rgba(241,237,228,0.16)">
-        <ellipse cx="170" cy="180" rx="22" ry="26" />
-        <ellipse cx="340" cy="176" rx="24" ry="28" />
-        <ellipse cx="500" cy="182" rx="22" ry="26" />
-      </g>
-
-      <g opacity="0.32">
-        {Array.from({ length: 160 }).map((_, i) => (
-          <line
-            key={i}
-            x1="0"
-            x2="600"
-            y1={i * 2}
-            y2={i * 2}
-            stroke="#000"
-            strokeWidth="0.6"
-          />
+      <span className="k-hero-wordmark-kaze-en" aria-hidden={jp}>
+        {WORDMARK_KAZE.split('').map((ch, i) => (
+          <span key={i} className="k-hero-wordmark-glyph">
+            {ch}
+          </span>
         ))}
-      </g>
-
-      <rect width="600" height="320" filter={`url(#room-grain-${tone})`} opacity="0.3" />
-    </svg>
+      </span>
+      <span className="k-hero-wordmark-kaze-jp" aria-hidden={!jp}>
+        {WORDMARK_KAZE_JP}
+      </span>
+    </span>
   )
 }
 
-// ─── wireframe globe (next-event decoration, mirrors reference 2) ──────────
-
-function WireGlobe() {
-  return (
-    <svg
-      viewBox="0 0 200 200"
-      preserveAspectRatio="xMidYMid meet"
-      style={{ width: '100%', height: '100%', display: 'block' }}
-      aria-hidden
-    >
-      <defs>
-        <radialGradient id="globe-bg" cx="35%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="rgba(224, 26, 23, 0.6)" />
-          <stop offset="65%" stopColor="rgba(139, 0, 0, 0.28)" />
-          <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
-        </radialGradient>
-        <filter id="globe-grain">
-          <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="5" />
-          <feColorMatrix values="0 0 0 0 0.9 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.4 0" />
-        </filter>
-      </defs>
-      <circle cx="100" cy="100" r="82" fill="url(#globe-bg)" />
-      {/* latitudes */}
-      {[0.18, 0.34, 0.5, 0.66, 0.82].map((r) => (
-        <ellipse
-          key={`lat-${r}`}
-          cx="100"
-          cy={100 + (r - 0.5) * 100}
-          rx="82"
-          ry={82 * (1 - Math.abs(0.5 - r) * 1.4)}
-          fill="none"
-          stroke="rgba(255, 200, 200, 0.45)"
-          strokeWidth="0.6"
-        />
-      ))}
-      {/* longitudes */}
-      {[0, 22.5, 45, 67.5, 90, 112.5, 135, 157.5].map((deg) => (
-        <ellipse
-          key={`lon-${deg}`}
-          cx="100"
-          cy="100"
-          rx={Math.max(0.5, Math.abs(82 * Math.cos((deg * Math.PI) / 180)))}
-          ry="82"
-          fill="none"
-          stroke="rgba(255, 200, 200, 0.35)"
-          strokeWidth="0.5"
-        />
-      ))}
-      <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(224, 26, 23, 0.75)" strokeWidth="1" />
-      <circle cx="100" cy="100" r="82" fill="url(#globe-bg)" opacity="0.35" filter="url(#globe-grain)" />
-      {/* corner ticks */}
-      {[
-        [8, 8, 20, 8],
-        [8, 8, 8, 20],
-        [192, 8, 180, 8],
-        [192, 8, 192, 20],
-        [8, 192, 20, 192],
-        [8, 192, 8, 180],
-        [192, 192, 180, 192],
-        [192, 192, 192, 180],
-      ].map((c, i) => (
-        <line
-          key={i}
-          x1={c[0]}
-          y1={c[1]}
-          x2={c[2]}
-          y2={c[3]}
-          stroke="rgba(224, 26, 23, 0.7)"
-          strokeWidth="1"
-        />
-      ))}
-    </svg>
-  )
-}
-
-// ─── wordmark w/ hover + idle glitch (KAMIKAZE) ────────────────────────────
-
-const WORDMARK = 'KAMIKAZE'
-const WORDMARK_GLITCH = 'K∆MIKΛZE'
-
-function Wordmark({ reduced }: { reduced: boolean }) {
-  const [text, setText] = useState(WORDMARK)
+function EnglishWordmark({ reduced }: { reduced: boolean }) {
+  const [kamiText, setKamiText] = useState(WORDMARK_KAMI)
   const [glitching, setGlitching] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const trigger = useCallback(() => {
     if (reduced) return
     if (timerRef.current) clearTimeout(timerRef.current)
-    setText(WORDMARK_GLITCH)
+    setKamiText(WORDMARK_KAMI_GLITCH)
     setGlitching(true)
     timerRef.current = setTimeout(() => {
-      setText(WORDMARK)
+      setKamiText(WORDMARK_KAMI)
       setGlitching(false)
     }, 220)
   }, [reduced])
@@ -523,264 +451,392 @@ function Wordmark({ reduced }: { reduced: boolean }) {
   }, [reduced, trigger])
 
   return (
-    <span
-      onMouseEnter={trigger}
-      className="k-hero-wordmark"
-      aria-label="KAMIKAZE"
-      style={{ cursor: 'default' }}
-    >
-      {text.split('').map((ch, i) => (
-        <span
-          key={i}
-          className="k-hero-wordmark-glyph"
-          style={{
-            transition: glitching
-              ? 'transform 50ms linear'
-              : 'transform 320ms ease-out',
-            transform: glitching
-              ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
-              : 'none',
-          }}
-        >
-          {ch}
-        </span>
-      ))}
+    <span className="k-hero-wordmark" aria-label="KAMIKAZE">
+      <span className="k-hero-wordmark-kami">
+        {kamiText.split('').map((ch, i) => (
+          <span
+            key={i}
+            className="k-hero-wordmark-glyph"
+            style={{
+              transition: glitching
+                ? 'transform 50ms linear'
+                : 'transform 320ms ease-out',
+              transform: glitching
+                ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
+                : 'none',
+            }}
+          >
+            {ch}
+          </span>
+        ))}
+      </span>
+      <WordmarkKazeSwap reduced={reduced} />
     </span>
   )
 }
 
-// ─── HERO panel — the 2nd (dark) reference ────────────────────────────────
+function TitleMark({ reduced }: { reduced: boolean }) {
+  return (
+    <>
+      <EnglishWordmark reduced={reduced} />
+      <div className="k-hero-brush" aria-hidden>
+        {CONSTANT.brushKanji.map((c, i) => (
+          <span key={i}>{c}</span>
+        ))}
+      </div>
+    </>
+  )
+}
 
-function PanelHero({ now }: { now: string }) {
-  const reduced = usePrefersReducedMotion()
-  const ref = useReveal<HTMLElement>()
-  const { t } = useFlavour()
+function HeroSunStack({ reduced }: { reduced: boolean }) {
+  const [hovered, setHovered] = useState(false)
+  const [glitching, setGlitching] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const kanjiLines = t(HOME_COPY.hero.kanjiStack).split('\n')
-  const taglineLines = t(HOME_COPY.hero.tagline).split('\n')
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+  }, [])
+
+  const triggerGlitch = useCallback(() => {
+    if (reduced) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setGlitching(true)
+    timerRef.current = setTimeout(() => setGlitching(false), 220)
+  }, [reduced])
+
+  const onEnter = useCallback(() => {
+    triggerGlitch()
+    setHovered(true)
+  }, [triggerGlitch])
+
+  const onLeave = useCallback(() => {
+    setHovered(false)
+    setGlitching(false)
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }, [])
+
+  const onTouchStart = useCallback(() => {
+    onEnter()
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchTimerRef.current = setTimeout(onLeave, 700)
+  }, [onEnter, onLeave])
+
+  useEffect(() => clearTimers, [clearTimers])
 
   return (
-    <section ref={ref} className="k-panel k-panel--void k-hero" data-panel="00">
-      {/* Top rail — brand / collective / city / menu */}
-      <header className="k-hero-topbar">
-        <span className="k-hero-brand">KAMIKAZE</span>
-        <span className="k-hero-topbar-sep" />
-        <span className="k-hero-topbar-mid">{t(HOME_COPY.topbar.collective)}</span>
-        <span className="k-hero-topbar-mid">{t(HOME_COPY.topbar.city)}</span>
-        <span className="k-hero-topbar-sep" />
-        <a href="/events" className="k-hero-menu" aria-label="Menu">
-          {t(HOME_COPY.topbar.menu)}
-          <span aria-hidden className="k-hero-menu-dot">⊕</span>
-        </a>
-      </header>
-
-      {/* Under-rail — red kanji stack (left), matching dark reference */}
-      <div className="k-hero-subrail">
-        <div className="k-hero-kanjistack" aria-hidden>
-          {kanjiLines.map((line, i) => (
-            <span key={i}>{line}</span>
-          ))}
+    <div
+      className={[
+        'k-hero-sun-stack',
+        hovered ? 'k-hero-sun-stack--hover' : '',
+        glitching ? 'k-hero-sun-stack--glitch' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-hidden
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      onTouchStart={onTouchStart}
+    >
+      <div className="k-hero-sun-bloom" />
+      <div className="k-hero-sun">
+        <div className="k-hero-sun-crt" />
+        <SunLogo3D reduced={reduced} hovered={hovered} />
+        <div className="k-hero-sun-kami">
+          <span className="k-hero-sun-kami-glyph">神</span>
+          <span className="k-hero-sun-kami-label">KAMI</span>
         </div>
       </div>
+      <div className="k-hero-sun-noise" />
+    </div>
+  )
+}
 
-      {/* Centrepiece — red rising-sun disc + wordmark + brush kanji overlay */}
-      <div className="k-hero-stage" aria-hidden>
-        <div className="k-hero-sun" />
-        <div className="k-hero-sun-noise" />
+// ─── HERO ─────────────────────────────────────────────────────────────────
+// Sitewide menu/topbar lives in AppShell (SiteMenu). Hero keeps a spacer so
+// the composition still clears the fixed topbar.
+
+function PanelHero() {
+  const reduced = usePrefersReducedMotion()
+  const ref = useReveal<HTMLElement>()
+  const taglineLines = HOME_COPY.hero.tagline.split('\n')
+
+  return (
+    <section
+      ref={ref}
+      className="k-panel k-panel--void k-hero"
+      data-panel="00"
+      data-reduced={reduced ? 'true' : undefined}
+    >
+      <div className="k-hero-topbar-spacer" aria-hidden />
+
+      <div className="k-hero-subrail">
+        <div className="k-hero-kanjistack" aria-hidden>
+          {HOME_COPY.hero.kanjiStack.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+        </div>
       </div>
 
       <div className="k-hero-mark">
-        <Wordmark reduced={reduced} />
-        <div className="k-hero-brush" aria-hidden>
-          {CONSTANT.brushKanji.map((c, i) => (
-            <span key={i}>{c}</span>
-          ))}
-        </div>
+        <HeroSunStack reduced={reduced} />
+        <TitleMark reduced={reduced} />
       </div>
 
-      {/* Mid-left: ENTER THE SIGNAL */}
-      <a href="/events" className="k-hero-enter">
-        <span className="k-hero-enter-label">{t(HOME_COPY.hero.enter)}</span>
-      </a>
-
-      {/* Bottom rail — SCROLL · waveform · slogan + EST */}
       <div className="k-hero-bottom">
-        <div className="k-hero-scroll">
-          <span className="k-hero-scroll-arrow" aria-hidden>
-            ↓
-          </span>
-          <span>{t(HOME_COPY.hero.scroll)}</span>
+        <div className="k-hero-scroll" aria-hidden>
+          <span className="k-hero-scroll-arrow">↓</span>
         </div>
-
-        <ScrollWaveform reduced={reduced} variant="hero" />
 
         <div className="k-hero-est">
           <div className="k-hero-tagline">
-            {taglineLines.map((line, i) => (
-              <span key={i}>{line}</span>
-            ))}
+            {taglineLines.map((line, i) =>
+              line === '' ? (
+                <span key={`gap-${i}`} className="k-hero-tagline-gap" />
+              ) : (
+                <span key={`${line}-${i}`}>{line}</span>
+              ),
+            )}
           </div>
-          <span className="k-hero-est-line">{t(HOME_COPY.hero.est)}</span>
+          <span className="k-hero-est-line">{HOME_COPY.hero.est}</span>
         </div>
       </div>
 
-      {/* Quiet time readout — not in the dark reference; kept tiny for vibe */}
-      <div className="k-hero-coords" aria-hidden={false}>
-        <span className="k-hero-coords-sub">{now || '····'}</span>
-      </div>
     </section>
   )
 }
 
-// ─── ABOUT (集団について) ──────────────────────────────────────────────────
+// ─── RESIDENTS ────────────────────────────────────────────────────────────
 
-function PanelAbout() {
-  const ref = useReveal<HTMLElement>()
-  const { t } = useFlavour()
-  const bodyLines = t(HOME_COPY.about.body).split('\n')
+function ResidentTagline({ en, ja }: { en: string; ja?: string }) {
+  const reduced = usePrefersReducedMotion()
+  const [jp, setJp] = useState(false)
+  const [glitching, setGlitching] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+  }, [])
+
+  const triggerGlitch = useCallback(() => {
+    if (reduced) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setGlitching(true)
+    timerRef.current = setTimeout(() => setGlitching(false), 220)
+  }, [reduced])
+
+  const showJp = useCallback(() => {
+    triggerGlitch()
+    setJp(true)
+  }, [triggerGlitch])
+
+  const showEn = useCallback(() => {
+    triggerGlitch()
+    setJp(false)
+  }, [triggerGlitch])
+
+  const onTouchStart = useCallback(() => {
+    showJp()
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchTimerRef.current = setTimeout(showEn, 700)
+  }, [showEn, showJp])
+
+  useEffect(() => clearTimers, [clearTimers])
+
+  if (!ja) {
+    return <p className="k-resident-tagline">{en}</p>
+  }
 
   return (
-    <section ref={ref} className="k-panel k-panel--warm" data-panel="01">
-      <div className="k-section">
-        <div className="k-section-index">
-          <span className="k-section-num">01</span>
-          <span className="k-section-dash" />
-        </div>
-
-        <div className="k-section-body">
-          <h2 className="k-section-heading">{t(HOME_COPY.about.label)}</h2>
-          <p className="k-section-copy">
-            {bodyLines.map((line, i) => (
-              <span key={i}>
-                {line}
-                {i < bodyLines.length - 1 ? <br /> : null}
-              </span>
-            ))}
-          </p>
-          <a href="/about" className="k-section-cta">
-            {t(HOME_COPY.about.cta)}
-          </a>
-        </div>
-
-        <div className="k-section-visual">
-          <div className="k-section-photo">
-            <RoomPhoto tone="warm" />
-            <span className="k-section-caption">{t(HOME_COPY.about.caption)}</span>
-          </div>
-        </div>
-
-        <div className="k-section-rail" aria-hidden>
-          <span>{t(HOME_COPY.about.frequency)} →</span>
-        </div>
-      </div>
-    </section>
+    <p
+      className={[
+        'k-resident-tagline',
+        'k-resident-tagline--swap',
+        jp ? 'k-resident-tagline--jp' : '',
+        glitching ? 'k-resident-tagline--glitch' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onMouseEnter={showJp}
+      onMouseLeave={showEn}
+      onTouchStart={onTouchStart}
+      aria-label={jp ? ja : en}
+    >
+      <span className="k-resident-tagline-en" aria-hidden={jp}>
+        {en}
+      </span>
+      <span className="k-resident-tagline-jp" aria-hidden={!jp}>
+        {ja}
+      </span>
+    </p>
   )
 }
-
-// ─── NEXT EVENT (次のイベント) ────────────────────────────────────────────
-
-function PanelNextEvent() {
-  const ref = useReveal<HTMLElement>()
-  const { t } = useFlavour()
-
-  return (
-    <section ref={ref} className="k-panel k-panel--void" data-panel="02">
-      <div className="k-section">
-        <div className="k-section-index">
-          <span className="k-section-num">02</span>
-          <span className="k-section-dash" />
-        </div>
-
-        <div className="k-section-body">
-          <span className="k-section-eyebrow">{t(HOME_COPY.event.label)}</span>
-          <h2 className="k-event-name">{CONSTANT.eventName}</h2>
-          <div className="k-event-date">{CONSTANT.eventDate}</div>
-          <div className="k-event-location">{t(HOME_COPY.event.location)}</div>
-          <a href="/events" className="k-section-cta">
-            {t(HOME_COPY.event.cta)}
-          </a>
-        </div>
-
-        <div className="k-section-visual">
-          <div className="k-globe-wrap">
-            <WireGlobe />
-            <span className="k-globe-tag">SC / 26</span>
-          </div>
-        </div>
-
-        <div className="k-section-rail" aria-hidden>
-          <span>{t(HOME_COPY.event.status)}</span>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── RESIDENTS (レジデント) ───────────────────────────────────────────────
 
 function PanelResidents() {
   const ref = useReveal<HTMLElement>()
-  const { t } = useFlavour()
 
   return (
-    <section ref={ref} className="k-panel k-panel--warm" data-panel="03">
+    <section ref={ref} className="k-panel k-panel--warm" data-panel="01">
       <div className="k-section k-section--residents">
         <div className="k-section-index">
-          <span className="k-section-num">03</span>
+          <span className="k-section-num">01</span>
           <span className="k-section-eyebrow k-section-eyebrow--inline">
-            {t(HOME_COPY.residents.label)}
+            {HOME_COPY.residents.label}
           </span>
         </div>
 
-        <div className="k-residents-grid">
-          {CONSTANT.residents.map((r, i) => (
-            <a key={r.name} href={r.href} className="k-resident-card">
-              <div className="k-resident-portrait">
-                <PortraitSilhouette variant={i} />
-                <span className="k-resident-cross" aria-hidden>+</span>
+        <div className="k-residents-layout">
+          {CONSTANT.residents.map((r, i) => {
+            const slug = r.href.split('/').pop()
+            const artist = slug ? getArtistBySlug(slug) : undefined
+
+            return (
+              <div key={r.name} className="k-residents-row">
+                <a href={getAssetPath(r.href)} className="k-resident-card">
+                  <div
+                    className={[
+                      'k-resident-portrait',
+                      slug === 'ibliiiz' ? 'k-resident-portrait--glitch' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {artist?.photo ? (
+                      <img
+                        src={getAssetPath(artist.photo)}
+                        alt=""
+                        className="k-resident-photo"
+                      />
+                    ) : (
+                      <PortraitSilhouette variant={i} />
+                    )}
+                    <span className="k-resident-cross" aria-hidden>
+                      +
+                    </span>
+                  </div>
+                  <div className="k-resident-name">{r.name}</div>
+                  <div className="k-resident-role">
+                    {HOME_COPY.residents.role(i + 1)}
+                  </div>
+                </a>
+
+                {artist && (
+                  <div className="k-resident-writeup">
+                    <ResidentTagline en={artist.tagline} ja={artist.taglineJa} />
+                    <p className="k-resident-bio">{artist.bio}</p>
+                  </div>
+                )}
               </div>
-              <div className="k-resident-name">{r.name}</div>
-              <div className="k-resident-role">{t(HOME_COPY.residents.role(i + 1))}</div>
-            </a>
-          ))}
+            )
+          })}
         </div>
 
         <div className="k-section-rail" aria-hidden>
-          <a href="/artists">{t(HOME_COPY.residents.viewAll)}</a>
+          <a href={getAssetPath('/artists')}>{HOME_COPY.residents.viewAll}</a>
         </div>
       </div>
     </section>
   )
 }
 
-// ─── SIGIL (印) closer ────────────────────────────────────────────────────
+// ─── SIGIL ────────────────────────────────────────────────────────────────
+
+const SIGIL_DARK_EN = 'DARK.'
+const SIGIL_DARK_JP = '闇。'
+
+function SigilDarkWord() {
+  const reduced = usePrefersReducedMotion()
+  const [jp, setJp] = useState(false)
+  const [glitching, setGlitching] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+  }, [])
+
+  const triggerGlitch = useCallback(() => {
+    if (reduced) return
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setGlitching(true)
+    timerRef.current = setTimeout(() => setGlitching(false), 220)
+  }, [reduced])
+
+  const showJp = useCallback(() => {
+    triggerGlitch()
+    setJp(true)
+  }, [triggerGlitch])
+
+  const showEn = useCallback(() => {
+    triggerGlitch()
+    setJp(false)
+  }, [triggerGlitch])
+
+  const onTouchStart = useCallback(() => {
+    showJp()
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    touchTimerRef.current = setTimeout(showEn, 700)
+  }, [showEn, showJp])
+
+  useEffect(() => clearTimers, [clearTimers])
+
+  return (
+    <span
+      className={[
+        'k-sigil-title-three',
+        'k-sigil-dark',
+        jp ? 'k-sigil-dark--jp' : '',
+        glitching ? 'k-sigil-dark--glitch' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onMouseEnter={showJp}
+      onMouseLeave={showEn}
+      onTouchStart={onTouchStart}
+      aria-label={jp ? SIGIL_DARK_JP : SIGIL_DARK_EN}
+    >
+      <span className="k-sigil-dark-en" aria-hidden={jp}>
+        {SIGIL_DARK_EN}
+      </span>
+      <span className="k-sigil-dark-jp" aria-hidden={!jp}>
+        {SIGIL_DARK_JP}
+      </span>
+    </span>
+  )
+}
 
 function PanelSigil({ now }: { now: string }) {
   const ref = useReveal<HTMLElement>()
-  const { t } = useFlavour()
-  const headingLines = t(HOME_COPY.sigil.heading).split('\n')
+  const headingLines = HOME_COPY.sigil.heading.split('\n')
 
   return (
-    <section ref={ref} className="k-panel k-panel--void k-panel--sigil" data-panel="04">
+    <section ref={ref} className="k-panel k-panel--void k-panel--sigil" data-panel="02">
       <div className="k-sigil-eyebrow">
-        <span>{t(HOME_COPY.sigil.number)}</span>
-        <span className="k-sigil-num">04</span>
-        <span>{t(HOME_COPY.sigil.label)}</span>
+        <span className="k-sigil-num">02</span>
+        <span>{HOME_COPY.sigil.label}</span>
       </div>
 
       <h2 className="k-sigil-title">
-        {headingLines.map((line, i) => (
-          <span key={i} className={i === 1 ? 'k-sigil-title-two' : ''}>
-            {line}
-          </span>
-        ))}
+        {headingLines.map((line, i) =>
+          i === 2 ? (
+            <SigilDarkWord key={line} />
+          ) : (
+            <span key={line} className={i === 1 ? 'k-sigil-title-two' : ''}>
+              {line}
+            </span>
+          ),
+        )}
       </h2>
 
       <div className="k-sigil-footerrow">
         <div className="k-coord">
           <div className="k-coord-line">{CONSTANT.coords.lat}</div>
           <div className="k-coord-line">{CONSTANT.coords.lon}</div>
-          <div className="k-coord-sub">{t(HOME_COPY.hero.coordsCity)}</div>
+          <div className="k-coord-sub">{HOME_COPY.sigil.zone}</div>
           <div className="k-coord-sub">{now || '····'}</div>
         </div>
 
@@ -794,7 +850,7 @@ function PanelSigil({ now }: { now: string }) {
               }}
             />
           ))}
-          <div className="k-barcode-num">{t(HOME_COPY.sigil.caption)}</div>
+          <div className="k-barcode-num">{HOME_COPY.sigil.caption}</div>
         </div>
 
         <div className="k-hanko" aria-label="hanko stamp">
@@ -842,66 +898,69 @@ function PanelSigil({ now }: { now: string }) {
 
 // ─── fixed textures ────────────────────────────────────────────────────────
 
+const PAPER_STYLE: CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  pointerEvents: 'none',
+  zIndex: 21,
+  opacity: 0.06,
+  mixBlendMode: 'soft-light',
+  background:
+    'radial-gradient(ellipse 90% 70% at 50% 40%, rgba(241,237,228,0.18) 0%, transparent 70%), #0a0908',
+}
+
 const GRAIN_STYLE: CSSProperties = {
   position: 'fixed',
   inset: 0,
   pointerEvents: 'none',
   zIndex: 25,
-  opacity: 0.3,
+  opacity: 0.07,
   mixBlendMode: 'overlay',
   backgroundImage:
     "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.55' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.8 0'/></filter><rect width='320' height='320' filter='url(%23n)'/></svg>\")",
-  backgroundSize: '320px 320px',
+  backgroundSize: '280px 280px',
 }
 
-const RED_BLEED_STYLE: CSSProperties = {
+const DUST_STYLE: CSSProperties = {
   position: 'fixed',
   inset: 0,
   pointerEvents: 'none',
-  zIndex: 22,
-  background:
-    'radial-gradient(ellipse 60% 40% at 0% 0%, rgba(139, 0, 0, 0.12) 0%, transparent 55%), radial-gradient(ellipse 60% 40% at 100% 100%, rgba(139, 0, 0, 0.10) 0%, transparent 55%)',
+  zIndex: 24,
+  opacity: 0.05,
   mixBlendMode: 'screen',
+  backgroundImage:
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='d'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/></filter><rect width='400' height='400' filter='url(%23d)' opacity='0.35'/></svg>\")",
+  backgroundSize: '400px 400px',
+}
+
+const SCRATCH_STYLE: CSSProperties = {
+  position: 'fixed',
+  inset: 0,
+  pointerEvents: 'none',
+  zIndex: 23,
+  opacity: 0.045,
+  mixBlendMode: 'overlay',
+  background:
+    'linear-gradient(118deg, transparent 0%, transparent 42%, rgba(241,237,228,0.35) 42.2%, transparent 42.5%, transparent 61%, rgba(241,237,228,0.2) 61.15%, transparent 61.4%), linear-gradient(12deg, transparent 70%, rgba(0,0,0,0.4) 70.3%, transparent 70.6%)',
 }
 
 const VIGNETTE_STYLE: CSSProperties = {
   position: 'fixed',
   inset: 0,
   pointerEvents: 'none',
-  zIndex: 24,
+  zIndex: 26,
   background:
-    'radial-gradient(ellipse 120% 90% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%)',
+    'radial-gradient(ellipse 115% 85% at 50% 45%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)',
   mixBlendMode: 'multiply',
-}
-
-const FOLD_STYLE: CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  pointerEvents: 'none',
-  zIndex: 23,
-  background:
-    'linear-gradient(180deg, rgba(0,0,0,0) 46%, rgba(0,0,0,0.28) 50%, rgba(0,0,0,0) 54%), linear-gradient(90deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.22) 33%, rgba(0,0,0,0) 36%)',
-  mixBlendMode: 'multiply',
-  opacity: 0.55,
-}
-
-const SCAN_STYLE: CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  pointerEvents: 'none',
-  zIndex: 23,
-  backgroundImage:
-    'repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 3px)',
-  mixBlendMode: 'multiply',
-  opacity: 0.28,
+  opacity: 0.85,
 }
 
 function PosterTextures() {
   return (
     <>
-      <div style={RED_BLEED_STYLE} aria-hidden />
-      <div style={SCAN_STYLE} aria-hidden />
-      <div style={FOLD_STYLE} aria-hidden />
+      <div style={PAPER_STYLE} aria-hidden />
+      <div style={SCRATCH_STYLE} aria-hidden />
+      <div style={DUST_STYLE} aria-hidden />
       <div style={GRAIN_STYLE} aria-hidden />
       <div style={VIGNETTE_STYLE} aria-hidden />
     </>
@@ -914,7 +973,6 @@ function PosterHomepageContent() {
   const reduced = usePrefersReducedMotion()
   useScrollVelocity(reduced)
   const now = useNowUTC()
-  const { flavour } = useFlavour()
 
   useEffect(() => {
     document.body.classList.add('k-home-body')
@@ -922,16 +980,10 @@ function PosterHomepageContent() {
   }, [])
 
   return (
-    <div
-      className="k-home"
-      data-reduced={reduced ? 'true' : 'false'}
-      data-flavour={flavour}
-    >
+    <div className="k-home" data-reduced={reduced ? 'true' : 'false'}>
       <PosterTextures />
 
-      <PanelHero now={now} />
-      <PanelAbout />
-      <PanelNextEvent />
+      <PanelHero />
       <PanelResidents />
       <PanelSigil now={now} />
 
@@ -944,11 +996,7 @@ function PosterHomepageContent() {
 }
 
 export function PosterHomepage() {
-  return (
-    <FlavourProvider>
-      <PosterHomepageContent />
-    </FlavourProvider>
-  )
+  return <PosterHomepageContent />
 }
 
 export default PosterHomepage
@@ -962,13 +1010,14 @@ function PosterStyles() {
         --k-void: #050505;
         --k-warm: #0d0b0a;
         --k-bone: #f1ede4;
+        --k-bone-print: #e4dfd4;
         --k-bone-2: rgba(241, 237, 228, 0.7);
         --k-bone-3: rgba(241, 237, 228, 0.45);
-        --k-red: #e01a17;
-        --k-red-deep: #b3140f;
-        --k-red-hanko: #b31212;
-        --k-hair: rgba(241, 237, 228, 0.16);
-        --k-waveform: rgba(241, 237, 228, 0.5);
+        --k-red: #b30e12;
+        --k-red-deep: #8c1114;
+        --k-red-hanko: #a61216;
+        --k-hair: rgba(241, 237, 228, 0.1);
+        --k-waveform: rgba(241, 237, 228, 0.35);
       }
 
       body.k-home-body {
@@ -1001,11 +1050,8 @@ function PosterStyles() {
         font-family: 'IBM Plex Mono', ui-monospace, monospace;
         font-size: 15px;
         line-height: 1.55;
-      }
-
-      /* When JP is active, prefer Noto Sans JP so kanji + mono UI sit together. */
-      .k-home[data-flavour='jp'] {
-        font-family: 'IBM Plex Mono', 'Noto Sans JP', ui-monospace, monospace;
+        overflow-x: clip;
+        max-width: 100vw;
       }
 
       .k-panel {
@@ -1042,76 +1088,43 @@ function PosterStyles() {
       /* ── HERO ─────────────────────────────────────────────────────── */
 
       .k-hero {
-        display: grid;
-        grid-template-rows: auto auto 1fr auto;
+        position: relative;
+        display: block;
         min-height: 100svh;
-        padding-bottom: clamp(32px, 5vh, 72px);
-        gap: clamp(12px, 2vh, 24px);
+        min-height: 100dvh;
+        overflow: visible;
+      }
+      .k-panel.k-hero {
+        overflow: visible;
       }
 
-      .k-hero-topbar {
-        display: flex;
-        align-items: center;
-        gap: clamp(16px, 3vw, 40px);
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 11px;
-        letter-spacing: 0.32em;
-        text-transform: uppercase;
-        color: var(--k-bone-2);
-        border-bottom: 1px solid var(--k-hair);
-        padding-bottom: 12px;
+      /* Clears the fixed SiteMenu topbar (mounted in AppShell) */
+      .k-hero-topbar-spacer {
+        height: 1.25rem;
+        pointer-events: none;
       }
-      .k-hero-brand {
-        font-family: 'Archivo', 'Archivo Black', system-ui, sans-serif;
-        font-weight: 900;
-        letter-spacing: 0.02em;
-        color: var(--k-bone);
-        font-size: 15px;
+
+      /* logo.glb canvas — oversized so radial spikes aren't WebGL-clipped */
+      .k-hero-sun-logo {
+        position: absolute;
+        inset: -15%;
+        z-index: 2;
+        overflow: visible;
+        pointer-events: none;
       }
-      .k-hero-topbar-sep {
-        flex: 1 1 auto;
-        height: 1px;
-        background: var(--k-hair);
-      }
-      .k-hero-topbar-mid {
-        white-space: nowrap;
-      }
-      .k-home[data-flavour='jp'] .k-hero-topbar-mid {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.18em;
-      }
-      .k-hero-menu {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--k-bone);
-        text-decoration: none;
-        transition: color 200ms ease;
-      }
-      .k-hero-menu:hover {
-        color: var(--k-red);
-      }
-      .k-hero-menu-dot {
-        display: inline-block;
-        border: 1px solid currentColor;
-        border-radius: 50%;
-        width: 14px;
-        height: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 8px;
-      }
-      .k-home[data-flavour='jp'] .k-hero-menu {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.18em;
+      .k-hero-sun-logo canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
       }
 
       .k-hero-subrail {
+        position: relative;
+        z-index: 5;
         display: flex;
         justify-content: flex-start;
         align-items: flex-start;
-        z-index: 3;
+        margin-top: 14px;
       }
       .k-hero-kanjistack {
         display: flex;
@@ -1128,73 +1141,341 @@ function PosterStyles() {
         display: block;
       }
 
-      /* Centrepiece — red rising-sun disc positioned behind the wordmark */
-      .k-hero-stage {
+      /* Centrepiece — red sun sits behind the wordmark, may extend past the mark box */
+      .k-hero-sun-stack {
         position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-        z-index: 1;
-      }
-      .k-hero-sun {
-        position: absolute;
-        top: 50%;
         left: 50%;
+        top: 38%;
+        z-index: 0;
+        width: clamp(380px, 72vmin, 900px);
+        height: clamp(380px, 72vmin, 900px);
         transform: translate(-50%, -50%);
-        width: clamp(340px, 62vmin, 780px);
-        height: clamp(340px, 62vmin, 780px);
-        border-radius: 50%;
-        background:
-          radial-gradient(circle at 42% 38%, #ff2a1d 0%, #d40b06 45%, #7c0300 82%, #3c0100 100%);
-        box-shadow: 0 0 90px rgba(224, 26, 23, 0.35), inset 0 0 120px rgba(0, 0, 0, 0.35);
+        pointer-events: auto;
+        overflow: visible;
+        cursor: default;
       }
+      .k-hero-sun-bloom {
+        position: absolute;
+        inset: -5%;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(179, 14, 18, 0.075) 0%,
+          rgba(179, 14, 18, 0.04) 40%,
+          transparent 68%
+        );
+      }
+      .k-hero-sun,
       .k-hero-sun-noise {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: clamp(340px, 62vmin, 780px);
-        height: clamp(340px, 62vmin, 780px);
+        inset: 0;
         border-radius: 50%;
+      }
+      .k-hero-sun {
+        background:
+          radial-gradient(circle at 40% 36%, #d41a1a 0%, #b30e12 38%, #7a0c10 72%, #3a0507 100%);
+        box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.45);
+        overflow: visible;
+        animation: k-sun-breathe 12s ease-in-out infinite;
+        transition:
+          filter 280ms ease,
+          box-shadow 280ms ease;
+      }
+      .k-hero-sun-stack--hover .k-hero-sun {
+        filter: brightness(1.06);
+        box-shadow:
+          inset 0 0 120px rgba(0, 0, 0, 0.38),
+          0 0 72px rgba(179, 14, 18, 0.22);
+      }
+      .k-hero-sun-kami {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.08em;
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(0.97);
+        transition:
+          opacity 280ms ease,
+          transform 320ms ease;
+      }
+      .k-hero-sun-stack--hover .k-hero-sun-kami {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .k-hero-sun-kami-glyph {
+        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+        font-weight: 900;
+        font-size: clamp(96px, 22vmin, 280px);
+        line-height: 0.92;
+        color: rgba(232, 224, 210, 0.22);
+        text-shadow:
+          0 0 40px rgba(224, 26, 23, 0.35),
+          2px 0 0 rgba(224, 26, 23, 0.45),
+          -2px 0 0 rgba(0, 255, 255, 0.18);
+        mix-blend-mode: screen;
+        letter-spacing: -0.04em;
+      }
+      .k-hero-sun-kami-label {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: clamp(9px, 1.1vmin, 12px);
+        letter-spacing: 0.42em;
+        text-indent: 0.42em;
+        color: rgba(232, 224, 210, 0.38);
+        text-transform: uppercase;
+      }
+      .k-hero-sun-stack--glitch .k-hero-sun-kami-glyph {
+        animation: k-hero-sun-kami-glitch 220ms steps(4) forwards;
+      }
+      .k-hero-sun-stack--glitch .k-hero-sun-kami::after {
+        content: '';
+        position: absolute;
+        inset: 18% 12%;
+        pointer-events: none;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.24) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: k-sigil-dark-scan 220ms steps(2);
+      }
+      @keyframes k-hero-sun-kami-glitch {
+        0%,
+        100% {
+          transform: translate(0);
+          text-shadow:
+            0 0 40px rgba(224, 26, 23, 0.35),
+            2px 0 0 rgba(224, 26, 23, 0.45),
+            -2px 0 0 rgba(0, 255, 255, 0.18);
+          clip-path: inset(0);
+        }
+        25% {
+          transform: translate(-4px, 2px) skewX(2deg);
+          text-shadow:
+            -5px 0 rgba(224, 26, 23, 0.85),
+            5px 0 rgba(0, 255, 255, 0.55);
+        }
+        50% {
+          transform: translate(3px, -2px) skewX(-2deg);
+          clip-path: inset(36% 0 42% 0);
+          text-shadow:
+            4px 0 rgba(224, 26, 23, 0.75),
+            -4px 0 rgba(0, 255, 255, 0.65);
+        }
+        75% {
+          transform: translate(-2px, 1px);
+          text-shadow:
+            -3px 0 rgba(255, 0, 0, 0.55),
+            3px 0 rgba(0, 255, 255, 0.45);
+        }
+      }
+      .k-hero-mark:has(.k-hero-sun-stack--hover) .k-hero-brush {
+        opacity: 0.58;
+        transition: opacity 280ms ease;
+      }
+      .k-hero-mark:has(.k-hero-sun-stack--hover) .k-hero-brush span:first-child {
+        opacity: 1;
+        color: #040202;
+        text-shadow:
+          2px 0 0 rgba(224, 26, 23, 0.35),
+          -1px 1px 0 rgba(0, 0, 0, 0.7);
+      }
+      .k-hero[data-reduced='true'] .k-hero-sun-stack--glitch .k-hero-sun-kami-glyph {
+        animation: none;
+      }
+      .k-hero[data-reduced='true'] .k-hero-sun-stack--glitch .k-hero-sun-kami::after {
+        display: none;
+      }
+      .k-hero[data-reduced='true'] .k-hero-sun-stack--hover .k-hero-sun {
+        filter: brightness(1.04);
+      }
+      @media (hover: none) {
+        .k-hero-sun-stack:active .k-hero-sun-kami {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .k-hero-sun-crt {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        border-radius: 50%;
+        background-image: repeating-linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0.22) 0px,
+          rgba(0, 0, 0, 0.22) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        mix-blend-mode: multiply;
+        opacity: 0.55;
+        animation: k-crt-drift 18s linear infinite;
+        pointer-events: none;
+      }
+      .k-hero-sun-noise {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/></filter><rect width='320' height='320' filter='url(%23n)'/></svg>");
         background-size: 260px 260px;
         mix-blend-mode: multiply;
-        opacity: 0.5;
+        opacity: 0.45;
+        animation: k-sun-breathe 12s ease-in-out infinite;
+      }
+      @keyframes k-sun-breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.018); }
+      }
+      @keyframes k-crt-drift {
+        0% { background-position: 0 0; }
+        100% { background-position: 0 24px; }
+      }
+      .k-hero[data-reduced='true'] .k-hero-sun,
+      .k-hero[data-reduced='true'] .k-hero-sun-noise,
+      .k-hero[data-reduced='true'] .k-hero-sun-crt {
+        animation: none;
       }
 
       .k-hero-mark {
-        position: relative;
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        transform: translate(-50%, -50%);
         z-index: 2;
         display: grid;
         place-items: center;
-        align-self: center;
-        justify-self: center;
         text-align: center;
-        width: min(100%, 92vw);
-        max-width: 100%;
+        width: 115vw;
+        max-width: none;
         overflow: visible;
+        box-sizing: border-box;
+        pointer-events: auto;
+      }
+      .k-hero-mark > .k-hero-wordmark,
+      .k-hero-mark > .k-hero-brush {
+        position: relative;
+        z-index: 1;
       }
       .k-hero-wordmark {
+        position: relative;
         display: block;
         font-family: 'Archivo', 'Archivo Black', system-ui, sans-serif;
         font-weight: 900;
         font-stretch: 125%;
         letter-spacing: -0.055em;
-        color: var(--k-bone);
+        color: var(--k-bone-print);
         text-transform: uppercase;
         line-height: 0.86;
-        /* Fit inside the panel — never spill past the viewport */
-        font-size: clamp(48px, 12.5vw, 210px);
-        text-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        /* Poster crop — wider than the viewport */
+        font-size: clamp(52px, 15vw, 260px);
+        text-shadow:
+          0 0 1px rgba(10, 8, 6, 0.55),
+          0.5px 0 0 rgba(10, 8, 6, 0.35),
+          -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+          0 10px 36px rgba(0, 0, 0, 0.55);
         white-space: nowrap;
         grid-area: 1 / 1;
-        max-width: 100%;
+        overflow: visible;
+        pointer-events: none;
       }
-      .k-hero-wordmark-glyph { display: inline-block; }
+      .k-hero-wordmark::after {
+        content: '';
+        position: absolute;
+        inset: -4% -1%;
+        pointer-events: none;
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            rgba(10, 8, 6, 0.14) 0px,
+            rgba(10, 8, 6, 0.14) 1px,
+            transparent 1px,
+            transparent 3px
+          ),
+          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.05 0 0 0 0 0.04 0 0 0 0 0.03 0 0 0 0.55 0'/></filter><rect width='180' height='180' filter='url(%23g)'/></svg>");
+        background-size: auto, 160px 160px;
+        mix-blend-mode: multiply;
+        opacity: 0.45;
+      }
+      .k-hero-wordmark-glyph {
+        display: inline-block;
+        pointer-events: auto;
+      }
 
-      /* Black brush kanji — sits ON TOP of the wordmark and the red disc */
+      /* KAZE segment — hover/touch EN ↔ 風 (grid stack, sigil pattern) */
+      .k-hero-wordmark-kami {
+        display: inline;
+      }
+      .k-hero-wordmark-kaze {
+        position: relative;
+        display: inline-grid;
+        cursor: default;
+        isolation: isolate;
+        vertical-align: baseline;
+      }
+      .k-hero-wordmark-kaze-en,
+      .k-hero-wordmark-kaze-jp {
+        grid-area: 1 / 1;
+        transition: opacity 90ms ease;
+      }
+      .k-hero-wordmark-kaze-en {
+        display: inline;
+      }
+      .k-hero-wordmark-kaze-jp {
+        opacity: 0;
+        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+        font-weight: 900;
+        text-transform: none;
+        letter-spacing: -0.06em;
+        font-stretch: normal;
+        font-size: 2.35em;
+        line-height: 0.86;
+        place-self: center;
+        pointer-events: none;
+      }
+      .k-hero-wordmark-kaze--jp .k-hero-wordmark-kaze-en {
+        opacity: 0;
+      }
+      .k-hero-wordmark-kaze--jp .k-hero-wordmark-kaze-jp {
+        opacity: 1;
+      }
+      .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-en,
+      .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-jp {
+        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      }
+      .k-hero-wordmark-kaze--glitch::after {
+        content: '';
+        position: absolute;
+        inset: -4% -2%;
+        pointer-events: none;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.22) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: k-sigil-dark-scan 220ms steps(2);
+      }
+      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-en,
+      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-jp {
+        animation: none;
+      }
+      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch::after {
+        display: none;
+      }
+      @media (hover: none) {
+        .k-hero-wordmark-kaze:active .k-hero-wordmark-kaze-en {
+          opacity: 0;
+        }
+        .k-hero-wordmark-kaze:active .k-hero-wordmark-kaze-jp {
+          opacity: 1;
+        }
+      }
+
+      /* Black brush kanji — stamp over the poster */
       .k-hero-brush {
         grid-area: 1 / 1;
         display: flex;
@@ -1204,16 +1485,18 @@ function PosterStyles() {
         font-family: 'Noto Serif JP', 'Yu Mincho', serif;
         font-weight: 900;
         color: #060404;
-        font-size: clamp(90px, 22vmin, 280px);
-        line-height: 0.86;
+        font-size: clamp(140px, 34vmin, 440px);
+        line-height: 0.82;
         pointer-events: none;
         transform: translateX(-2%);
         letter-spacing: -0.02em;
-        filter: contrast(1.4);
+        /* Keep light so the sun modal can read through the stamp */
+        opacity: 0.42;
+        filter: contrast(1.35);
       }
       .k-hero-brush span {
         display: block;
-        text-shadow: 2px 0 0 rgba(0, 0, 0, 0.75), -1px 1px 0 rgba(0, 0, 0, 0.7);
+        text-shadow: 2px 0 0 rgba(0, 0, 0, 0.7), -1px 1px 0 rgba(0, 0, 0, 0.65);
         transform: skewY(-2deg);
       }
       .k-hero-brush span:first-child {
@@ -1223,134 +1506,60 @@ function PosterStyles() {
         transform: skewY(-1deg) translateX(-6%);
       }
 
-      .k-hero-enter {
+      .k-hero-bottom {
         position: absolute;
         left: clamp(24px, 4vw, 64px);
-        top: 46%;
-        transform: translateY(-50%);
-        color: var(--k-bone);
-        text-decoration: none;
-        z-index: 4;
-      }
-      .k-hero-enter-label {
-        display: inline-block;
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 12px;
-        letter-spacing: 0.32em;
-        text-transform: uppercase;
-        padding: 10px 0;
-        border-top: 1px solid var(--k-bone-3);
-        border-bottom: 1px solid var(--k-bone-3);
-        max-width: 220px;
-        transition: color 200ms ease, border-color 200ms ease;
-      }
-      .k-home[data-flavour='jp'] .k-hero-enter-label {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.14em;
-        text-transform: none;
-      }
-      .k-hero-enter:hover .k-hero-enter-label {
-        color: var(--k-red);
-        border-color: var(--k-red);
-      }
-
-      .k-hero-bottom {
+        right: clamp(24px, 4vw, 64px);
+        bottom: clamp(24px, 4vh, 48px);
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto 1fr;
         align-items: end;
         gap: clamp(16px, 3vw, 40px);
-        margin-top: auto;
-        z-index: 4;
+        z-index: 5;
       }
       .k-hero-scroll {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
         font-family: 'IBM Plex Mono', monospace;
-        font-size: 11px;
-        letter-spacing: 0.32em;
-        text-transform: uppercase;
-        color: var(--k-bone-2);
-      }
-      .k-home[data-flavour='jp'] .k-hero-scroll {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.16em;
-        text-transform: none;
+        color: var(--k-bone-3);
       }
       .k-hero-scroll-arrow {
         color: var(--k-red);
-        font-size: 14px;
+        font-size: 16px;
         line-height: 1;
       }
       .k-hero-est {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 10px;
+        gap: 14px;
         text-align: right;
         color: var(--k-bone-2);
-        max-width: min(36ch, 42vw);
+        max-width: 18ch;
+        justify-self: end;
       }
       .k-hero-tagline {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 0;
         text-align: right;
         font-family: 'IBM Plex Mono', monospace;
-        font-size: clamp(11px, 1.1vw, 14px);
-        letter-spacing: 0.14em;
+        font-size: clamp(10px, 1vw, 13px);
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--k-bone);
+        color: var(--k-bone-2);
+        line-height: 1.35;
       }
-      .k-home[data-flavour='jp'] .k-hero-tagline {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.08em;
-        text-transform: none;
-        font-size: clamp(12px, 1.2vw, 15px);
+      .k-hero-tagline-gap {
+        display: block;
+        height: 0.55em;
       }
       .k-hero-est-line {
         font-family: 'IBM Plex Mono', monospace;
-        font-size: 11px;
-        letter-spacing: 0.32em;
-        text-transform: uppercase;
-        color: var(--k-bone-2);
-      }
-      .k-home[data-flavour='jp'] .k-hero-est-line {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.16em;
-        text-transform: none;
-      }
-
-      .k-hero-waveform {
-        position: relative;
-        height: 40px;
-      }
-      .k-hero-waveform-tick {
-        position: absolute;
-        top: 12px;
-        width: 1px;
-        height: 16px;
-        background: var(--k-red);
-      }
-
-      .k-hero-coords {
-        position: absolute;
-        right: clamp(24px, 4vw, 64px);
-        top: clamp(72px, 12vh, 120px);
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 10px;
-        letter-spacing: 0.22em;
-        color: var(--k-bone-3);
-        z-index: 3;
-        text-align: right;
-      }
-      .k-hero-coords-sub {
         font-size: 10px;
         letter-spacing: 0.28em;
-        opacity: 0.55;
+        text-transform: uppercase;
+        color: var(--k-bone-3);
       }
 
       /* ── SCROLL SECTIONS (about / event / residents) ─────────────── */
@@ -1414,13 +1623,6 @@ function PosterStyles() {
         line-height: 1.15;
         margin: 0;
       }
-      .k-home[data-flavour='en'] .k-section-heading {
-        font-family: 'Archivo', system-ui, sans-serif;
-        font-weight: 900;
-        font-stretch: 125%;
-        text-transform: uppercase;
-        letter-spacing: -0.02em;
-      }
       .k-section-copy {
         font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
         font-size: clamp(13px, 1.15vw, 16px);
@@ -1428,11 +1630,6 @@ function PosterStyles() {
         color: var(--k-bone-2);
         max-width: 40ch;
         margin: 0;
-      }
-      .k-home[data-flavour='en'] .k-section-copy {
-        font-family: 'IBM Plex Mono', monospace;
-        line-height: 1.7;
-        text-transform: none;
       }
       .k-section-cta {
         display: inline-flex;
@@ -1447,12 +1644,6 @@ function PosterStyles() {
         padding: 6px 0;
         width: fit-content;
         transition: color 200ms ease, border-color 200ms ease;
-      }
-      .k-home[data-flavour='en'] .k-section-cta {
-        font-family: 'IBM Plex Mono', monospace;
-        text-transform: uppercase;
-        letter-spacing: 0.3em;
-        font-size: 11px;
       }
       .k-section-cta:hover {
         color: var(--k-red);
@@ -1500,11 +1691,6 @@ function PosterStyles() {
         display: flex;
         align-items: flex-start;
       }
-      .k-home[data-flavour='jp'] .k-section-rail {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        text-transform: none;
-        letter-spacing: 0.2em;
-      }
       .k-section-rail a {
         color: inherit;
         text-decoration: none;
@@ -1538,10 +1724,6 @@ function PosterStyles() {
         color: var(--k-bone-2);
         border-top: 1px solid var(--k-hair);
         padding-top: 8px;
-      }
-      .k-home[data-flavour='jp'] .k-event-location {
-        text-transform: none;
-        letter-spacing: 0.14em;
       }
 
       /* Wireframe globe container */
@@ -1581,17 +1763,19 @@ function PosterStyles() {
         align-items: center;
         gap: 12px;
       }
-      .k-residents-grid {
+      .k-residents-layout {
         grid-column: 2 / 3;
         grid-row: 2 / 3;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(24px, 4vh, 48px);
         margin-top: clamp(24px, 4vh, 48px);
       }
-      .k-section--residents .k-section-rail {
-        grid-column: 3 / 4;
-        grid-row: 1 / 4;
+      .k-residents-row {
+        display: grid;
+        grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+        gap: clamp(20px, 3vw, 40px);
+        align-items: start;
       }
       .k-resident-card {
         display: flex;
@@ -1610,6 +1794,12 @@ function PosterStyles() {
         overflow: hidden;
         filter: contrast(1.15) grayscale(1) brightness(0.95);
       }
+      .k-resident-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
       .k-resident-portrait::after {
         content: '';
         position: absolute;
@@ -1619,6 +1809,96 @@ function PosterStyles() {
           repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 2px, transparent 2px 4px);
         mix-blend-mode: multiply;
         pointer-events: none;
+      }
+      .k-resident-portrait--glitch {
+        isolation: isolate;
+      }
+      .k-resident-portrait--glitch::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.16) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+      }
+      .k-resident-portrait--glitch .k-resident-photo {
+        position: relative;
+        z-index: 0;
+      }
+      .k-resident-card:hover .k-resident-portrait--glitch .k-resident-photo,
+      .k-resident-portrait--glitch:hover .k-resident-photo {
+        animation: k-resident-photo-glitch 1.6s steps(6) infinite;
+      }
+      .k-resident-card:hover .k-resident-portrait--glitch::before,
+      .k-resident-portrait--glitch:hover::before {
+        animation: k-sigil-dark-scan 1.6s steps(2) infinite;
+      }
+      .k-resident-card:hover .k-resident-portrait--glitch::after,
+      .k-resident-portrait--glitch:hover::after {
+        background:
+          radial-gradient(ellipse at 70% 20%, rgba(224, 26, 23, 0.1), transparent 60%),
+          repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.38) 0 1px, transparent 1px 3px);
+      }
+      @keyframes k-resident-photo-glitch {
+        0%,
+        68%,
+        100% {
+          transform: translate3d(0, 0, 0);
+          clip-path: inset(0 0 0 0);
+          filter: drop-shadow(0 0 0 transparent);
+        }
+        10% {
+          transform: translate3d(-2px, 0, 0);
+          clip-path: inset(14% 0 58% 0);
+          filter:
+            drop-shadow(-3px 0 0 rgba(224, 26, 23, 0.32))
+            drop-shadow(3px 0 0 rgba(0, 255, 255, 0.2));
+        }
+        20% {
+          transform: translate3d(2px, 1px, 0);
+          clip-path: inset(52% 0 22% 0);
+          filter:
+            drop-shadow(2px 0 0 rgba(224, 26, 23, 0.26))
+            drop-shadow(-2px 0 0 rgba(0, 255, 255, 0.22));
+        }
+        30% {
+          transform: translate3d(-1px, 0, 0);
+          clip-path: inset(0 0 0 0);
+          filter:
+            drop-shadow(-2px 0 0 rgba(224, 26, 23, 0.18))
+            drop-shadow(2px 0 0 rgba(0, 255, 255, 0.16));
+        }
+        38% {
+          transform: translate3d(1px, -1px, 0) skewX(0.4deg);
+          clip-path: inset(36% 0 44% 0);
+          filter:
+            drop-shadow(-2px 0 0 rgba(255, 0, 0, 0.2))
+            drop-shadow(2px 0 0 rgba(0, 255, 255, 0.18));
+        }
+      }
+      .k-home[data-reduced='true'] .k-resident-card:hover .k-resident-portrait--glitch .k-resident-photo,
+      .k-home[data-reduced='true'] .k-resident-portrait--glitch:hover .k-resident-photo {
+        animation: none;
+        filter: brightness(1.02);
+      }
+      .k-home[data-reduced='true'] .k-resident-card:hover .k-resident-portrait--glitch::before,
+      .k-home[data-reduced='true'] .k-resident-portrait--glitch:hover::before {
+        animation: none;
+        opacity: 0;
+      }
+      @media (hover: none) {
+        .k-resident-card:active .k-resident-portrait--glitch .k-resident-photo {
+          animation: k-resident-photo-glitch 220ms steps(4) forwards;
+        }
+        .k-resident-card:active .k-resident-portrait--glitch::before {
+          animation: k-sigil-dark-scan 220ms steps(2) forwards;
+        }
       }
       .k-resident-cross {
         position: absolute;
@@ -1647,9 +1927,96 @@ function PosterStyles() {
         letter-spacing: 0.3em;
         color: var(--k-bone-3);
       }
-      .k-home[data-flavour='jp'] .k-resident-role {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.14em;
+      .k-resident-writeup {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(16px, 2vw, 24px);
+        padding-top: 4px;
+        border-left: 1px solid var(--k-hair);
+        padding-left: clamp(16px, 2.5vw, 28px);
+        max-width: 52ch;
+      }
+      .k-resident-tagline {
+        font-family: 'Archivo', system-ui, sans-serif;
+        font-weight: 900;
+        font-stretch: 125%;
+        font-size: clamp(18px, 2vw, 28px);
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        color: var(--k-bone);
+        margin: 0;
+        text-transform: lowercase;
+      }
+      .k-resident-tagline--swap {
+        position: relative;
+        display: inline-grid;
+        cursor: default;
+        isolation: isolate;
+        max-width: 100%;
+      }
+      .k-resident-tagline-en,
+      .k-resident-tagline-jp {
+        grid-area: 1 / 1;
+        transition: opacity 90ms ease;
+      }
+      .k-resident-tagline-jp {
+        opacity: 0;
+        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+        font-weight: 900;
+        text-transform: none;
+        letter-spacing: -0.03em;
+        font-stretch: normal;
+        font-size: 1.02em;
+      }
+      .k-resident-tagline--jp .k-resident-tagline-en {
+        opacity: 0;
+      }
+      .k-resident-tagline--jp .k-resident-tagline-jp {
+        opacity: 1;
+      }
+      .k-resident-tagline--glitch .k-resident-tagline-en,
+      .k-resident-tagline--glitch .k-resident-tagline-jp {
+        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      }
+      .k-resident-tagline--glitch::after {
+        content: '';
+        position: absolute;
+        inset: -4% -2%;
+        pointer-events: none;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.22) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: k-sigil-dark-scan 220ms steps(2);
+      }
+      .k-home[data-reduced='true'] .k-resident-tagline--glitch .k-resident-tagline-en,
+      .k-home[data-reduced='true'] .k-resident-tagline--glitch .k-resident-tagline-jp {
+        animation: none;
+      }
+      .k-home[data-reduced='true'] .k-resident-tagline--glitch::after {
+        display: none;
+      }
+      @media (hover: none) {
+        .k-resident-tagline--swap:active .k-resident-tagline-en {
+          opacity: 0;
+        }
+        .k-resident-tagline--swap:active .k-resident-tagline-jp {
+          opacity: 1;
+        }
+      }
+      .k-resident-bio {
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: clamp(12px, 1.05vw, 14px);
+        line-height: 1.75;
+        color: var(--k-bone-2);
+        margin: 0;
+      }
+      .k-section--residents .k-section-rail {
+        grid-column: 3 / 4;
+        grid-row: 1 / 4;
       }
 
       /* ── SIGIL ────────────────────────────────────────────────────── */
@@ -1668,25 +2035,12 @@ function PosterStyles() {
         text-transform: uppercase;
         color: var(--k-bone-2);
       }
-      .k-home[data-flavour='jp'] .k-sigil-eyebrow {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
-        letter-spacing: 0.14em;
-        text-transform: none;
-      }
       .k-sigil-num { color: var(--k-red); font-weight: 700; }
       .k-sigil-title {
         margin-top: clamp(48px, 10vh, 120px);
         display: flex;
         flex-direction: column;
         gap: clamp(8px, 1.2vw, 20px);
-        font-family: 'Noto Sans JP', 'Noto Serif JP', serif;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1.05;
-        font-size: clamp(40px, 7vw, 130px);
-        color: var(--k-bone);
-      }
-      .k-home[data-flavour='en'] .k-sigil-title {
         font-family: 'Archivo', system-ui, sans-serif;
         font-weight: 900;
         font-stretch: 125%;
@@ -1694,6 +2048,7 @@ function PosterStyles() {
         letter-spacing: -0.04em;
         line-height: 0.9;
         font-size: clamp(48px, 8.5vw, 180px);
+        color: var(--k-bone);
       }
       .k-sigil-title-two {
         padding-left: clamp(24px, 5vw, 90px);
@@ -1706,6 +2061,107 @@ function PosterStyles() {
         background: var(--k-red);
         vertical-align: middle;
         margin-right: 0.3em;
+      }
+      .k-sigil-title-three {
+        padding-left: clamp(24px, 5vw, 90px);
+      }
+      .k-sigil-dark {
+        position: relative;
+        display: inline-grid;
+        cursor: default;
+        isolation: isolate;
+      }
+      .k-sigil-dark-en,
+      .k-sigil-dark-jp {
+        grid-area: 1 / 1;
+        transition: opacity 90ms ease;
+      }
+      .k-sigil-dark-jp {
+        opacity: 0;
+        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+        font-weight: 900;
+        text-transform: none;
+        letter-spacing: -0.05em;
+        font-stretch: normal;
+        font-size: 1.08em;
+      }
+      .k-sigil-dark--jp .k-sigil-dark-en {
+        opacity: 0;
+      }
+      .k-sigil-dark--jp .k-sigil-dark-jp {
+        opacity: 1;
+      }
+      .k-sigil-dark--glitch .k-sigil-dark-en,
+      .k-sigil-dark--glitch .k-sigil-dark-jp {
+        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      }
+      .k-sigil-dark--glitch::after {
+        content: '';
+        position: absolute;
+        inset: -4% -2%;
+        pointer-events: none;
+        background: linear-gradient(
+          transparent 44%,
+          rgba(224, 26, 23, 0.22) 50%,
+          transparent 56%
+        );
+        mix-blend-mode: screen;
+        opacity: 0;
+        animation: k-sigil-dark-scan 220ms steps(2);
+      }
+      @keyframes k-sigil-dark-glitch {
+        0%,
+        100% {
+          transform: translate(0);
+          text-shadow: none;
+          clip-path: inset(0);
+        }
+        25% {
+          transform: translate(-3px, 1px) skewX(3deg);
+          text-shadow:
+            -4px 0 rgba(224, 26, 23, 0.85),
+            4px 0 rgba(0, 255, 255, 0.55);
+        }
+        50% {
+          transform: translate(2px, -1px) skewX(-2deg);
+          clip-path: inset(38% 0 40% 0);
+          text-shadow:
+            3px 0 rgba(224, 26, 23, 0.75),
+            -3px 0 rgba(0, 255, 255, 0.65);
+        }
+        75% {
+          transform: translate(-1px, 2px);
+          text-shadow:
+            -2px 0 rgba(255, 0, 0, 0.55),
+            2px 0 rgba(0, 255, 255, 0.45);
+        }
+      }
+      @keyframes k-sigil-dark-scan {
+        0%,
+        100% {
+          opacity: 0;
+          transform: translateY(0);
+        }
+        45%,
+        55% {
+          opacity: 1;
+          transform: translateY(2px);
+        }
+      }
+      .k-home[data-reduced='true'] .k-sigil-dark--glitch .k-sigil-dark-en,
+      .k-home[data-reduced='true'] .k-sigil-dark--glitch .k-sigil-dark-jp {
+        animation: none;
+      }
+      .k-home[data-reduced='true'] .k-sigil-dark--glitch::after {
+        display: none;
+      }
+      @media (hover: none) {
+        .k-sigil-dark:active .k-sigil-dark-en {
+          opacity: 0;
+        }
+        .k-sigil-dark:active .k-sigil-dark-jp {
+          opacity: 1;
+        }
       }
 
       .k-sigil-footerrow {
@@ -1772,103 +2228,194 @@ function PosterStyles() {
       /* Reveal-on-scroll */
       .k-panel[data-inview='true'] .k-section-body,
       .k-panel[data-inview='true'] .k-section-visual,
-      .k-panel[data-inview='true'] .k-residents-grid,
+      .k-panel[data-inview='true'] .k-residents-layout,
       .k-panel[data-inview='true'] .k-sigil-title,
       .k-panel[data-inview='true'] .k-sigil-footerrow,
       .k-panel[data-inview='true'] .k-hero-mark,
-      .k-panel[data-inview='true'] .k-hero-subrail {
+      .k-panel[data-inview='true'] .k-hero-subrail,
+      .k-panel[data-inview='true'] .k-hero-bottom {
         opacity: 1;
+      }
+      .k-panel[data-inview='true'] .k-section-body,
+      .k-panel[data-inview='true'] .k-section-visual,
+      .k-panel[data-inview='true'] .k-residents-layout,
+      .k-panel[data-inview='true'] .k-sigil-title,
+      .k-panel[data-inview='true'] .k-sigil-footerrow,
+      .k-panel[data-inview='true'] .k-hero-subrail {
         transform: translateY(0);
       }
-      .k-section-body, .k-section-visual, .k-residents-grid, .k-sigil-title, .k-sigil-footerrow, .k-hero-mark, .k-hero-subrail {
+      .k-section-body, .k-section-visual, .k-residents-layout, .k-sigil-title, .k-sigil-footerrow, .k-hero-subrail {
         opacity: 0;
         transform: translateY(24px);
         transition:
           opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
           transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
       }
+      /* Hero mark keeps its centering transform — fade only */
+      .k-hero-mark,
+      .k-hero-bottom {
+        opacity: 0;
+        transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
       .k-home[data-reduced='true'] .k-section-body,
       .k-home[data-reduced='true'] .k-section-visual,
-      .k-home[data-reduced='true'] .k-residents-grid,
+      .k-home[data-reduced='true'] .k-residents-layout,
       .k-home[data-reduced='true'] .k-sigil-title,
       .k-home[data-reduced='true'] .k-sigil-footerrow,
       .k-home[data-reduced='true'] .k-hero-mark,
-      .k-home[data-reduced='true'] .k-hero-subrail {
+      .k-home[data-reduced='true'] .k-hero-subrail,
+      .k-home[data-reduced='true'] .k-hero-bottom {
         opacity: 1;
         transform: none;
         transition: none;
       }
+      .k-home[data-reduced='true'] .k-hero-mark {
+        transform: translate(-50%, -50%);
+      }
 
       /* ── responsive ─────────────────────────────────────────────── */
 
-      @media (max-width: 900px) {
-        .k-hero-topbar {
-          flex-wrap: wrap;
-          gap: 10px 14px;
-          font-size: 10px;
-          letter-spacing: 0.2em;
-        }
-        .k-hero-topbar-sep { display: none; }
-        .k-hero-subrail {
-          flex-direction: column;
-          gap: 16px;
-          align-items: flex-start;
-        }
-        .k-hero-bottom {
-          grid-template-columns: 1fr;
-          gap: 16px;
-        }
-        .k-hero-est {
-          align-items: flex-start;
-          text-align: left;
-          max-width: 100%;
-        }
-        .k-hero-tagline {
-          text-align: left;
-          font-size: 12px;
-        }
-        .k-hero-sun,
-        .k-hero-sun-noise {
-          width: clamp(280px, 82vmin, 520px);
-          height: clamp(280px, 82vmin, 520px);
+      @media (max-width: 1024px) {
+        .k-hero-brush {
+          font-size: clamp(110px, 28vmin, 280px);
+          opacity: 0.88;
         }
         .k-hero-wordmark {
-          font-size: clamp(40px, 18vw, 120px);
+          font-size: clamp(48px, 13vw, 160px);
+        }
+        .k-hero-sun-logo {
+          inset: -12%;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .k-panel {
+          padding: 20px 18px 28px;
+          min-height: auto;
+        }
+        .k-hero {
+          min-height: 100svh;
+          min-height: 100dvh;
+          overflow: visible;
+        }
+        .k-hero-subrail { margin-top: 10px; }
+        .k-hero-kanjistack {
+          font-size: 12px;
+          flex-direction: row;
+          gap: 10px;
+        }
+        .k-hero-mark {
+          width: 110vw;
+          top: 46%;
+        }
+        .k-hero-sun-stack {
+          width: min(88vw, 460px);
+          height: min(88vw, 460px);
+          top: 36%;
+        }
+        .k-hero-bottom {
+          left: 18px;
+          right: 18px;
+          bottom: 22px;
+        }
+        .k-hero-wordmark {
+          font-size: clamp(32px, 12.5vw, 80px);
+          letter-spacing: -0.035em;
+          font-stretch: 115%;
         }
         .k-hero-brush {
-          font-size: clamp(72px, 30vmin, 200px);
+          font-size: clamp(88px, 26vmin, 180px);
+          opacity: 0.85;
         }
-        .k-hero-enter {
-          top: auto;
-          bottom: 28vh;
-          transform: none;
+        .k-hero-sun-logo {
+          inset: -10%;
         }
-        .k-hero-coords {
-          display: none;
+        .k-hero-bottom {
+          grid-template-columns: auto 1fr;
+          gap: 14px;
+          align-items: end;
+        }
+        .k-hero-est {
+          align-items: flex-end;
+          text-align: right;
+          max-width: 16ch;
+        }
+        .k-hero-tagline {
+          font-size: 10px;
+          letter-spacing: 0.1em;
         }
 
         .k-section {
           grid-template-columns: 48px minmax(0, 1fr);
           grid-template-rows: auto auto auto auto;
+          min-height: auto;
+          gap: 16px;
         }
         .k-section-index { grid-column: 1 / 2; grid-row: 1 / 2; flex-direction: row; align-items: center; }
         .k-section-body { grid-column: 2 / 3; grid-row: 1 / 3; }
         .k-section-visual { grid-column: 1 / 3; grid-row: 3 / 4; min-height: 220px; }
         .k-section-rail { display: none; }
 
-        .k-section--residents { grid-template-columns: 48px minmax(0, 1fr); }
-        .k-residents-grid {
-          grid-column: 1 / 3;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 14px;
+        .k-section--residents { grid-template-columns: minmax(0, 1fr); }
+        .k-section--residents .k-section-index {
+          grid-column: 1 / 2;
+          grid-row: 1 / 2;
         }
+        .k-residents-layout {
+          grid-column: 1 / 2;
+          grid-row: 2 / 3;
+          margin-top: 12px;
+          gap: 20px;
+        }
+        .k-residents-row {
+          grid-template-columns: minmax(0, 220px);
+          gap: 16px;
+        }
+        .k-resident-writeup {
+          border-left: none;
+          padding-left: 0;
+          max-width: none;
+        }
+        .k-resident-name { font-size: 13px; letter-spacing: 0.01em; }
+        .k-resident-role { font-size: 9px; letter-spacing: 0.18em; }
 
-        .k-sigil-title { font-size: clamp(30px, 10vw, 72px); }
-        .k-sigil-footerrow {
-          grid-template-columns: 1fr;
-          gap: 24px;
+        .k-sigil-title {
+          margin-top: 32px;
+          font-size: clamp(28px, 9.2vw, 56px);
+          font-stretch: 105%;
+          letter-spacing: -0.03em;
+          gap: 4px;
+          max-width: 100%;
         }
-        .k-hanko { justify-self: end; }
+        .k-sigil-title > span {
+          display: block;
+          max-width: 100%;
+          overflow: hidden;
+        }
+        .k-sigil-title-two,
+        .k-sigil-title-three { padding-left: 0; }
+        .k-sigil-title-two::before {
+          width: 28px;
+          margin-right: 0.25em;
+        }
+        .k-sigil-footerrow {
+          grid-template-columns: 1fr auto;
+          gap: 20px;
+          margin-top: 40px;
+        }
+        .k-barcode { grid-column: 1 / -1; }
+        .k-hanko { justify-self: end; width: 72px; height: 72px; }
+        .k-hanko svg { width: 72px; height: 72px; }
+        .k-horizon { height: 28vh; }
+      }
+
+      @media (max-width: 420px) {
+        .k-hero-wordmark {
+          font-size: clamp(26px, 10.8vw, 56px);
+        }
+        .k-residents-layout {
+          gap: 10px;
+        }
       }
     `}</style>
   )

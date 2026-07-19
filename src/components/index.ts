@@ -1,4 +1,5 @@
 // Layout
+export { SiteMenu } from './layout/SiteMenu'
 export { Navigation } from './layout/Navigation'
 export { MobileNav } from './layout/MobileNav'
 export { Footer } from './layout/Footer'

@@ -28,10 +28,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Split bio - first part is regular, last quoted part is the hero
-  const bioParts = artist.bio.split('\n\n').filter(Boolean)
-  const regularBio = bioParts.slice(0, -1)
-  const heroQuote = bioParts[bioParts.length - 1]
+  const bioParagraphs = artist.bio.split('\n\n').filter(Boolean)
 
   return (
     <div className="relative max-w-6xl mx-auto px-6 pb-32">
@@ -46,7 +43,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
 
         <div className="border-l-2 border-white/30/40 pl-6 md:pl-8">
           <div className="space-y-6 max-w-xl">
-            {regularBio.map((paragraph, index) => (
+            {bioParagraphs.map((paragraph, index) => (
               <p
                 key={index}
                 className="font-mono text-sm md:text-base text-white/70 leading-relaxed"
@@ -61,8 +58,8 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
         </div>
       </section>
 
-      {/* Hero quote - chromatic aberration effect */}
-      {heroQuote && heroQuote.includes('"') && (
+      {/* Tagline — chromatic aberration effect */}
+      {artist.tagline && (
         <section className="mb-32 relative">
           <div className="relative">
             {/* Red layer - offset left */}
@@ -72,7 +69,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                 transform: 'translate(-3px, -2px)',
               }}
             >
-              {heroQuote.trim()}
+              {artist.tagline}
             </p>
 
             {/* Blue layer - offset right */}
@@ -82,12 +79,12 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                 transform: 'translate(3px, 2px)',
               }}
             >
-              {heroQuote.trim()}
+              {artist.tagline}
             </p>
 
             {/* Main white layer */}
             <p className="font-display text-2xl md:text-4xl leading-tight text-white relative">
-              {heroQuote.trim()}
+              {artist.tagline}
             </p>
           </div>
 
