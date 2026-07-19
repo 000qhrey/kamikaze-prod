@@ -7,6 +7,12 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 const nextConfig = {
   output: 'export',
   basePath,
+  // Hide the Next.js dev overlay indicator (bottom-left lightning bolt)
+  // so it doesn't leak into the poster composition on `/`.
+  devIndicators: {
+    buildActivity: false,
+    appIsrStatus: false,
+  },
   assetPrefix: basePath,
   trailingSlash: true,
   images: {

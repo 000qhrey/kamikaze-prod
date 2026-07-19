@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { LenisProvider } from '@/providers/LenisProvider'
 import { CursorProvider } from '@/providers/CursorProvider'
@@ -47,11 +48,21 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname()
+  // Homepage runs its own composition. Skip the cyberpunk chrome, boot
+  // sequence, sigil, cursor override, nav + footer, etc. on `/` only.
+  const isHome = pathname === '/'
+
   const [hasBooted, setHasBooted] = useState(false)
   const [bootMode, setBootMode] = useState<'full' | 'fast' | 'none'>('none')
 
   // Check visitor state on mount
   useEffect(() => {
+    if (isHome) {
+      setBootMode('none')
+      setHasBooted(true)
+      return
+    }
     try {
       const stored = localStorage.getItem(VISITOR_STORAGE_KEY)
 
@@ -76,11 +87,22 @@ export function AppShell({ children }: AppShellProps) {
       // localStorage unavailable (SSR or privacy mode) - show full boot
       setBootMode('full')
     }
-  }, [])
+  }, [isHome])
 
   const handleBootComplete = () => {
     setHasBooted(true)
     setBootMode('none')
+  }
+
+  // Homepage: intentionally stripped-down. Just render the poster.
+  // Interior routes keep the cyberpunk chrome intact.
+  if (isHome) {
+    return (
+      <>
+        <FontLoader />
+        <main className="relative z-10">{children}</main>
+      </>
+    )
   }
 
   return (
