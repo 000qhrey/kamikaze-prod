@@ -11,7 +11,7 @@ export const HOME_COPY = {
   },
 
   hero: {
-    kanjiStack: ['神風', 'テクノ', '集団'] as const,
+    metaStack: ['TECHNO', 'COLLECTIVE', 'UNDERGROUND'] as const,
     tagline: "WE DON'T\nTHROW EVENTS.\n\nWE BUILD\nMOMENTS.",
     est: 'EST. MMXXVI',
     scroll: 'SCROLL',
@@ -39,7 +39,6 @@ export const HOME_COPY = {
 
 export const CONSTANT = {
   wordmark: 'KAMIKAZE',
-  brushKanji: ['神', '風'] as const,
   coords: { lat: '00.0000° N', lon: '00.0000° E' },
   residents: [
     { name: 'IBLIIIZ', handle: '@IBLIIIZ', href: '/artists/ibliiiz' },

@@ -4,8 +4,7 @@
  * Kamikaze — dark poster homepage.
  *
  * Scroll: Hero → Residents → Sigil → old footer.
- * KILL SWITCH flips only the hero title (EN KAMIKAZE ↔ JP 神風).
- * Hover on 神風 reveals KAMIKAZE. Rest of the page stays English.
+ * English-only lander. Cybersigil hover: RGB split + clip tear + cipher flicker.
  */
 
 import {
@@ -16,7 +15,6 @@ import {
   type CSSProperties,
 } from 'react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { getArtistBySlug } from '@/data/artists'
 import { getAssetPath } from '@/lib/basePath'
 import { HOME_COPY, CONSTANT } from './homeCopy'
@@ -355,121 +353,14 @@ function PortraitSilhouette({ variant }: { variant: number }) {
   )
 }
 
-// ─── hero title — EN wordmark or JP 神風 (hover → KAMIKAZE) ────────────────
+// ─── hero title — English cybersigil wordmark ─────────────────────────────
 
 const WORDMARK_KAMI = 'KAMI'
-const WORDMARK_KAMI_GLITCH = 'K∆MI'
-const WORDMARK_KAMI_JP = '神'
+const WORDMARK_KAMI_CIPHER = ['K∆MI', 'KΔMI', 'KΛMI', 'KAMI'] as const
 const WORDMARK_KAZE = 'KAZE'
-const WORDMARK_KAZE_JP = '風'
+const WORDMARK_KAZE_CIPHER = ['KΔZE', 'KΛZE', 'KÆZE', 'KAZE'] as const
 
-function WordmarkKamiSwap({ reduced }: { reduced: boolean }) {
-  const [jp, setJp] = useState(false)
-  const [swapGlitching, setSwapGlitching] = useState(false)
-  const [ambientGlitching, setAmbientGlitching] = useState(false)
-  const [kamiText, setKamiText] = useState(WORDMARK_KAMI)
-  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const ambientTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const clearTimers = useCallback(() => {
-    if (swapTimerRef.current) clearTimeout(swapTimerRef.current)
-    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-  }, [])
-
-  const resetAmbient = useCallback(() => {
-    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
-    setKamiText(WORDMARK_KAMI)
-    setAmbientGlitching(false)
-  }, [])
-
-  const triggerSwapGlitch = useCallback(() => {
-    if (reduced) return
-    if (swapTimerRef.current) clearTimeout(swapTimerRef.current)
-    setSwapGlitching(true)
-    swapTimerRef.current = setTimeout(() => setSwapGlitching(false), 220)
-  }, [reduced])
-
-  const showJp = useCallback(() => {
-    resetAmbient()
-    triggerSwapGlitch()
-    setJp(true)
-  }, [resetAmbient, triggerSwapGlitch])
-
-  const showEn = useCallback(() => {
-    triggerSwapGlitch()
-    setJp(false)
-  }, [triggerSwapGlitch])
-
-  const triggerAmbient = useCallback(() => {
-    if (reduced || jp) return
-    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
-    setKamiText(WORDMARK_KAMI_GLITCH)
-    setAmbientGlitching(true)
-    ambientTimerRef.current = setTimeout(() => {
-      setKamiText(WORDMARK_KAMI)
-      setAmbientGlitching(false)
-    }, 220)
-  }, [jp, reduced])
-
-  const onTouchStart = useCallback(() => {
-    showJp()
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-    touchTimerRef.current = setTimeout(showEn, 700)
-  }, [showEn, showJp])
-
-  useEffect(() => clearTimers, [clearTimers])
-
-  useEffect(() => {
-    if (reduced || jp) return
-    const i = setInterval(() => {
-      if (Math.random() < 0.22) triggerAmbient()
-    }, 9_000)
-    return () => clearInterval(i)
-  }, [jp, reduced, triggerAmbient])
-
-  return (
-    <span
-      className={[
-        'k-hero-wordmark-kami',
-        jp ? 'k-hero-wordmark-kami--jp' : '',
-        swapGlitching ? 'k-hero-wordmark-kami--glitch' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      onMouseEnter={showJp}
-      onMouseLeave={showEn}
-      onTouchStart={onTouchStart}
-      aria-label={jp ? WORDMARK_KAMI_JP : WORDMARK_KAMI}
-    >
-      <span className="k-hero-wordmark-kami-en" aria-hidden={jp}>
-        {kamiText.split('').map((ch, i) => (
-          <span
-            key={i}
-            className="k-hero-wordmark-glyph"
-            style={{
-              transition: ambientGlitching
-                ? 'transform 50ms linear'
-                : 'transform 320ms ease-out',
-              transform: ambientGlitching
-                ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
-                : 'none',
-            }}
-          >
-            {ch}
-          </span>
-        ))}
-      </span>
-      <span className="k-hero-wordmark-kami-jp" aria-hidden={!jp}>
-        {WORDMARK_KAMI_JP}
-      </span>
-    </span>
-  )
-}
-
-function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
-  const [jp, setJp] = useState(false)
+function useCybersigilBurst(reduced: boolean) {
   const [glitching, setGlitching] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -479,55 +370,123 @@ function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
     if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
   }, [])
 
-  const triggerGlitch = useCallback(() => {
+  const burst = useCallback(() => {
     if (reduced) return
     if (timerRef.current) clearTimeout(timerRef.current)
     setGlitching(true)
-    timerRef.current = setTimeout(() => setGlitching(false), 220)
+    timerRef.current = setTimeout(() => setGlitching(false), 260)
   }, [reduced])
 
-  const showJp = useCallback(() => {
-    triggerGlitch()
-    setJp(true)
-  }, [triggerGlitch])
+  const settle = useCallback(() => {
+    setGlitching(false)
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }, [])
 
-  const showEn = useCallback(() => {
-    triggerGlitch()
-    setJp(false)
-  }, [triggerGlitch])
-
-  const onTouchStart = useCallback(() => {
-    showJp()
+  const onTouchBurst = useCallback(() => {
+    burst()
     if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-    touchTimerRef.current = setTimeout(showEn, 700)
-  }, [showEn, showJp])
+    touchTimerRef.current = setTimeout(settle, 700)
+  }, [burst, settle])
 
   useEffect(() => clearTimers, [clearTimers])
 
+  return { glitching, burst, settle, onTouchBurst }
+}
+
+function WordmarkSegment({
+  base,
+  cipher,
+  segmentClass,
+  reduced,
+  ambient,
+}: {
+  base: string
+  cipher: readonly string[]
+  segmentClass: string
+  reduced: boolean
+  ambient?: boolean
+}) {
+  const [text, setText] = useState(base)
+  const [glitching, setGlitching] = useState(false)
+  const [jitter, setJitter] = useState(false)
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const ambientTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
+  }, [])
+
+  const settle = useCallback(() => {
+    clearTimers()
+    setText(base)
+    setGlitching(false)
+    setJitter(false)
+  }, [base, clearTimers])
+
+  const runCipherBurst = useCallback(() => {
+    if (reduced) return
+    clearTimers()
+    setGlitching(true)
+    setJitter(true)
+    cipher.forEach((frame, i) => {
+      timersRef.current.push(setTimeout(() => setText(frame), 36 + i * 52))
+    })
+    timersRef.current.push(
+      setTimeout(() => {
+        setText(base)
+        setJitter(false)
+        setGlitching(false)
+      }, 36 + cipher.length * 52 + 90),
+    )
+  }, [base, cipher, clearTimers, reduced])
+
+  const triggerAmbient = useCallback(() => {
+    if (reduced) return
+    if (ambientTimerRef.current) clearTimeout(ambientTimerRef.current)
+    setText(cipher[0] ?? base)
+    setJitter(true)
+    ambientTimerRef.current = setTimeout(() => {
+      setText(base)
+      setJitter(false)
+    }, 220)
+  }, [base, cipher, reduced])
+
+  useEffect(() => clearTimers, [clearTimers])
+
+  useEffect(() => {
+    if (!ambient || reduced) return
+    const i = setInterval(() => {
+      if (Math.random() < 0.22) triggerAmbient()
+    }, 9_000)
+    return () => clearInterval(i)
+  }, [ambient, reduced, triggerAmbient])
+
   return (
     <span
-      className={[
-        'k-hero-wordmark-kaze',
-        jp ? 'k-hero-wordmark-kaze--jp' : '',
-        glitching ? 'k-hero-wordmark-kaze--glitch' : '',
-      ]
+      className={[segmentClass, glitching ? `${segmentClass}--glitch` : '']
         .filter(Boolean)
         .join(' ')}
-      onMouseEnter={showJp}
-      onMouseLeave={showEn}
-      onTouchStart={onTouchStart}
-      aria-label={jp ? WORDMARK_KAZE_JP : WORDMARK_KAZE}
+      onMouseEnter={runCipherBurst}
+      onMouseLeave={settle}
+      onTouchStart={runCipherBurst}
+      aria-label={base}
     >
-      <span className="k-hero-wordmark-kaze-en" aria-hidden={jp}>
-        {WORDMARK_KAZE.split('').map((ch, i) => (
-          <span key={i} className="k-hero-wordmark-glyph">
-            {ch}
-          </span>
-        ))}
-      </span>
-      <span className="k-hero-wordmark-kaze-jp" aria-hidden={!jp}>
-        {WORDMARK_KAZE_JP}
-      </span>
+      {text.split('').map((ch, i) => (
+        <span
+          key={`${i}-${ch}`}
+          className="k-hero-wordmark-glyph"
+          style={{
+            transition: jitter ? 'transform 50ms linear' : 'transform 320ms ease-out',
+            transform: jitter
+              ? `translateY(${(Math.random() - 0.5) * 6}px) skewY(${(Math.random() - 0.5) * 4}deg)`
+              : 'none',
+          }}
+        >
+          {ch}
+        </span>
+      ))}
     </span>
   )
 }
@@ -535,52 +494,35 @@ function WordmarkKazeSwap({ reduced }: { reduced: boolean }) {
 function EnglishWordmark({ reduced }: { reduced: boolean }) {
   return (
     <span className="k-hero-wordmark" aria-label="KAMIKAZE">
-      <WordmarkKamiSwap reduced={reduced} />
-      <WordmarkKazeSwap reduced={reduced} />
+      <WordmarkSegment
+        base={WORDMARK_KAMI}
+        cipher={WORDMARK_KAMI_CIPHER}
+        segmentClass="k-hero-wordmark-kami"
+        reduced={reduced}
+        ambient
+      />
+      <WordmarkSegment
+        base={WORDMARK_KAZE}
+        cipher={WORDMARK_KAZE_CIPHER}
+        segmentClass="k-hero-wordmark-kaze"
+        reduced={reduced}
+      />
     </span>
   )
 }
 
 function TitleMark({ reduced }: { reduced: boolean }) {
-  return (
-    <>
-      <EnglishWordmark reduced={reduced} />
-      <div className="k-hero-brush" aria-hidden>
-        {CONSTANT.brushKanji.map((c, i) => (
-          <span key={i}>{c}</span>
-        ))}
-      </div>
-    </>
-  )
+  return <EnglishWordmark reduced={reduced} />
 }
 
 function HeroSunStack({ reduced }: { reduced: boolean }) {
   const [hovered, setHovered] = useState(false)
-  const [glitching, setGlitching] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const clearTimers = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-  }, [])
-
-  const triggerGlitch = useCallback(() => {
-    if (reduced) return
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setGlitching(true)
-    timerRef.current = setTimeout(() => setGlitching(false), 220)
-  }, [reduced])
-
-  const onEnter = useCallback(() => {
-    triggerGlitch()
-    setHovered(true)
-  }, [triggerGlitch])
-
+  const onEnter = useCallback(() => setHovered(true), [])
   const onLeave = useCallback(() => {
     setHovered(false)
-    setGlitching(false)
-    if (timerRef.current) clearTimeout(timerRef.current)
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
   }, [])
 
   const onTouchStart = useCallback(() => {
@@ -589,15 +531,16 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
     touchTimerRef.current = setTimeout(onLeave, 700)
   }, [onEnter, onLeave])
 
-  useEffect(() => clearTimers, [clearTimers])
+  useEffect(
+    () => () => {
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    },
+    [],
+  )
 
   return (
     <div
-      className={[
-        'k-hero-sun-stack',
-        hovered ? 'k-hero-sun-stack--hover' : '',
-        glitching ? 'k-hero-sun-stack--glitch' : '',
-      ]
+      className={['k-hero-sun-stack', hovered ? 'k-hero-sun-stack--hover' : '']
         .filter(Boolean)
         .join(' ')}
       aria-hidden
@@ -609,10 +552,6 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
       <div className="k-hero-sun">
         <div className="k-hero-sun-crt" />
         <SunLogo3D reduced={reduced} hovered={hovered} />
-        <div className="k-hero-sun-kami">
-          <span className="k-hero-sun-kami-glyph">神</span>
-          <span className="k-hero-sun-kami-label">KAMI</span>
-        </div>
       </div>
       <div className="k-hero-sun-noise" />
     </div>
@@ -638,8 +577,8 @@ function PanelHero() {
       <div className="k-hero-topbar-spacer" aria-hidden />
 
       <div className="k-hero-subrail">
-        <div className="k-hero-kanjistack" aria-hidden>
-          {HOME_COPY.hero.kanjiStack.map((line) => (
+        <div className="k-hero-metastack" aria-hidden>
+          {HOME_COPY.hero.metaStack.map((line) => (
             <span key={line}>{line}</span>
           ))}
         </div>
@@ -675,67 +614,60 @@ function PanelHero() {
 
 // ─── RESIDENTS ────────────────────────────────────────────────────────────
 
-function ResidentTagline({ en, ja }: { en: string; ja?: string }) {
+const RESIDENT_TAGLINE_ALT = 'never belonged'
+
+function ResidentTagline({ en }: { en: string }) {
   const reduced = usePrefersReducedMotion()
-  const [jp, setJp] = useState(false)
-  const [glitching, setGlitching] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { glitching, burst } = useCybersigilBurst(reduced)
+  const [alt, setAlt] = useState(false)
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const clearTimers = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-  }, [])
+  const onEnter = useCallback(() => {
+    burst()
+    setAlt(true)
+  }, [burst])
 
-  const triggerGlitch = useCallback(() => {
-    if (reduced) return
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setGlitching(true)
-    timerRef.current = setTimeout(() => setGlitching(false), 220)
-  }, [reduced])
-
-  const showJp = useCallback(() => {
-    triggerGlitch()
-    setJp(true)
-  }, [triggerGlitch])
-
-  const showEn = useCallback(() => {
-    triggerGlitch()
-    setJp(false)
-  }, [triggerGlitch])
+  const onLeave = useCallback(() => {
+    setAlt(false)
+    burst()
+  }, [burst])
 
   const onTouchStart = useCallback(() => {
-    showJp()
+    setAlt(true)
+    burst()
     if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-    touchTimerRef.current = setTimeout(showEn, 700)
-  }, [showEn, showJp])
+    touchTimerRef.current = setTimeout(() => {
+      setAlt(false)
+    }, 700)
+  }, [burst])
 
-  useEffect(() => clearTimers, [clearTimers])
-
-  if (!ja) {
-    return <p className="k-resident-tagline">{en}</p>
-  }
+  useEffect(
+    () => () => {
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    },
+    [],
+  )
 
   return (
     <p
       className={[
         'k-resident-tagline',
         'k-resident-tagline--swap',
-        jp ? 'k-resident-tagline--jp' : '',
+        alt ? 'k-resident-tagline--alt' : '',
         glitching ? 'k-resident-tagline--glitch' : '',
       ]
         .filter(Boolean)
         .join(' ')}
-      onMouseEnter={showJp}
-      onMouseLeave={showEn}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
       onTouchStart={onTouchStart}
-      aria-label={jp ? ja : en}
+      aria-label={alt ? RESIDENT_TAGLINE_ALT : en}
     >
-      <span className="k-resident-tagline-en" aria-hidden={jp}>
+      <span className="k-resident-tagline-en" aria-hidden={alt}>
         {en}
       </span>
-      <span className="k-resident-tagline-jp" aria-hidden={!jp}>
-        {ja}
+      <span className="k-resident-tagline-alt" aria-hidden={!alt}>
+        {RESIDENT_TAGLINE_ALT}
       </span>
     </p>
   )
@@ -791,7 +723,7 @@ function PanelResidents() {
 
                 {artist && (
                   <div className="k-resident-writeup">
-                    <ResidentTagline en={artist.tagline} ja={artist.taglineJa} />
+                    <ResidentTagline en={artist.tagline} />
                     <p className="k-resident-bio">{artist.bio}</p>
                   </div>
                 )}
@@ -811,66 +743,26 @@ function PanelResidents() {
 // ─── SIGIL ────────────────────────────────────────────────────────────────
 
 const SIGIL_DARK_EN = 'DARK.'
-const SIGIL_DARK_JP = '闇。'
 
 function SigilDarkWord() {
   const reduced = usePrefersReducedMotion()
-  const [jp, setJp] = useState(false)
-  const [glitching, setGlitching] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const clearTimers = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-  }, [])
-
-  const triggerGlitch = useCallback(() => {
-    if (reduced) return
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setGlitching(true)
-    timerRef.current = setTimeout(() => setGlitching(false), 220)
-  }, [reduced])
-
-  const showJp = useCallback(() => {
-    triggerGlitch()
-    setJp(true)
-  }, [triggerGlitch])
-
-  const showEn = useCallback(() => {
-    triggerGlitch()
-    setJp(false)
-  }, [triggerGlitch])
-
-  const onTouchStart = useCallback(() => {
-    showJp()
-    if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
-    touchTimerRef.current = setTimeout(showEn, 700)
-  }, [showEn, showJp])
-
-  useEffect(() => clearTimers, [clearTimers])
+  const { glitching, burst, settle, onTouchBurst } = useCybersigilBurst(reduced)
 
   return (
     <span
       className={[
         'k-sigil-title-three',
         'k-sigil-dark',
-        jp ? 'k-sigil-dark--jp' : '',
         glitching ? 'k-sigil-dark--glitch' : '',
       ]
         .filter(Boolean)
         .join(' ')}
-      onMouseEnter={showJp}
-      onMouseLeave={showEn}
-      onTouchStart={onTouchStart}
-      aria-label={jp ? SIGIL_DARK_JP : SIGIL_DARK_EN}
+      onMouseEnter={burst}
+      onMouseLeave={settle}
+      onTouchStart={onTouchBurst}
+      aria-label={SIGIL_DARK_EN}
     >
-      <span className="k-sigil-dark-en" aria-hidden={jp}>
-        {SIGIL_DARK_EN}
-      </span>
-      <span className="k-sigil-dark-jp" aria-hidden={!jp}>
-        {SIGIL_DARK_JP}
-      </span>
+      {SIGIL_DARK_EN}
     </span>
   )
 }
@@ -919,39 +811,15 @@ function PanelSigil({ now }: { now: string }) {
           <div className="k-barcode-num">{HOME_COPY.sigil.caption}</div>
         </div>
 
-        <div className="k-hanko" aria-label="hanko stamp">
-          <svg viewBox="0 0 120 120" width="120" height="120">
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="var(--k-red-hanko)"
-              strokeWidth="4"
-            />
-            <text
-              x="60"
-              y="52"
-              textAnchor="middle"
-              fontFamily='"Noto Serif JP", serif'
-              fontWeight="900"
-              fontSize="42"
-              fill="var(--k-red-hanko)"
-            >
-              神
-            </text>
-            <text
-              x="60"
-              y="98"
-              textAnchor="middle"
-              fontFamily='"Noto Serif JP", serif'
-              fontWeight="900"
-              fontSize="42"
-              fill="var(--k-red-hanko)"
-            >
-              風
-            </text>
-          </svg>
+        <div className="k-hanko" aria-label="KM stamp">
+          <img
+            src={getAssetPath('/logo-sigil.png')}
+            alt=""
+            width={120}
+            height={120}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </div>
 
@@ -1180,18 +1048,19 @@ function PosterStyles() {
         align-items: flex-start;
         margin-top: 14px;
       }
-      .k-hero-kanjistack {
+      .k-hero-metastack {
         display: flex;
         flex-direction: column;
         gap: 4px;
-        font-family: 'Noto Sans JP', 'Noto Serif JP', serif;
-        font-weight: 700;
-        font-size: clamp(16px, 1.8vw, 22px);
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-weight: 600;
+        font-size: clamp(11px, 1.2vw, 13px);
         color: var(--k-red);
-        letter-spacing: 0.12em;
-        line-height: 1.1;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        line-height: 1.2;
       }
-      .k-hero-kanjistack span {
+      .k-hero-metastack span {
         display: block;
       }
 
@@ -1214,8 +1083,8 @@ function PosterStyles() {
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(179, 14, 18, 0.075) 0%,
-          rgba(179, 14, 18, 0.04) 40%,
+          rgba(26, 5, 5, 0.032) 0%,
+          rgba(26, 5, 5, 0.016) 40%,
           transparent 68%
         );
       }
@@ -1227,8 +1096,8 @@ function PosterStyles() {
       }
       .k-hero-sun {
         background:
-          radial-gradient(circle at 40% 36%, #d41a1a 0%, #b30e12 38%, #7a0c10 72%, #3a0507 100%);
-        box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.45);
+          radial-gradient(circle at 40% 36%, #2a0808 0%, #1a0505 34%, #120303 62%, #080202 100%);
+        box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.82);
         overflow: visible;
         animation: k-sun-breathe 12s ease-in-out infinite;
         transition:
@@ -1236,124 +1105,23 @@ function PosterStyles() {
           box-shadow 280ms ease;
       }
       .k-hero-sun-stack--hover .k-hero-sun {
-        filter: brightness(1.06);
+        filter: brightness(1.05) saturate(1.03);
         box-shadow:
-          inset 0 0 120px rgba(0, 0, 0, 0.38),
-          0 0 72px rgba(179, 14, 18, 0.22);
+          inset 0 0 140px rgba(0, 0, 0, 0.68),
+          0 0 44px rgba(26, 5, 5, 0.1),
+          0 0 72px rgba(26, 5, 5, 0.05);
       }
-      .k-hero-sun-kami {
-        position: absolute;
-        inset: 0;
-        z-index: 3;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.08em;
-        pointer-events: none;
-        opacity: 0;
-        transform: scale(0.97);
-        transition:
-          opacity 280ms ease,
-          transform 320ms ease;
-      }
-      .k-hero-sun-stack--hover .k-hero-sun-kami {
-        opacity: 1;
-        transform: scale(1);
-      }
-      .k-hero-sun-kami-glyph {
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        font-size: clamp(96px, 22vmin, 280px);
-        line-height: 0.92;
-        color: rgba(232, 224, 210, 0.22);
-        text-shadow:
-          0 0 40px rgba(224, 26, 23, 0.35),
-          2px 0 0 rgba(224, 26, 23, 0.45),
-          -2px 0 0 rgba(0, 255, 255, 0.18);
-        mix-blend-mode: screen;
-        letter-spacing: -0.04em;
-      }
-      .k-hero-sun-kami-label {
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: clamp(9px, 1.1vmin, 12px);
-        letter-spacing: 0.42em;
-        text-indent: 0.42em;
-        color: rgba(232, 224, 210, 0.38);
-        text-transform: uppercase;
-      }
-      .k-hero-sun-stack--glitch .k-hero-sun-kami-glyph {
-        animation: k-hero-sun-kami-glitch 220ms steps(4) forwards;
-      }
-      .k-hero-sun-stack--glitch .k-hero-sun-kami::after {
-        content: '';
-        position: absolute;
-        inset: 18% 12%;
-        pointer-events: none;
-        background: linear-gradient(
-          transparent 44%,
-          rgba(224, 26, 23, 0.24) 50%,
-          transparent 56%
+      .k-hero-sun-stack--hover .k-hero-sun-bloom {
+        inset: -10%;
+        background: radial-gradient(
+          circle,
+          rgba(26, 5, 5, 0.055) 0%,
+          rgba(26, 5, 5, 0.022) 42%,
+          transparent 70%
         );
-        mix-blend-mode: screen;
-        opacity: 0;
-        animation: k-sigil-dark-scan 220ms steps(2);
-      }
-      @keyframes k-hero-sun-kami-glitch {
-        0%,
-        100% {
-          transform: translate(0);
-          text-shadow:
-            0 0 40px rgba(224, 26, 23, 0.35),
-            2px 0 0 rgba(224, 26, 23, 0.45),
-            -2px 0 0 rgba(0, 255, 255, 0.18);
-          clip-path: inset(0);
-        }
-        25% {
-          transform: translate(-4px, 2px) skewX(2deg);
-          text-shadow:
-            -5px 0 rgba(224, 26, 23, 0.85),
-            5px 0 rgba(0, 255, 255, 0.55);
-        }
-        50% {
-          transform: translate(3px, -2px) skewX(-2deg);
-          clip-path: inset(36% 0 42% 0);
-          text-shadow:
-            4px 0 rgba(224, 26, 23, 0.75),
-            -4px 0 rgba(0, 255, 255, 0.65);
-        }
-        75% {
-          transform: translate(-2px, 1px);
-          text-shadow:
-            -3px 0 rgba(255, 0, 0, 0.55),
-            3px 0 rgba(0, 255, 255, 0.45);
-        }
-      }
-      .k-hero-mark:has(.k-hero-sun-stack--hover) .k-hero-brush {
-        opacity: 0.58;
-        transition: opacity 280ms ease;
-      }
-      .k-hero-mark:has(.k-hero-sun-stack--hover) .k-hero-brush span:first-child {
-        opacity: 1;
-        color: #040202;
-        text-shadow:
-          2px 0 0 rgba(224, 26, 23, 0.35),
-          -1px 1px 0 rgba(0, 0, 0, 0.7);
-      }
-      .k-hero[data-reduced='true'] .k-hero-sun-stack--glitch .k-hero-sun-kami-glyph {
-        animation: none;
-      }
-      .k-hero[data-reduced='true'] .k-hero-sun-stack--glitch .k-hero-sun-kami::after {
-        display: none;
       }
       .k-hero[data-reduced='true'] .k-hero-sun-stack--hover .k-hero-sun {
-        filter: brightness(1.04);
-      }
-      @media (hover: none) {
-        .k-hero-sun-stack:active .k-hero-sun-kami {
-          opacity: 1;
-          transform: scale(1);
-        }
+        filter: brightness(1.02);
       }
       .k-hero-sun-crt {
         position: absolute;
@@ -1368,7 +1136,7 @@ function PosterStyles() {
           transparent 3px
         );
         mix-blend-mode: multiply;
-        opacity: 0.55;
+        opacity: 0.72;
         animation: k-crt-drift 18s linear infinite;
         pointer-events: none;
       }
@@ -1376,7 +1144,7 @@ function PosterStyles() {
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/></filter><rect width='320' height='320' filter='url(%23n)'/></svg>");
         background-size: 260px 260px;
         mix-blend-mode: multiply;
-        opacity: 0.45;
+        opacity: 0.26;
         animation: k-sun-breathe 12s ease-in-out infinite;
       }
       @keyframes k-sun-breathe {
@@ -1408,21 +1176,20 @@ function PosterStyles() {
         box-sizing: border-box;
         pointer-events: auto;
       }
-      .k-hero-mark > .k-hero-wordmark,
-      .k-hero-mark > .k-hero-brush {
+      .k-hero-mark > .k-hero-wordmark {
         position: relative;
         z-index: 1;
       }
       .k-hero-wordmark {
         position: relative;
         display: block;
-        font-family: 'Archivo', 'Archivo Black', system-ui, sans-serif;
-        font-weight: 900;
-        font-stretch: 125%;
-        letter-spacing: -0.055em;
+        /* Cybersigil display — site ritual face (FontLoader), not Archivo */
+        font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
+        font-weight: 400;
+        letter-spacing: 0.04em;
         color: var(--k-bone-print);
         text-transform: uppercase;
-        line-height: 0.86;
+        line-height: 0.9;
         /* Poster crop — wider than the viewport */
         font-size: clamp(52px, 15vw, 260px);
         text-shadow:
@@ -1435,135 +1202,26 @@ function PosterStyles() {
         overflow: visible;
         pointer-events: none;
       }
-      .k-hero-wordmark::after {
-        content: '';
-        position: absolute;
-        inset: -4% -1%;
-        pointer-events: none;
-        background-image:
-          repeating-linear-gradient(
-            0deg,
-            rgba(10, 8, 6, 0.14) 0px,
-            rgba(10, 8, 6, 0.14) 1px,
-            transparent 1px,
-            transparent 3px
-          ),
-          url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.05 0 0 0 0 0.04 0 0 0 0 0.03 0 0 0 0.55 0'/></filter><rect width='180' height='180' filter='url(%23g)'/></svg>");
-        background-size: auto, 160px 160px;
-        mix-blend-mode: multiply;
-        opacity: 0.45;
-      }
       .k-hero-wordmark-glyph {
         display: inline-block;
         pointer-events: auto;
       }
 
-      /* KAMI segment — hover/touch EN ↔ 神 (grid stack, sigil pattern) */
-      .k-hero-wordmark-kami {
-        position: relative;
-        display: inline-grid;
-        cursor: default;
-        isolation: isolate;
-        vertical-align: baseline;
-      }
-      .k-hero-wordmark-kami-en,
-      .k-hero-wordmark-kami-jp {
-        grid-area: 1 / 1;
-        transition: opacity 90ms ease;
-      }
-      .k-hero-wordmark-kami-en {
-        display: inline;
-      }
-      .k-hero-wordmark-kami-jp {
-        opacity: 0;
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        text-transform: none;
-        letter-spacing: -0.06em;
-        font-stretch: normal;
-        font-size: 2.35em;
-        line-height: 0.86;
-        place-self: center;
-        pointer-events: none;
-      }
-      .k-hero-wordmark-kami--jp .k-hero-wordmark-kami-en {
-        opacity: 0;
-      }
-      .k-hero-wordmark-kami--jp .k-hero-wordmark-kami-jp {
-        opacity: 1;
-      }
-      .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-en,
-      .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-jp {
-        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
-      }
-      .k-hero-wordmark-kami--glitch::after {
-        content: '';
-        position: absolute;
-        inset: -4% -2%;
-        pointer-events: none;
-        background: linear-gradient(
-          transparent 44%,
-          rgba(224, 26, 23, 0.22) 50%,
-          transparent 56%
-        );
-        mix-blend-mode: screen;
-        opacity: 0;
-        animation: k-sigil-dark-scan 220ms steps(2);
-      }
-      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-en,
-      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch .k-hero-wordmark-kami-jp {
-        animation: none;
-      }
-      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch::after {
-        display: none;
-      }
-      @media (hover: none) {
-        .k-hero-wordmark-kami:active .k-hero-wordmark-kami-en {
-          opacity: 0;
-        }
-        .k-hero-wordmark-kami:active .k-hero-wordmark-kami-jp {
-          opacity: 1;
-        }
-      }
-
-      /* KAZE segment — hover/touch EN ↔ 風 (grid stack, sigil pattern) */
+      /* KAMI / KAZE — cipher flicker + RGB tear (English only) */
+      .k-hero-wordmark-kami,
       .k-hero-wordmark-kaze {
         position: relative;
-        display: inline-grid;
+        display: inline-block;
         cursor: default;
         isolation: isolate;
         vertical-align: baseline;
+        pointer-events: auto;
       }
-      .k-hero-wordmark-kaze-en,
-      .k-hero-wordmark-kaze-jp {
-        grid-area: 1 / 1;
-        transition: opacity 90ms ease;
+      .k-hero-wordmark-kami--glitch,
+      .k-hero-wordmark-kaze--glitch {
+        animation: k-sigil-dark-glitch 260ms steps(4) forwards;
       }
-      .k-hero-wordmark-kaze-en {
-        display: inline;
-      }
-      .k-hero-wordmark-kaze-jp {
-        opacity: 0;
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        text-transform: none;
-        letter-spacing: -0.06em;
-        font-stretch: normal;
-        font-size: 2.35em;
-        line-height: 0.86;
-        place-self: center;
-        pointer-events: none;
-      }
-      .k-hero-wordmark-kaze--jp .k-hero-wordmark-kaze-en {
-        opacity: 0;
-      }
-      .k-hero-wordmark-kaze--jp .k-hero-wordmark-kaze-jp {
-        opacity: 1;
-      }
-      .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-en,
-      .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-jp {
-        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
-      }
+      .k-hero-wordmark-kami--glitch::after,
       .k-hero-wordmark-kaze--glitch::after {
         content: '';
         position: absolute;
@@ -1571,58 +1229,20 @@ function PosterStyles() {
         pointer-events: none;
         background: linear-gradient(
           transparent 44%,
-          rgba(224, 26, 23, 0.22) 50%,
+          rgba(224, 26, 23, 0.28) 50%,
           transparent 56%
         );
         mix-blend-mode: screen;
         opacity: 0;
-        animation: k-sigil-dark-scan 220ms steps(2);
+        animation: k-sigil-dark-scan 260ms steps(2);
       }
-      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-en,
-      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch .k-hero-wordmark-kaze-jp {
+      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch,
+      .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch {
         animation: none;
       }
+      .k-home[data-reduced='true'] .k-hero-wordmark-kami--glitch::after,
       .k-home[data-reduced='true'] .k-hero-wordmark-kaze--glitch::after {
         display: none;
-      }
-      @media (hover: none) {
-        .k-hero-wordmark-kaze:active .k-hero-wordmark-kaze-en {
-          opacity: 0;
-        }
-        .k-hero-wordmark-kaze:active .k-hero-wordmark-kaze-jp {
-          opacity: 1;
-        }
-      }
-
-      /* Black brush kanji — stamp over the poster */
-      .k-hero-brush {
-        grid-area: 1 / 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        color: #060404;
-        font-size: clamp(140px, 34vmin, 440px);
-        line-height: 0.82;
-        pointer-events: none;
-        transform: translateX(-2%);
-        letter-spacing: -0.02em;
-        /* Keep light so the sun modal can read through the stamp */
-        opacity: 0.42;
-        filter: contrast(1.35);
-      }
-      .k-hero-brush span {
-        display: block;
-        text-shadow: 2px 0 0 rgba(0, 0, 0, 0.7), -1px 1px 0 rgba(0, 0, 0, 0.65);
-        transform: skewY(-2deg);
-      }
-      .k-hero-brush span:first-child {
-        transform: skewY(-1deg) translateX(6%);
-      }
-      .k-hero-brush span:last-child {
-        transform: skewY(-1deg) translateX(-6%);
       }
 
       .k-hero-bottom {
@@ -1714,11 +1334,11 @@ function PosterStyles() {
         background: var(--k-red);
       }
       .k-section-eyebrow {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Mono', monospace;
         font-size: 12px;
         letter-spacing: 0.24em;
         color: var(--k-bone-2);
-        text-transform: none;
+        text-transform: uppercase;
       }
       .k-section-eyebrow--inline {
         margin-top: 4px;
@@ -1734,16 +1354,18 @@ function PosterStyles() {
         max-width: 44ch;
       }
       .k-section-heading {
-        font-family: 'Noto Sans JP', 'Noto Serif JP', serif;
-        font-weight: 700;
+        font-family: 'Archivo', 'Archivo Black', system-ui, sans-serif;
+        font-weight: 900;
+        font-stretch: 125%;
         font-size: clamp(30px, 3.6vw, 44px);
         color: var(--k-bone);
-        letter-spacing: 0.02em;
-        line-height: 1.15;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+        text-transform: uppercase;
         margin: 0;
       }
       .k-section-copy {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Mono', monospace;
         font-size: clamp(13px, 1.15vw, 16px);
         line-height: 1.75;
         color: var(--k-bone-2);
@@ -1754,7 +1376,7 @@ function PosterStyles() {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Mono', monospace;
         font-size: 13px;
         letter-spacing: 0.18em;
         color: var(--k-bone);
@@ -1836,7 +1458,7 @@ function PosterStyles() {
         color: var(--k-bone);
       }
       .k-event-location {
-        font-family: 'Noto Sans JP', 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Mono', monospace;
         font-size: 11px;
         letter-spacing: 0.28em;
         text-transform: uppercase;
@@ -2074,28 +1696,23 @@ function PosterStyles() {
         max-width: 100%;
       }
       .k-resident-tagline-en,
-      .k-resident-tagline-jp {
+      .k-resident-tagline-alt {
         grid-area: 1 / 1;
         transition: opacity 90ms ease;
       }
-      .k-resident-tagline-jp {
+      .k-resident-tagline-alt {
         opacity: 0;
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        text-transform: none;
-        letter-spacing: -0.03em;
-        font-stretch: normal;
-        font-size: 1.02em;
+        letter-spacing: -0.02em;
       }
-      .k-resident-tagline--jp .k-resident-tagline-en {
+      .k-resident-tagline--alt .k-resident-tagline-en {
         opacity: 0;
       }
-      .k-resident-tagline--jp .k-resident-tagline-jp {
+      .k-resident-tagline--alt .k-resident-tagline-alt {
         opacity: 1;
       }
       .k-resident-tagline--glitch .k-resident-tagline-en,
-      .k-resident-tagline--glitch .k-resident-tagline-jp {
-        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      .k-resident-tagline--glitch .k-resident-tagline-alt {
+        animation: k-sigil-dark-glitch 260ms steps(4) forwards;
       }
       .k-resident-tagline--glitch::after {
         content: '';
@@ -2109,10 +1726,10 @@ function PosterStyles() {
         );
         mix-blend-mode: screen;
         opacity: 0;
-        animation: k-sigil-dark-scan 220ms steps(2);
+        animation: k-sigil-dark-scan 260ms steps(2);
       }
       .k-home[data-reduced='true'] .k-resident-tagline--glitch .k-resident-tagline-en,
-      .k-home[data-reduced='true'] .k-resident-tagline--glitch .k-resident-tagline-jp {
+      .k-home[data-reduced='true'] .k-resident-tagline--glitch .k-resident-tagline-alt {
         animation: none;
       }
       .k-home[data-reduced='true'] .k-resident-tagline--glitch::after {
@@ -2122,7 +1739,7 @@ function PosterStyles() {
         .k-resident-tagline--swap:active .k-resident-tagline-en {
           opacity: 0;
         }
-        .k-resident-tagline--swap:active .k-resident-tagline-jp {
+        .k-resident-tagline--swap:active .k-resident-tagline-alt {
           opacity: 1;
         }
       }
@@ -2186,33 +1803,12 @@ function PosterStyles() {
       }
       .k-sigil-dark {
         position: relative;
-        display: inline-grid;
+        display: inline-block;
         cursor: default;
         isolation: isolate;
       }
-      .k-sigil-dark-en,
-      .k-sigil-dark-jp {
-        grid-area: 1 / 1;
-        transition: opacity 90ms ease;
-      }
-      .k-sigil-dark-jp {
-        opacity: 0;
-        font-family: 'Noto Serif JP', 'Yu Mincho', serif;
-        font-weight: 900;
-        text-transform: none;
-        letter-spacing: -0.05em;
-        font-stretch: normal;
-        font-size: 1.08em;
-      }
-      .k-sigil-dark--jp .k-sigil-dark-en {
-        opacity: 0;
-      }
-      .k-sigil-dark--jp .k-sigil-dark-jp {
-        opacity: 1;
-      }
-      .k-sigil-dark--glitch .k-sigil-dark-en,
-      .k-sigil-dark--glitch .k-sigil-dark-jp {
-        animation: k-sigil-dark-glitch 220ms steps(4) forwards;
+      .k-sigil-dark--glitch {
+        animation: k-sigil-dark-glitch 260ms steps(4) forwards;
       }
       .k-sigil-dark--glitch::after {
         content: '';
@@ -2226,7 +1822,7 @@ function PosterStyles() {
         );
         mix-blend-mode: screen;
         opacity: 0;
-        animation: k-sigil-dark-scan 220ms steps(2);
+        animation: k-sigil-dark-scan 260ms steps(2);
       }
       @keyframes k-sigil-dark-glitch {
         0%,
@@ -2267,20 +1863,11 @@ function PosterStyles() {
           transform: translateY(2px);
         }
       }
-      .k-home[data-reduced='true'] .k-sigil-dark--glitch .k-sigil-dark-en,
-      .k-home[data-reduced='true'] .k-sigil-dark--glitch .k-sigil-dark-jp {
+      .k-home[data-reduced='true'] .k-sigil-dark--glitch {
         animation: none;
       }
       .k-home[data-reduced='true'] .k-sigil-dark--glitch::after {
         display: none;
-      }
-      @media (hover: none) {
-        .k-sigil-dark:active .k-sigil-dark-en {
-          opacity: 0;
-        }
-        .k-sigil-dark:active .k-sigil-dark-jp {
-          opacity: 1;
-        }
       }
 
       .k-sigil-footerrow {
@@ -2317,7 +1904,13 @@ function PosterStyles() {
         transform: rotate(-6deg);
         filter: drop-shadow(0 0 8px rgba(224, 26, 23, 0.25));
       }
-      .k-hanko svg { display: block; opacity: 0.95; }
+      .k-hanko img {
+        display: block;
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        opacity: 0.95;
+      }
 
       .k-horizon {
         position: absolute;
@@ -2395,10 +1988,6 @@ function PosterStyles() {
       /* ── responsive ─────────────────────────────────────────────── */
 
       @media (max-width: 1024px) {
-        .k-hero-brush {
-          font-size: clamp(110px, 28vmin, 280px);
-          opacity: 0.88;
-        }
         .k-hero-wordmark {
           font-size: clamp(48px, 13vw, 160px);
         }
@@ -2418,10 +2007,11 @@ function PosterStyles() {
           overflow: visible;
         }
         .k-hero-subrail { margin-top: 10px; }
-        .k-hero-kanjistack {
-          font-size: 12px;
+        .k-hero-metastack {
+          font-size: 10px;
           flex-direction: row;
           gap: 10px;
+          letter-spacing: 0.2em;
         }
         .k-hero-mark {
           width: 110vw;
@@ -2439,12 +2029,7 @@ function PosterStyles() {
         }
         .k-hero-wordmark {
           font-size: clamp(32px, 12.5vw, 80px);
-          letter-spacing: -0.035em;
-          font-stretch: 115%;
-        }
-        .k-hero-brush {
-          font-size: clamp(88px, 26vmin, 180px);
-          opacity: 0.85;
+          letter-spacing: 0.03em;
         }
         .k-hero-sun-logo {
           inset: -10%;
@@ -2524,7 +2109,7 @@ function PosterStyles() {
         }
         .k-barcode { grid-column: 1 / -1; }
         .k-hanko { justify-self: end; width: 72px; height: 72px; }
-        .k-hanko svg { width: 72px; height: 72px; }
+        .k-hanko img { width: 72px; height: 72px; }
         .k-horizon { height: 28vh; }
       }
 
