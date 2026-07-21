@@ -31,11 +31,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="pacific">
       <head>
-        {/* Preload 3D assets for faster loading */}
-        <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossOrigin="anonymous" />
-        <link rel="preload" href="/logo.glb" as="fetch" crossOrigin="anonymous" />
+        {/* Apply stored theme before paint to avoid Pacific→Heatmap flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('k-theme');if(t==='heatmap'||t==='pacific')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
+        {/* 3D assets (logo.glb / draco) preload via useGLTF when Canvas mounts —
+            avoid competing with LCP on mobile / GH Pages static path */}
         <Script
         id="meta-pixel"
         strategy="afterInteractive"
@@ -54,12 +59,12 @@ export default function RootLayout({
         `}
       </Script>
 
-        {/* Homepage typography — wide geometric brutalist display + mono body + Japanese */}
+        {/* Display + mono — drop unused JP families / italic axes for smaller CSS */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Archivo+Black&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;700;900&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
         />
       </head>
       <body className="bg-void text-white min-h-screen overflow-x-hidden">

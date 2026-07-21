@@ -28,16 +28,18 @@
    CSS VARIABLES
    ============================================ */
 
-:root {
-  /* Core colors */
+:root,
+[data-theme='pacific'] {
+  /* Core colors — RGB channels for Tailwind opacity modifiers */
   --black: #000000;
   --void: #0a0a0a;
-  --white: #EFEFEF;
-  --grey-dark: #3A3A3A;
+  --void-rgb: 10 10 10;
+  --white: #efefef;
+  --grey-dark: #3a3a3a;
   --grey-mid: #555555;
   --ash: #1a1818;
 
-  /* Poster / homepage — same black family as interiors */
+  /* Poster / homepage — Pacific Punk (blood / bone) */
   --k-void: #0a0a0a;
   --k-warm: #121010;
   --k-bone: #f1ede4;
@@ -49,10 +51,25 @@
   --k-red-hanko: #a61216;
   --k-hair: rgba(241, 237, 228, 0.1);
   --k-waveform: rgba(241, 237, 228, 0.35);
+  --k-accent: #b30e12;
+  --k-wordmark: #e4dfd4;
+  --k-grid: transparent;
+
+  /* Sun disc / thermal aura (Pacific: deep reds) */
+  --k-sun-inner: #2a0808;
+  --k-sun-mid: #1a0505;
+  --k-sun-outer: #080202;
+  --k-sun-bloom: rgba(26, 5, 5, 0.04);
+  --k-thermal-core: #e01a17;
+  --k-thermal-mid: #b30e12;
+  --k-thermal-edge: #5c080c;
+  --k-thermal-void: #1a0505;
 
   /* Accent - blood */
-  --blood: #8B0000;
-  --arterial: #CC0000;
+  --blood: #8b0000;
+  --blood-rgb: 139 0 0;
+  --arterial: #cc0000;
+  --arterial-rgb: 204 0 0;
 
   /* Organic corruption */
   --bruise: #1a0a1a;
@@ -78,6 +95,50 @@
   --scroll-progress: 0;
 }
 
+/* Heatmap — thermal / surveillance: indigo void + heat spectrum accents */
+[data-theme='heatmap'] {
+  --black: #04040e;
+  --void: #07071a;
+  --void-rgb: 7 7 26;
+  --white: #e8ecf4;
+  --ash: #0a0a1c;
+
+  --k-void: #07071a;
+  --k-warm: #0c0c24;
+  --k-bone: #e8ecf4;
+  --k-bone-print: #0a0a12;
+  --k-bone-2: rgba(232, 236, 244, 0.72);
+  --k-bone-3: rgba(232, 236, 244, 0.45);
+  /* Meta accents read as lime/yellow (moodboard) */
+  --k-red: #d4ff3a;
+  --k-red-deep: #b8e000;
+  --k-red-hanko: #ffe14a;
+  --k-hair: rgba(90, 220, 200, 0.14);
+  --k-waveform: rgba(255, 225, 74, 0.5);
+  --k-accent: #d4ff3a;
+  --k-wordmark: #0a0a12;
+  --k-grid: rgba(70, 210, 180, 0.09);
+
+  /* Thermal aura behind wordmark */
+  --k-sun-inner: #ffe14a;
+  --k-sun-mid: #ff6a1a;
+  --k-sun-outer: #1a1048;
+  --k-sun-bloom: rgba(255, 120, 40, 0.35);
+  --k-thermal-core: #ffe14a;
+  --k-thermal-mid: #ff6a1a;
+  --k-thermal-edge: #e01a7a;
+  --k-thermal-void: #0a0820;
+
+  --blood: #ff4d1a;
+  --blood-rgb: 255 77 26;
+  --arterial: #ffcc00;
+  --arterial-rgb: 255 204 0;
+
+  --bruise: #0a0a22;
+  --infection: #061818;
+  --signal: #d4ff3a;
+}
+
 /* ============================================
    BASE STYLES
    ============================================ */
@@ -101,6 +162,13 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   min-height: 100dvh;
+  transition: background-color 280ms ease, color 280ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 @media (max-width: 767px) {

@@ -180,14 +180,22 @@ export function TerminalAudioPlayer() {
     return () => { unsubscribe() }
   }, [])
 
-  // Animate frequency bars — only while playing (saves mobile CPU)
+  // Animate frequency bars — only while playing; throttle on mobile / hidden tab
   useEffect(() => {
     if (!state.isPlaying) {
       setBars(new Array(16).fill(0.1))
       return
     }
 
+    let frame = 0
+    const stride = isMobile ? 3 : 1
+
     const updateBars = () => {
+      animationRef.current = requestAnimationFrame(updateBars)
+      if (document.visibilityState === 'hidden') return
+      frame += 1
+      if (frame % stride !== 0) return
+
       const freqData = getFrequencyData()
       const newBars: number[] = []
 
@@ -202,12 +210,11 @@ export function TerminalAudioPlayer() {
       }
 
       setBars(newBars)
-      animationRef.current = requestAnimationFrame(updateBars)
     }
 
     updateBars()
     return () => cancelAnimationFrame(animationRef.current)
-  }, [state.isPlaying])
+  }, [state.isPlaying, isMobile])
 
   const handlePlayPause = useCallback(() => {
     initAudioEngine()

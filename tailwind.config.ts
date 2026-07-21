@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         black: '#000000',
-        void: '#0a0a0a',
+        void: 'rgb(var(--void-rgb) / <alpha-value>)',
         white: '#EFEFEF',
         grey: {
           dark: '#1A1A1A',
@@ -21,11 +21,11 @@ const config: Config = {
           dark: '#8B0000',
           bright: '#CC0000',
         },
-        blood: '#8B0000',
-        arterial: '#CC0000',
+        blood: 'rgb(var(--blood-rgb) / <alpha-value>)',
+        arterial: 'rgb(var(--arterial-rgb) / <alpha-value>)',
         bruise: '#1a0a1a',
         infection: '#0a1a0a',
-        signal: '#00ff41',
+        signal: 'var(--signal)',
       },
       fontFamily: {
         display: ['CyberpunkCity', 'Archivo Black', 'sans-serif'],

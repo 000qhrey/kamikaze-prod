@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { LenisProvider } from '@/providers/LenisProvider'
 import { CursorProvider } from '@/providers/CursorProvider'
 import { TransitionProvider } from '@/providers/TransitionProvider'
+import { ThemeProvider } from '@/providers/ThemeProvider'
 import { SiteMenu } from '@/components/layout/SiteMenu'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { Footer } from '@/components/layout/Footer'
@@ -97,20 +98,16 @@ export function AppShell({ children }: AppShellProps) {
 
   // Homepage: stripped cyberpunk chrome (boot/cursor/sigil/footer), but
   // shares SiteMenu + minimized music bar with every other route.
-  if (isHome) {
-    return (
-      <>
-        <FontLoader />
-        <SiteMenu />
-        <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
-          <PageTransition>{children}</PageTransition>
-        </main>
-        {hasBooted && <TerminalAudioPlayer />}
-      </>
-    )
-  }
-
-  return (
+  const shell = isHome ? (
+    <>
+      <FontLoader />
+      <SiteMenu />
+      <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
+        <PageTransition>{children}</PageTransition>
+      </main>
+      {hasBooted && <TerminalAudioPlayer />}
+    </>
+  ) : (
     <>
       {/* Load fonts with correct base path */}
       <FontLoader />
@@ -144,4 +141,6 @@ export function AppShell({ children }: AppShellProps) {
       </LenisProvider>
     </>
   )
+
+  return <ThemeProvider>{shell}</ThemeProvider>
 }

@@ -11,19 +11,22 @@ export interface Event {
   isSecretLocation?: boolean
   isFullyRedacted?: boolean
   isDateHidden?: boolean
+  /** Homepage featured event — only one should be true */
+  featured?: boolean
   tbdFields?: ('venue' | 'lineup' | 'date')[]
 }
 
 export const events: Event[] = [
   {
     id: 'kamikaze-override',
-    name: 'KAMIKAZE OVERRIDE',
+    name: 'OVERRIDE',
     date: '2026-09-04',
     venue: 'Undisclosed',
     city: 'Trivandrum',
     lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
+    featured: true,
     description: 'Venue, lineup, and tickets coming soon.',
     isSecretLocation: true,
     tbdFields: ['venue', 'lineup'],
@@ -35,14 +38,20 @@ export const events: Event[] = [
     venue: 'UNKNOWN',
     city: 'UNKNOWN',
     lineup: ['█████████', '███████', '██████'],
-    isPast: false,
-    description: 'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
+    isPast: true,
+    description:
+      'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
     isFullyRedacted: true,
   },
 ]
 
 export function getUpcomingEvents(): Event[] {
   return events.filter((e) => !e.isPast)
+}
+
+/** Single homepage feature — OVERRIDE */
+export function getFeaturedEvent(): Event | undefined {
+  return events.find((e) => e.featured && !e.isPast) ?? getUpcomingEvents()[0]
 }
 
 export function getPastEvents(): Event[] {
@@ -55,11 +64,13 @@ export function getEventById(id: string): Event | undefined {
 
 export function formatEventDate(dateStr: string): string {
   const date = new Date(dateStr)
-  return date.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).replace(/\//g, '.')
+  return date
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '.')
 }
 
 /** Day redacted — month and year only (e.g. XX.09.2026) */

@@ -12,23 +12,38 @@ export const HOME_COPY = {
 
   hero: {
     metaStack: ['TECHNO', 'COLLECTIVE', 'UNDERGROUND'] as const,
-    tagline: "WE DON'T\nTHROW EVENTS.\n\nWE BUILD\nMOMENTS.",
+    tagline: "WE DON'T THROW EVENTS.\nWE BUILD MOMENTS.",
     est: 'EST. MMXXVI',
     scroll: 'SCROLL',
   },
 
+  events: {
+    label: 'UPCOMING EVENTS',
+    locationTbd: 'LOCATION TBA',
+    cta: 'DETAILS →',
+    viewAll: 'ALL EVENTS →',
+  },
+
   residents: {
-    label: 'RESIDENTS',
+    label: 'THE COLLECTIVE',
     heading: 'ONE NAME.\nONE ROOM.',
     viewAll: 'VIEW ALL →',
     role: (n: number) => `RESIDENT · ${String(n).padStart(3, '0')}`,
   },
 
+  telemetry: {
+    frequency: 'FREQUENCY',
+    transmission: 'TRANSMISSION',
+    signal: 'SIGNAL STRENGTH',
+    live: 'LIVE FEED',
+  },
+
   sigil: {
-    label: 'SIGIL',
+    label: 'MANIFESTO',
     heading: 'LEVIATHANS\nIN THE\nDARK.',
     caption: 'KAMIKAZE / MMXXVI',
     zone: 'UNDERGROUND',
+    readMore: 'READ MORE →',
   },
 
   footer: {

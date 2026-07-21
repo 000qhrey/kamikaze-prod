@@ -12,6 +12,7 @@ import { DataStreamBar } from '@/components/layout/DataStreamBar'
 import { AscendButton } from '@/components/layout/AscendButton'
 import { MarqueeGlitch } from '@/components/effects/MarqueeGlitch'
 import { FOOTER_NAV } from '@/data/navigation'
+import { KillSwitch } from '@/components/layout/KillSwitch'
 import { HOME_COPY } from './homeCopy'
 
 const GLITCH_CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`'
@@ -87,8 +88,8 @@ export function HomeFooter() {
               0deg,
               transparent,
               transparent 2px,
-              rgba(204, 0, 0, 0.1) 2px,
-              rgba(204, 0, 0, 0.1) 4px
+              color-mix(in srgb, var(--arterial) 12%, transparent) 2px,
+              color-mix(in srgb, var(--arterial) 12%, transparent) 4px
             )`,
           }}
         />
@@ -136,23 +137,29 @@ export function HomeFooter() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#9f9fa9]/10">
-            <div className="font-mono text-[10px] text-[#9f9fa9] tracking-wider flex flex-wrap items-center justify-center sm:justify-start gap-x-1">
-              <span>&copy; {new Date().getFullYear()} Kamikaze</span>
-              <span className="text-[#9f9fa9]/40">{'//'}</span>
-              <span>UNDERGROUND</span>
-              <span className="text-[#9f9fa9]/40">{'//'}</span>
-              <span>STAY_UNDERGROUND</span>
-              <span className="text-[#9f9fa9]/40">{'//'}</span>
-              <Link
-                href="/privacy"
-                className="text-[#9f9fa9]/60 hover:text-arterial transition-colors"
-              >
-                PRIVACY
-              </Link>
+          <div className="flex flex-col gap-4 pt-6 border-t border-[#9f9fa9]/10">
+            <div className="flex items-center justify-center sm:justify-start">
+              <KillSwitch />
             </div>
 
-            <AscendButton />
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="font-mono text-[10px] text-[#9f9fa9] tracking-wider flex flex-wrap items-center justify-center sm:justify-start gap-x-1">
+                <span>&copy; {new Date().getFullYear()} Kamikaze</span>
+                <span className="text-[#9f9fa9]/40">{'//'}</span>
+                <span>UNDERGROUND</span>
+                <span className="text-[#9f9fa9]/40">{'//'}</span>
+                <span>STAY_UNDERGROUND</span>
+                <span className="text-[#9f9fa9]/40">{'//'}</span>
+                <Link
+                  href="/privacy"
+                  className="text-[#9f9fa9]/60 hover:text-arterial transition-colors"
+                >
+                  PRIVACY
+                </Link>
+              </div>
+
+              <AscendButton />
+            </div>
           </div>
         </div>
       </div>
