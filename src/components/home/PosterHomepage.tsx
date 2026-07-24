@@ -711,9 +711,10 @@ function PanelEvents() {
   if (!event) return null
 
   const dateLabel = formatEventDate(event.date)
-  const location =
-    event.isSecretLocation || event.tbdFields?.includes('venue')
-      ? HOME_COPY.events.locationTbd
+  const location = event.isSecretLocation
+    ? HOME_COPY.events.locationTbd
+    : event.tbdFields?.includes('venue')
+      ? `${event.city}, India`
       : `${event.venue} · ${event.city}`
 
   return (

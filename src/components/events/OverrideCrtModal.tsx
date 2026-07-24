@@ -156,7 +156,9 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
   if (!isOpen) return null
 
   const dateLabel = formatEventDatePartial(event.date)
-  const locationLabel = event.isSecretLocation ? 'LOCATION TBA' : event.city.toUpperCase()
+  const locationLabel = event.isSecretLocation
+    ? 'LOCATION TBA'
+    : `${event.city.toUpperCase()}, INDIA`
 
   return (
     <div
@@ -430,9 +432,17 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                   <p className="font-mono text-[7px] sm:text-[8px] tracking-[0.35em] text-white/30 uppercase mb-1 sm:mb-2">
                     Channels
                   </p>
-                  <div className="grid grid-cols-3 gap-1 sm:gap-2">
+                  <div
+                    className={clsx(
+                      'grid gap-1 sm:gap-2',
+                      channels.length > 3 ? 'grid-cols-3 sm:grid-cols-3' : 'grid-cols-3'
+                    )}
+                  >
                     {channels.map((artist, i) => {
                       const selected = i === channelIndex
+                      const status = artist.isOpenCall ? 'CALL' : 'LIVE'
+                      const shortName =
+                        artist.name === 'COMPETITION WINNER' ? 'OPEN' : artist.name
                       return (
                         <button
                           key={artist.id}
@@ -464,7 +474,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                                 )}
                               >
                                 {channelLabel(i)}
-                                {selected ? '·L' : ''}
+                                {selected ? `·${status[0]}` : ''}
                               </p>
                               <p
                                 className={clsx(
@@ -472,7 +482,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                                   selected ? 'text-white' : 'text-white/60'
                                 )}
                               >
-                                {artist.name}
+                                {shortName}
                               </p>
                             </div>
                           </div>
@@ -484,7 +494,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                               )}
                             >
                               {channelLabel(i)}
-                              {selected ? ' · LIVE' : ''}
+                              {selected ? ` · ${status}` : ''}
                             </p>
                             <p
                               className={clsx(
@@ -492,7 +502,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                                 selected ? 'text-white' : 'text-white/55'
                               )}
                             >
-                              {artist.name}
+                              {shortName}
                             </p>
                           </div>
                         </button>
@@ -527,7 +537,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                     {tuning ? 'TUNING…' : '← TUNE →'}
                   </span>
                   <span className="font-mono text-[7px] sm:text-[8px] text-white/30 tracking-[0.2em] mt-0.5">
-                    3 CHANNELS
+                    {channels.length} CHANNELS
                   </span>
                 </div>
                 <CrtKnob
@@ -598,13 +608,18 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
 function ArtistDossier({ artist, channel }: { artist: Artist; channel: string }) {
   const blurb = artist.blurb ?? artist.bio.split('\n')[0]
+  const isOpenCall = Boolean(artist.isOpenCall)
+  // Next <Link> already prefixes basePath — do not use getAssetPath here
+  const profileHref = `/artists/${artist.slug}`
+  const ctaHref = artist.ctaHref ?? profileHref
+  const ctaLabel = artist.ctaLabel ?? (isOpenCall ? 'SEND YOUR MIX →' : 'VIEW FULL PROFILE →')
 
   return (
     <div className="flex flex-col flex-1 min-h-0 p-2.5 sm:p-4 overflow-hidden gap-2 sm:gap-3">
       <div className="space-y-2 sm:space-y-3">
         <div>
           <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.35em] text-signal mb-0.5">
-            CH {channel} · LIVE
+            CH {channel} · {isOpenCall ? 'OPEN CALL' : 'LIVE'}
           </p>
           <h3 className="font-display text-lg sm:text-2xl text-white tracking-wide leading-none">
             {artist.name}
@@ -616,20 +631,21 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
 
         <div>
           <p className="font-mono text-[7px] sm:text-[8px] tracking-[0.35em] text-white/30 uppercase mb-0.5 sm:mb-1">
-            Biography
+            {isOpenCall ? 'Brief' : 'Biography'}
           </p>
-          <p className="font-mono text-[10px] sm:text-[11px] text-white/60 leading-snug line-clamp-2 sm:line-clamp-3">
-            {blurb}
+          <p className="font-mono text-[10px] sm:text-[11px] text-white/60 leading-snug line-clamp-3 sm:line-clamp-4">
+            {isOpenCall
+              ? 'Do you have what it takes to open our night? Send your mix — you might open OVERRIDE.'
+              : blurb}
           </p>
         </div>
 
-        {/* Origin + genre on one dense row (mobile), stacked on desktop */}
         <div className="font-mono text-[9px] sm:text-[10px] grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1 sm:space-y-1 sm:block">
           <MetaRow label="Origin" value={artist.origin ?? artist.location} />
           <MetaRow label="Genre" value={artist.genre ?? '—'} />
         </div>
 
-        {(artist.socials.instagram || artist.socials.soundcloud) && (
+        {!isOpenCall && (artist.socials.instagram || artist.socials.soundcloud) && (
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             {artist.socials.instagram && (
               <a
@@ -656,7 +672,7 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
       </div>
 
       <Link
-        href={`/artists/${artist.slug}`}
+        href={isOpenCall ? ctaHref : profileHref}
         className={clsx(
           'mt-auto shrink-0 relative block w-full text-center',
           'font-mono text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em]',
@@ -665,8 +681,16 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
           'active:bg-arterial active:text-void hover:bg-arterial hover:text-void transition-colors'
         )}
       >
-        VIEW FULL PROFILE →
+        {ctaLabel}
       </Link>
+      {isOpenCall && (
+        <Link
+          href={profileHref}
+          className="shrink-0 font-mono text-[9px] tracking-[0.2em] text-center text-white/40 hover:text-white/70 transition-colors"
+        >
+          READ THE BRIEF →
+        </Link>
+      )}
     </div>
   )
 }

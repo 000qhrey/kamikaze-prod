@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Artist } from '@/data/artists'
 import { ARTIST_DETAIL } from '@/data/siteCopy'
 import clsx from 'clsx'
@@ -29,14 +30,45 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
   }, [])
 
   const bioParagraphs = artist.bio.split('\n\n').filter(Boolean)
+  const isOpenCall = Boolean(artist.isOpenCall)
+  // Next <Link> prefixes basePath — keep app-relative paths
+  const ctaHref = artist.ctaHref ?? '/artists'
+  const ctaLabel = artist.ctaLabel ?? 'SEND YOUR MIX →'
 
   return (
     <div className="relative max-w-6xl mx-auto px-6 pb-32">
+      {isOpenCall && (
+        <section className="mb-16 md:ml-[20%]">
+          <div className="border border-arterial/50 bg-arterial/10 p-6 md:p-8 max-w-xl">
+            <p className="font-mono text-[10px] tracking-[0.35em] text-arterial mb-3">
+              [OPEN CALL // OVERRIDE]
+            </p>
+            <p className="font-display text-xl md:text-2xl text-white leading-snug mb-4">
+              Do you have what it takes to open our night?
+            </p>
+            <p className="font-mono text-sm text-white/60 leading-relaxed mb-6">
+              Send us your mix and you might be the one to open this legendary
+              night in Trivandrum.
+            </p>
+            <Link
+              href={ctaHref}
+              className={clsx(
+                'inline-block font-mono text-xs tracking-[0.3em]',
+                'px-5 py-3 border border-arterial text-arterial',
+                'hover:bg-arterial hover:text-void transition-colors'
+              )}
+            >
+              {ctaLabel}
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Bio section - pushed to the right with left border */}
       <section className="mb-24 md:ml-[20%]">
         <div className="flex items-start gap-4 mb-8">
           <span className="font-mono text-xs text-arterial tracking-widest">
-            [BIO]
+            {isOpenCall ? '[BRIEF]' : '[BIO]'}
           </span>
           <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>
@@ -184,6 +216,11 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
       )}
 
       {/* Socials - terminal style */}
+      {!isOpenCall &&
+        (artist.socials.instagram ||
+          artist.socials.soundcloud ||
+          artist.socials.bandcamp ||
+          artist.socials.spotify) && (
       <section>
         <div className="flex items-start gap-4 mb-8">
           <span className="font-mono text-xs text-arterial tracking-widest">
@@ -259,6 +296,22 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
           )}
         </div>
       </section>
+      )}
+
+      {isOpenCall && (
+        <section className="md:ml-[20%]">
+          <Link
+            href={ctaHref}
+            className={clsx(
+              'inline-block font-mono text-xs tracking-[0.3em]',
+              'px-5 py-3 bg-arterial text-void',
+              'hover:bg-white transition-colors'
+            )}
+          >
+            {ctaLabel}
+          </Link>
+        </section>
+      )}
     </div>
   )
 }

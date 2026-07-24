@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1024" viewBox="0 0 720 1024" fill="none">
+  <rect width="720" height="1024" fill="#0a0a0a"/>
+  <defs>
+    <radialGradient id="g" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#5c080c"/>
+      <stop offset="55%" stop-color="#1a0505"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+    <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#000" fill-opacity="0.45"/>
+    </pattern>
+  </defs>
+  <rect width="720" height="1024" fill="url(#g)"/>
+  <rect width="720" height="1024" fill="url(#scan)"/>
+  <!-- corner brackets -->
+  <path d="M48 48h72M48 48v72" stroke="#cc0000" stroke-width="3"/>
+  <path d="M672 48h-72M672 48v72" stroke="#cc0000" stroke-width="3"/>
+  <path d="M48 976h72M48 976v-72" stroke="#cc0000" stroke-width="3"/>
+  <path d="M672 976h-72M672 976v-72" stroke="#cc0000" stroke-width="3"/>
+  <text x="360" y="470" text-anchor="middle" fill="#cc0000" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="44" letter-spacing="0.28em">OPEN SLOT</text>
+  <text x="360" y="520" text-anchor="middle" fill="#888" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="16" letter-spacing="0.35em">COMPETITION // CH 05</text>
+  <text x="360" y="580" text-anchor="middle" fill="#555" font-family="IBM Plex Mono, ui-monospace, monospace" font-size="13" letter-spacing="0.22em">SEND MIX // OPEN THE NIGHT</text>
+</svg>

@@ -165,7 +165,9 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
               <span>{getDisplayDate()}</span>
               {' // '}
               <span className="text-arterial font-medium">
-                {isSecretLocation ? 'LOCATION TBA' : event.city.toUpperCase()}
+                {isSecretLocation
+                  ? 'LOCATION TBA'
+                  : `${event.city.toUpperCase()}, INDIA`}
               </span>
             </div>
 
