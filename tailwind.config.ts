@@ -28,9 +28,24 @@ const config: Config = {
         signal: 'var(--signal)',
       },
       fontFamily: {
-        display: ['CyberpunkCity', 'Archivo Black', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
-        ritual: ['CyberpunkCity', 'Archivo Black', 'sans-serif'],
+        display: [
+          'CyberpunkCity',
+          'var(--font-archivo-black)',
+          'Archivo Black',
+          'sans-serif',
+        ],
+        mono: [
+          'var(--font-ibm-plex-mono)',
+          'IBM Plex Mono',
+          'ui-monospace',
+          'monospace',
+        ],
+        ritual: [
+          'CyberpunkCity',
+          'var(--font-archivo-black)',
+          'Archivo Black',
+          'sans-serif',
+        ],
       },
       fontSize: {
         'hero': 'clamp(4rem, 15vw, 10rem)',

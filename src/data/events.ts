@@ -5,6 +5,8 @@ export interface Event {
   venue: string
   city: string
   lineup: string[]
+  /** Optional artist slugs for CRT / rich lineup UI */
+  lineupArtistSlugs?: string[]
   ticketUrl?: string
   isPast: boolean
   description?: string
@@ -23,13 +25,15 @@ export const events: Event[] = [
     date: '2026-09-04',
     venue: 'Undisclosed',
     city: 'Trivandrum',
-    lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
+    lineup: ['ANSHE', 'SIREN', 'IBLIIIZ'],
+    /** Artist slugs for CRT channel surf — order = channel order */
+    lineupArtistSlugs: ['anshe', 'siren', 'ibliiiz'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
     featured: true,
-    description: 'Venue, lineup, and tickets coming soon.',
+    description: 'A night of hard techno. Venue and tickets coming soon.',
     isSecretLocation: true,
-    tbdFields: ['venue', 'lineup'],
+    tbdFields: ['venue'],
   },
   {
     id: 'redacted-session-01',

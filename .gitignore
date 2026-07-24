@@ -39,4 +39,7 @@ next-env.d.ts
 CLAUDE.md
 .implementation_plan.md
 
+# Press kit dumps (large; curated assets live in public/artists)
+.agent/presskits/
+
 

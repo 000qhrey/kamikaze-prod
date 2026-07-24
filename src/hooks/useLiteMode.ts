@@ -12,14 +12,14 @@ export function checkLiteMode(): boolean {
 
 /**
  * Skip hero WebGL (logo.glb) — static sigil image instead.
- * Reduced motion, or coarse pointer on a small viewport (typical phones).
+ * Phones, touch viewports, and reduced motion never mount R3F.
  */
 export function checkSkipHeroWebGL(): boolean {
   if (typeof window === 'undefined') return false
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
-  const coarse = window.matchMedia('(pointer: coarse)').matches
-  const small = window.matchMedia('(max-width: 767px)').matches
-  return coarse && small
+  if (window.matchMedia('(max-width: 767px)').matches) return true
+  if (window.matchMedia('(pointer: coarse)').matches) return true
+  return checkIsMobile()
 }
 
 export function useLiteMode(): boolean {

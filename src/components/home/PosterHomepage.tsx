@@ -26,6 +26,7 @@ import { useLiteMode, useSkipHeroWebGL } from '@/hooks/useLiteMode'
 import { HOME_COPY, CONSTANT } from './homeCopy'
 import { HomeFooter } from './HomeFooter'
 import { SunLogoStatic } from './SunLogoStatic'
+import { EventFeatureVisual } from './EventFeatureVisual'
 
 const SunLogo3D = dynamic(
   () => import('./SunLogo3D').then((m) => m.SunLogo3D),
@@ -465,8 +466,29 @@ function EnglishWordmark() {
 
 function HeroSunStack({ reduced }: { reduced: boolean }) {
   const skipWebGL = useSkipHeroWebGL()
+  const lite = useLiteMode()
+  // Defer WebGL chunk until after first paint / idle so static LCP wins first
+  const [allowWebGL, setAllowWebGL] = useState(false)
   const [hovered, setHovered] = useState(false)
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (skipWebGL || lite) {
+      setAllowWebGL(false)
+      return
+    }
+    let cancelled = false
+    const enable = () => {
+      if (!cancelled) setAllowWebGL(true)
+    }
+    const ric = window.requestIdleCallback?.(enable, { timeout: 2200 })
+    const timer = window.setTimeout(enable, 2500)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+      if (ric != null && window.cancelIdleCallback) window.cancelIdleCallback(ric)
+    }
+  }, [skipWebGL, lite])
 
   const onEnter = useCallback(() => setHovered(true), [])
   const onLeave = useCallback(() => {
@@ -487,6 +509,8 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
     [],
   )
 
+  const useStatic = skipWebGL || lite || !allowWebGL
+
   return (
     <div
       className={['k-hero-sun-stack', hovered ? 'k-hero-sun-stack--hover' : '']
@@ -500,7 +524,7 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
       <div className="k-hero-sun-bloom" />
       <div className="k-hero-sun">
         <div className="k-hero-sun-crt" />
-        {skipWebGL ? (
+        {useStatic ? (
           <SunLogoStatic />
         ) : (
           <SunLogo3D reduced={reduced} hovered={hovered} />
@@ -705,10 +729,7 @@ function PanelEvents() {
           className="k-event-feature"
           aria-label={`${event.name}, ${dateLabel}`}
         >
-          <div className="k-event-feature-visual" aria-hidden>
-            <div className="k-event-feature-glow" />
-            <span className="k-event-feature-cross">+</span>
-          </div>
+          <EventFeatureVisual artistSlugs={event.lineupArtistSlugs ?? []} />
           <div className="k-event-feature-meta">
             <span className="k-event-feature-date">{dateLabel}</span>
             <span className="k-event-feature-name">{event.name}</span>
@@ -1080,7 +1101,7 @@ function PosterStyles() {
         cursor: auto !important;
         background: var(--void);
         color: var(--k-bone);
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
         overflow-x: hidden;
       }
       body.k-home-body,
@@ -1104,7 +1125,7 @@ function PosterStyles() {
         min-height: 100dvh;
         background: var(--void);
         color: var(--k-bone);
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
         font-size: 15px;
         line-height: 1.55;
         overflow-x: clip;
@@ -1120,6 +1141,15 @@ function PosterStyles() {
         box-sizing: border-box;
         isolation: isolate;
         color: var(--k-bone);
+      }
+
+      /* Skip layout/paint for below-fold panels until near viewport (INP/LCP) */
+      .k-panel--telemetry,
+      .k-panel--events,
+      .k-panel--collective,
+      .k-panel--sigil {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 100svh;
       }
 
       .k-panel + .k-panel::before {
@@ -1161,7 +1191,7 @@ function PosterStyles() {
 
       /* Clears the fixed SiteMenu topbar (mounted in AppShell) */
       .k-hero-topbar-spacer {
-        height: 2.5rem;
+        height: calc(env(safe-area-inset-top, 0px) + 2.75rem);
         pointer-events: none;
       }
 
@@ -1235,7 +1265,7 @@ function PosterStyles() {
         display: flex;
         flex-direction: column;
         gap: 4px;
-        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+        font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
         font-weight: 600;
         font-size: clamp(10px, 1.1vw, 12px);
         color: var(--k-red);
@@ -1771,25 +1801,147 @@ function PosterStyles() {
       .k-event-feature-glow {
         position: absolute;
         inset: 0;
+        z-index: 0;
         background:
           radial-gradient(
-            ellipse 80% 70% at 40% 40%,
-            color-mix(in srgb, var(--k-thermal-mid) 45%, transparent) 0%,
-            transparent 70%
+            ellipse 70% 65% at 50% 48%,
+            color-mix(in srgb, var(--k-red) 38%, transparent) 0%,
+            color-mix(in srgb, var(--k-thermal-mid) 18%, transparent) 42%,
+            transparent 72%
           ),
           repeating-linear-gradient(
             0deg,
-            rgba(0, 0, 0, 0.35) 0 2px,
+            rgba(0, 0, 0, 0.4) 0 2px,
             transparent 2px 4px
           );
+        transition: opacity 160ms ease;
+      }
+      .k-event-feature-sigil {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        transition: opacity 120ms ease, filter 160ms ease, transform 200ms ease;
+      }
+      .k-event-feature-sigil img {
+        width: min(58%, 160px);
+        height: auto;
+        object-fit: contain;
+        opacity: 0.92;
+        filter:
+          brightness(0.9)
+          sepia(1)
+          saturate(9)
+          hue-rotate(-25deg)
+          contrast(1.2)
+          drop-shadow(0 0 18px color-mix(in srgb, var(--k-red) 45%, transparent));
+        animation: k-event-sigil-idle 4.2s ease-in-out infinite;
+      }
+      @keyframes k-event-sigil-idle {
+        0%,
+        100% {
+          transform: rotate(0deg) scale(1);
+          opacity: 0.88;
+        }
+        50% {
+          transform: rotate(6deg) scale(1.04);
+          opacity: 1;
+        }
+      }
+      .k-event-feature-feed {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        opacity: 0;
+        pointer-events: none;
+        background-color: #050505;
+        background-size: cover;
+        background-position: center 20%;
+        background-repeat: no-repeat;
+        filter: contrast(1.15) saturate(0.85) brightness(0.92);
+        transition: opacity 60ms linear;
+      }
+      .k-event-feature-feed::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.55) 0%,
+            transparent 45%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.45) 0 1px,
+            transparent 1px 3px
+          );
+        mix-blend-mode: multiply;
+      }
+      .k-event-feature-visual[data-surf='true'] .k-event-feature-sigil {
+        opacity: 0;
+      }
+      .k-event-feature-visual[data-surf='true'] .k-event-feature-glow {
+        opacity: 0.35;
+      }
+      .k-event-feature-visual[data-surf='true'] .k-event-feature-feed {
+        opacity: 1;
+        animation: k-event-feed-glitch 0.22s steps(3) infinite;
+      }
+      @keyframes k-event-feed-glitch {
+        0%,
+        100% {
+          transform: translate3d(0, 0, 0);
+          clip-path: inset(0 0 0 0);
+          filter:
+            contrast(1.15) saturate(0.85) brightness(0.92)
+            drop-shadow(0 0 0 transparent);
+        }
+        33% {
+          transform: translate3d(-3px, 0, 0);
+          clip-path: inset(12% 0 48% 0);
+          filter:
+            contrast(1.25) saturate(1.1) brightness(1.05)
+            drop-shadow(-3px 0 0 color-mix(in srgb, var(--k-red) 55%, transparent))
+            drop-shadow(3px 0 0 rgba(255, 255, 255, 0.2));
+        }
+        66% {
+          transform: translate3d(3px, 1px, 0);
+          clip-path: inset(50% 0 18% 0);
+          filter:
+            contrast(1.2) saturate(0.7) brightness(0.95)
+            drop-shadow(2px 0 0 color-mix(in srgb, var(--k-red) 40%, transparent))
+            drop-shadow(-2px 0 0 rgba(255, 255, 255, 0.18));
+        }
       }
       .k-event-feature-cross {
         position: absolute;
         top: 8px;
         right: 10px;
+        z-index: 3;
         color: var(--k-red);
         font-family: 'IBM Plex Mono', monospace;
         font-size: 14px;
+      }
+      .k-event-feature-ch {
+        position: absolute;
+        left: 10px;
+        bottom: 8px;
+        z-index: 3;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        color: var(--k-red);
+        text-shadow: 0 0 8px color-mix(in srgb, var(--k-red) 50%, transparent);
+      }
+      .k-home[data-reduced='true'] .k-event-feature-sigil img,
+      .k-home[data-lite='true'] .k-event-feature-sigil img {
+        animation: none;
+      }
+      .k-home[data-reduced='true'] .k-event-feature-visual[data-surf='true'] .k-event-feature-feed,
+      .k-home[data-lite='true'] .k-event-feature-visual[data-surf='true'] .k-event-feature-feed {
+        animation: none;
       }
       .k-event-feature-meta {
         display: flex;
@@ -1805,11 +1957,11 @@ function PosterStyles() {
         color: var(--k-red);
       }
       .k-event-feature-name {
-        font-family: 'Archivo', 'Archivo Black', system-ui, sans-serif;
-        font-weight: 900;
-        font-stretch: 125%;
-        font-size: clamp(36px, 5vw, 64px);
-        letter-spacing: -0.02em;
+        /* Same ritual face as hero wordmark — less razor than Archivo */
+        font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
+        font-weight: 400;
+        font-size: clamp(40px, 5.5vw, 68px);
+        letter-spacing: 0.04em;
         line-height: 0.95;
         text-transform: uppercase;
         color: var(--k-bone);
@@ -2604,22 +2756,28 @@ function PosterStyles() {
         .k-hero {
           min-height: 100svh;
           min-height: 100dvh;
-          overflow: visible;
+          overflow: hidden;
+        }
+        .k-hero-topbar-spacer {
+          height: calc(env(safe-area-inset-top, 0px) + 3rem);
         }
         .k-hero-stage {
           padding:
-            12px
+            calc(env(safe-area-inset-top, 0px) + 3.25rem)
             var(--k-page-gutter)
             clamp(20px, 3.5vh, 40px);
           grid-template-columns: 1fr;
           grid-template-rows: auto 1fr auto;
-          gap: 12px;
+          gap: 10px;
         }
         .k-hero-flank--left {
           grid-column: 1;
           grid-row: 1;
           margin-top: 0;
           justify-self: start;
+          align-self: start;
+          max-width: calc(100vw - 2 * var(--k-page-gutter) - 7.5rem);
+          padding-right: 0.5rem;
         }
         .k-hero-flank--right {
           grid-column: 1;
@@ -2634,23 +2792,24 @@ function PosterStyles() {
           width: min(100%, calc(100vw - 2 * var(--k-page-gutter)));
         }
         .k-hero-metastack {
-          font-size: 9px;
-          flex-direction: row;
-          flex-wrap: wrap;
-          gap: 8px;
-          letter-spacing: 0.18em;
+          font-size: 8px;
+          flex-direction: column;
+          flex-wrap: nowrap;
+          gap: 2px;
+          letter-spacing: 0.16em;
+          line-height: 1.3;
         }
         .k-hero-mark {
           min-height: clamp(200px, 38vh, 360px);
         }
         .k-hero-sun-stack {
-          width: min(88vw, 460px);
-          height: min(88vw, 460px);
+          width: min(82vw, 420px);
+          height: min(82vw, 420px);
         }
         .k-hero-bottom {
           left: var(--k-page-gutter);
           right: var(--k-page-gutter);
-          bottom: 22px;
+          bottom: calc(22px + env(safe-area-inset-bottom, 0px));
         }
         .k-hero-wordmark {
           font-size: clamp(28px, 11cqi, 80px);
@@ -2658,6 +2817,9 @@ function PosterStyles() {
         }
         .k-hero-sun-logo {
           inset: -10%;
+        }
+        .k-hero-sun-logo--static img {
+          transform: rotate(45deg);
         }
         .k-hero-tagline {
           font-size: 9px;
@@ -2668,6 +2830,13 @@ function PosterStyles() {
           display: none;
         }
 
+        .k-panel--events,
+        .k-panel--collective,
+        .k-panel--sigil {
+          padding-left: var(--k-page-gutter);
+          padding-right: var(--k-page-gutter);
+        }
+
         .k-telemetry {
           grid-template-columns: 1fr;
         }
@@ -2675,6 +2844,7 @@ function PosterStyles() {
         .k-event-feature {
           grid-template-columns: 1fr;
           max-width: none;
+          padding: clamp(14px, 3vw, 20px);
         }
         .k-event-feature-cta {
           align-self: start;
@@ -2728,8 +2898,19 @@ function PosterStyles() {
       }
 
       @media (max-width: 420px) {
+        .k-hero-flank--left {
+          max-width: calc(100vw - 2 * var(--k-page-gutter) - 6.5rem);
+        }
+        .k-hero-metastack {
+          font-size: 7px;
+          letter-spacing: 0.12em;
+        }
         .k-hero-wordmark {
           font-size: clamp(26px, 10.8vw, 56px);
+        }
+        .k-hero-sun-stack {
+          width: min(78vw, 360px);
+          height: min(78vw, 360px);
         }
       }
     `}</style>

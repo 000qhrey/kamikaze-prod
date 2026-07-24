@@ -1,49 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { LenisProvider } from '@/providers/LenisProvider'
-import { CursorProvider } from '@/providers/CursorProvider'
-import { TransitionProvider } from '@/providers/TransitionProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
-import { SiteMenu } from '@/components/layout/SiteMenu'
-import { PageTransition } from '@/components/layout/PageTransition'
-import { Footer } from '@/components/layout/Footer'
-import { ScrollTracker } from '@/components/layout/ScrollTracker'
-import { BootSequence } from '@/components/layout/BootSequence'
-import { FastBoot } from '@/components/layout/FastBoot'
-import { FontLoader } from '@/components/layout/FontLoader'
+import HomeShell from '@/components/layout/HomeShell'
 
-// Dynamic imports for performance - these don't block initial render
-const SigilScene3D = dynamic(
-  () => import('@/components/canvas/SigilScene3D'),
-  { ssr: false }
-)
-
-const DepthLayers = dynamic(
-  () => import('@/components/canvas/DepthLayers').then(mod => ({ default: mod.DepthLayers })),
-  { ssr: false }
-)
-
-const ScreenCorruption = dynamic(
-  () => import('@/components/effects/ScreenCorruption').then(mod => ({ default: mod.ScreenCorruption })),
-  { ssr: false }
-)
-
-const TerminalAudioPlayer = dynamic(
-  () => import('@/components/audio/TerminalAudioPlayer').then(mod => ({ default: mod.TerminalAudioPlayer })),
-  { ssr: false }
-)
-
-// localStorage key for visitor state
-const VISITOR_STORAGE_KEY = 'kamikaze_visitor'
-
-interface VisitorState {
-  firstVisit: string
-  visitCount: number
-  lastVisit: string
-}
+// Interior chrome (boot / cursor / Lenis / R3F sigil) — separate async chunk.
+// Keep SSR so interior static HTML still includes page chrome + content.
+const InteriorShell = dynamic(() => import('@/components/layout/InteriorShell'))
 
 interface AppShellProps {
   children: React.ReactNode
@@ -51,96 +15,15 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname()
-  // Homepage runs its own composition. Skip cyberpunk chrome (boot, sigil,
-  // cursor, footer) on `/` only. SiteMenu mounts on every route.
   const isHome = pathname === '/'
 
-  const [hasBooted, setHasBooted] = useState(false)
-  const [bootMode, setBootMode] = useState<'full' | 'fast' | 'none'>('none')
-
-  // Check visitor state on mount
-  useEffect(() => {
-    if (isHome) {
-      setBootMode('none')
-      setHasBooted(true)
-      return
-    }
-    try {
-      const stored = localStorage.getItem(VISITOR_STORAGE_KEY)
-
-      if (stored) {
-        // Returning visitor - update state and show fast boot
-        const visitor: VisitorState = JSON.parse(stored)
-        visitor.visitCount++
-        visitor.lastVisit = new Date().toISOString()
-        localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(visitor))
-        setBootMode('fast')
-      } else {
-        // First visit - create visitor record and show full boot
-        const newVisitor: VisitorState = {
-          firstVisit: new Date().toISOString(),
-          visitCount: 1,
-          lastVisit: new Date().toISOString(),
-        }
-        localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(newVisitor))
-        setBootMode('full')
-      }
-    } catch {
-      // localStorage unavailable (SSR or privacy mode) - show full boot
-      setBootMode('full')
-    }
-  }, [isHome])
-
-  const handleBootComplete = () => {
-    setHasBooted(true)
-    setBootMode('none')
-  }
-
-  // Homepage: stripped cyberpunk chrome (boot/cursor/sigil/footer), but
-  // shares SiteMenu + minimized music bar with every other route.
-  const shell = isHome ? (
-    <>
-      <FontLoader />
-      <SiteMenu />
-      <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
-        <PageTransition>{children}</PageTransition>
-      </main>
-      {hasBooted && <TerminalAudioPlayer />}
-    </>
-  ) : (
-    <>
-      {/* Load fonts with correct base path */}
-      <FontLoader />
-
-      {/* Boot sequence - full for first visit, fast for returning */}
-      {bootMode === 'full' && (
-        <BootSequence onComplete={handleBootComplete} />
+  return (
+    <ThemeProvider>
+      {isHome ? (
+        <HomeShell>{children}</HomeShell>
+      ) : (
+        <InteriorShell>{children}</InteriorShell>
       )}
-      {bootMode === 'fast' && (
-        <FastBoot onComplete={handleBootComplete} />
-      )}
-
-      {/* Global screen corruption overlay - responds to danger level */}
-      <ScreenCorruption />
-
-      {/* Main app */}
-      <ScrollTracker />
-      <SigilScene3D />
-      <LenisProvider>
-        <CursorProvider>
-          <TransitionProvider>
-            <SiteMenu />
-            <main className="relative z-10 pb-[calc(2.75rem+env(safe-area-inset-bottom,0px))]">
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <Footer />
-            <DepthLayers />
-            {hasBooted && <TerminalAudioPlayer />}
-          </TransitionProvider>
-        </CursorProvider>
-      </LenisProvider>
-    </>
+    </ThemeProvider>
   )
-
-  return <ThemeProvider>{shell}</ThemeProvider>
 }

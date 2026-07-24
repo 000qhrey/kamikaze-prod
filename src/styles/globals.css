@@ -3,26 +3,9 @@
 @tailwind utilities;
 
 /* ============================================
-   FONTS - Aggressive industrial typography
+   FONTS — Archivo / IBM Plex via next/font (layout.tsx CSS vars).
+   SD Cyberpunk City — FontLoader.tsx (correct basePath).
    ============================================ */
-
-@font-face {
-  font-family: 'Archivo Black';
-  src: url('https://fonts.gstatic.com/s/archivoblack/v21/HTxqL289NzCGg4MzN6KJ7eW6OYuP_x7yx3A.woff2') format('woff2');
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* SD Cyberpunk City - loaded via FontLoader.tsx for correct basePath */
 
 /* ============================================
    CSS VARIABLES
@@ -156,7 +139,7 @@ html {
 body {
   background-color: var(--void);
   color: var(--white);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
   font-size: var(--text-body);
   line-height: 1.6;
   overflow-x: hidden;
@@ -183,7 +166,7 @@ body {
    ============================================ */
 
 .font-display {
-  font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
+  font-family: 'CyberpunkCity', var(--font-archivo-black), 'Archivo Black', sans-serif;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -191,13 +174,13 @@ body {
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
   letter-spacing: var(--tracking-wide);
 }
 
 /* CyberpunkCity for ritual headlines */
 .font-ritual {
-  font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
+  font-family: 'CyberpunkCity', var(--font-archivo-black), 'Archivo Black', sans-serif;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.08em;

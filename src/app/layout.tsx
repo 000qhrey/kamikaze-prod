@@ -1,8 +1,38 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/next'
+import { Archivo, Archivo_Black, IBM_Plex_Mono } from 'next/font/google'
 import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
-import Script from "next/script";
+import Script from 'next/script'
+
+// Self-hosted at build time — no runtime Google Fonts CSS round-trips.
+// Preload display + body only; Archivo Black is secondary brand face.
+const archivo = Archivo({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  display: 'swap',
+  variable: '--font-archivo',
+  adjustFontFallback: true,
+  preload: true,
+})
+
+const archivoBlack = Archivo_Black({
+  subsets: ['latin'],
+  weight: '400',
+  display: 'swap',
+  variable: '--font-archivo-black',
+  adjustFontFallback: true,
+  preload: false,
+})
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  display: 'swap',
+  variable: '--font-ibm-plex-mono',
+  adjustFontFallback: true,
+  preload: true,
+})
 
 export const metadata: Metadata = {
   title: 'Kamikaze | The Room Is The Headliner',
@@ -31,7 +61,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-theme="pacific">
+    <html
+      lang="en"
+      data-theme="pacific"
+      className={`${archivo.variable} ${archivoBlack.variable} ${ibmPlexMono.variable}`}
+    >
       <head>
         {/* Apply stored theme before paint to avoid Pacific→Heatmap flash */}
         <script
@@ -39,13 +73,9 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('k-theme');if(t==='heatmap'||t==='pacific')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
           }}
         />
-        {/* 3D assets (logo.glb / draco) preload via useGLTF when Canvas mounts —
-            avoid competing with LCP on mobile / GH Pages static path */}
-        <Script
-        id="meta-pixel"
-        strategy="afterInteractive"
-      >
-        {`
+        {/* Third-party pixel — defer past LCP / hydration */}
+        <Script id="meta-pixel" strategy="lazyOnload">
+          {`
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
           n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -57,17 +87,9 @@ export default function RootLayout({
           fbq('init', '2234042430703510');
           fbq('track', 'PageView');
         `}
-      </Script>
-
-        {/* Display + mono — drop unused JP families / italic axes for smaller CSS */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400;700;900&family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-        />
+        </Script>
       </head>
-      <body className="bg-void text-white min-h-screen overflow-x-hidden">
+      <body className="bg-void text-white min-h-screen overflow-x-hidden font-mono">
         <AppShell>{children}</AppShell>
         <Analytics />
       </body>
