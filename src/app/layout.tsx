@@ -1,9 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { Archivo, Archivo_Black, IBM_Plex_Mono } from 'next/font/google'
 import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
 import Script from 'next/script'
+
+// Match next.config.js — GitHub Pages serves under /kamikaze
+const assetBase = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 
 // Self-hosted at build time — no runtime Google Fonts CSS round-trips.
 // Preload display + body only; Archivo Black is secondary brand face.
@@ -34,6 +37,13 @@ const ibmPlexMono = IBM_Plex_Mono({
   preload: true,
 })
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#0a0a0a',
+}
+
 export const metadata: Metadata = {
   title: 'Kamikaze | The Room Is The Headliner',
   description:
@@ -46,13 +56,24 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      {
+        url: `${assetBase}/favicon/favicon-32x32.png`,
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        url: `${assetBase}/favicon/favicon-16x16.png`,
+        sizes: '16x16',
+        type: 'image/png',
+      },
     ],
-    shortcut: '/favicon/favicon-32x32.png',
-    apple: { url: '/favicon/apple-touch-icon.png', sizes: '180x180' },
+    shortcut: `${assetBase}/favicon/favicon-32x32.png`,
+    apple: {
+      url: `${assetBase}/favicon/apple-touch-icon.png`,
+      sizes: '180x180',
+    },
   },
-  manifest: '/favicon/site.webmanifest',
+  manifest: `${assetBase}/favicon/site.webmanifest`,
 }
 
 export default function RootLayout({

@@ -28,33 +28,6 @@ export interface Artist {
 
 export const artists: Artist[] = [
   {
-    id: 'anshe',
-    name: 'ANSHE',
-    slug: 'anshe',
-    photo: '/artists/anshe.png',
-    location: 'India',
-    origin: 'India',
-    genre: 'Hard Techno',
-    activeSince: '2018',
-    bio: `AN’SHE (Priyanka Das) is a hard-techno operator built for peak pressure — precise, unsentimental, and locked to the floor. Her sets favour relentless pacing over soft landings: acid edges, industrial weight, and selections that keep bodies committed past the point of polite exit.
-
-On the road she runs a strict NXS2 brief (DJM + linked CDJs), treating every booth like a sealed transmission. For OVERRIDE she arrives as Channel 01 — the first frequency in the night’s pirate broadcast.`,
-    blurb:
-      'AN’SHE (Priyanka Das) — hard techno, peak pressure, zero soft landings. Channel 01 for OVERRIDE.',
-    tagline: 'signal locked // pressure incoming',
-    socials: {
-      instagram: 'https://instagram.com/anshemusic',
-      soundcloud: 'https://soundcloud.com/anshemusic',
-    },
-    mixes: [
-      {
-        title: 'AN’SHE // SoundCloud',
-        url: 'https://soundcloud.com/anshemusic',
-        platform: 'soundcloud',
-      },
-    ],
-  },
-  {
     id: 'siren',
     name: 'SIREN',
     slug: 'siren',
@@ -65,9 +38,9 @@ On the road she runs a strict NXS2 brief (DJM + linked CDJs), treating every boo
     activeSince: '—',
     bio: `SIREN333 is a rising force in the global hard-groove wave — originally from India, now based in Belgium. Fast, percussive techno with a hypnotic low-end signature: tension, release, and zero soft exits.
 
-She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Paganotto, and Lily Palmer, hitting stages including Awakenings, Decibel Outdoor, and DGTL India, with sets broadcast on HÖR Berlin and Rinse FM. Releases include the Throttle and Error EPs. On OVERRIDE she holds Channel 02 — the red channel.`,
+She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Paganotto, and Lily Palmer, hitting stages including Awakenings, Decibel Outdoor, and DGTL India, with sets broadcast on HÖR Berlin and Rinse FM. Releases include the Throttle and Error EPs. On OVERRIDE she holds Channel 01 — the red channel opens the night.`,
     blurb:
-      'SIREN333 — India → Belgium. Hard groove, Awakenings / Decibel / DGTL. Channel 02 — the red channel.',
+      'SIREN333 — India → Belgium. Hard groove, Awakenings / Decibel / DGTL. Channel 01 — the red channel.',
     tagline: 'red channel // no soft exits',
     socials: {
       instagram: 'https://instagram.com/siren333_',
@@ -77,6 +50,33 @@ She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Pagan
       {
         title: 'SIREN333 // SoundCloud',
         url: 'https://soundcloud.com/siren333-music',
+        platform: 'soundcloud',
+      },
+    ],
+  },
+  {
+    id: 'anshe',
+    name: 'ANSHE',
+    slug: 'anshe',
+    photo: '/artists/anshe.png',
+    location: 'India',
+    origin: 'India',
+    genre: 'Hard Techno',
+    activeSince: '2018',
+    bio: `AN’SHE (Priyanka Das) is a hard-techno operator built for peak pressure — precise, unsentimental, and locked to the floor. Her sets favour relentless pacing over soft landings: acid edges, industrial weight, and selections that keep bodies committed past the point of polite exit.
+
+On the road she runs a strict NXS2 brief (DJM + linked CDJs), treating every booth like a sealed transmission. For OVERRIDE she arrives as Channel 02 — locked pressure after the red channel opens.`,
+    blurb:
+      'AN’SHE (Priyanka Das) — hard techno, peak pressure, zero soft landings. Channel 02 for OVERRIDE.',
+    tagline: 'signal locked // pressure incoming',
+    socials: {
+      instagram: 'https://instagram.com/anshemusic',
+      soundcloud: 'https://soundcloud.com/anshemusic',
+    },
+    mixes: [
+      {
+        title: 'AN’SHE // SoundCloud',
+        url: 'https://soundcloud.com/anshemusic',
         platform: 'soundcloud',
       },
     ],

@@ -94,6 +94,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
     if (!isOpen) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    document.body.classList.add('k-crt-focus')
 
     const onKey = (e: KeyboardEvent) => {
       // TV mode: only POWER / [CLOSE] dismiss — Escape does not exit
@@ -110,6 +111,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
     window.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
+      document.body.classList.remove('k-crt-focus')
       window.removeEventListener('keydown', onKey)
     }
   }, [isOpen, boot, channels.length, changeChannel])
@@ -158,11 +160,23 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-stretch justify-center p-1.5 sm:p-3 md:p-4"
+      className="fixed inset-0 z-[220] flex items-stretch justify-center p-1.5 sm:p-3 md:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={`${event.name} transmission`}
     >
+      <style jsx global>{`
+        /* TV on — site chrome drops out of focus with the room */
+        body.k-crt-focus .k-site-topbar,
+        body.k-crt-focus .k-site-menu-overlay,
+        body.k-crt-focus .k-audio-bar,
+        body.k-crt-focus .k-audio-panel,
+        body.k-crt-focus .k-audio-sheet {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+      `}</style>
       {/* Room behind the set — blur + dim; eats clicks (POWER / CLOSE only dismiss) */}
       <div
         className="absolute inset-0"

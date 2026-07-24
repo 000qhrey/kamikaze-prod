@@ -25,9 +25,9 @@ export const events: Event[] = [
     date: '2026-09-04',
     venue: 'Undisclosed',
     city: 'Trivandrum',
-    lineup: ['ANSHE', 'SIREN', 'IBLIIIZ'],
+    lineup: ['SIREN', 'ANSHE', 'IBLIIIZ'],
     /** Artist slugs for CRT channel surf — order = channel order */
-    lineupArtistSlugs: ['anshe', 'siren', 'ibliiiz'],
+    lineupArtistSlugs: ['siren', 'anshe', 'ibliiiz'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
     featured: true,

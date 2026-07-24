@@ -589,7 +589,7 @@ export function TerminalAudioPlayer() {
       )}
 
       {showChannelSelector && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="k-audio-sheet fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80"
             onClick={() => setShowChannelSelector(false)}

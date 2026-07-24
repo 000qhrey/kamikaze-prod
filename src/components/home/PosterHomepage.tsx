@@ -1120,6 +1120,7 @@ function PosterStyles() {
 
       .k-home {
         --k-page-gutter: clamp(24px, 4vw, 64px);
+        --k-audio-clearance: calc(2.75rem + env(safe-area-inset-bottom, 0px));
         position: relative;
         min-height: 100vh;
         min-height: 100dvh;
@@ -1129,7 +1130,8 @@ function PosterStyles() {
         font-size: 15px;
         line-height: 1.55;
         overflow-x: clip;
-        max-width: 100vw;
+        max-width: 100%;
+        width: 100%;
       }
 
       .k-panel {
@@ -1137,19 +1139,22 @@ function PosterStyles() {
         min-height: 100vh;
         min-height: 100svh;
         padding: clamp(24px, 4vw, 64px);
-        overflow: hidden;
+        overflow-x: clip;
+        overflow-y: visible;
         box-sizing: border-box;
         isolation: isolate;
         color: var(--k-bone);
+        width: 100%;
+        max-width: 100%;
       }
 
-      /* Skip layout/paint for below-fold panels until near viewport (INP/LCP) */
+      /* Skip layout/paint for below-fold panels — keep size estimate modest */
       .k-panel--telemetry,
       .k-panel--events,
       .k-panel--collective,
       .k-panel--sigil {
         content-visibility: auto;
-        contain-intrinsic-size: auto 100svh;
+        contain-intrinsic-size: auto 640px;
       }
 
       .k-panel + .k-panel::before {
@@ -1283,8 +1288,9 @@ function PosterStyles() {
         left: 50%;
         top: 50%;
         z-index: 0;
-        width: clamp(380px, 72vmin, 900px);
-        height: clamp(380px, 72vmin, 900px);
+        /* Never wider than the viewport — old 380px floor blew out narrow phones */
+        width: min(92vw, 72vmin, 900px);
+        height: min(92vw, 72vmin, 900px);
         transform: translate(-50%, -50%);
         pointer-events: auto;
         overflow: visible;
@@ -1690,12 +1696,17 @@ function PosterStyles() {
         position: absolute;
         left: var(--k-page-gutter);
         right: var(--k-page-gutter);
-        bottom: clamp(20px, 3.5vh, 40px);
+        /* Clear the fixed music bar + home indicator */
+        bottom: calc(var(--k-audio-clearance) + 12px);
         display: flex;
-        align-items: center;
+        align-items: flex-end;
         justify-content: space-between;
-        gap: 16px;
+        gap: 12px;
         z-index: 5;
+        pointer-events: none;
+      }
+      .k-hero-bottom > * {
+        pointer-events: auto;
       }
       .k-hero-scroll {
         display: inline-flex;
@@ -1777,14 +1788,17 @@ function PosterStyles() {
         display: grid;
         grid-template-columns: minmax(200px, 340px) minmax(0, 1fr) auto;
         align-items: stretch;
-        gap: clamp(20px, 3vw, 40px);
+        gap: clamp(16px, 2.5vw, 40px);
         outline: 1px solid var(--k-hair);
         background: var(--k-void);
         text-decoration: none;
         color: inherit;
         padding: clamp(16px, 2vw, 24px);
+        width: 100%;
         max-width: 920px;
         margin: 0 auto;
+        box-sizing: border-box;
+        min-width: 0;
         transition: outline-color 200ms ease, transform 200ms ease;
       }
       .k-event-feature:hover {
@@ -1794,6 +1808,8 @@ function PosterStyles() {
       .k-event-feature-visual {
         position: relative;
         aspect-ratio: 16 / 10;
+        width: 100%;
+        min-width: 0;
         background: var(--k-warm);
         outline: 1px solid var(--k-hair);
         overflow: hidden;
@@ -1960,11 +1976,14 @@ function PosterStyles() {
         /* Same ritual face as hero wordmark — less razor than Archivo */
         font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
         font-weight: 400;
-        font-size: clamp(40px, 5.5vw, 68px);
+        font-size: clamp(32px, 7vw, 68px);
         letter-spacing: 0.04em;
         line-height: 0.95;
         text-transform: uppercase;
         color: var(--k-bone);
+        min-width: 0;
+        max-width: 100%;
+        overflow-wrap: anywhere;
       }
       .k-event-feature-loc {
         font-family: 'IBM Plex Mono', monospace;
@@ -1992,11 +2011,13 @@ function PosterStyles() {
       /* Collective — single portrait editorial, not empty multi-col grid */
       .k-collective-feature {
         display: grid;
-        grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
         gap: clamp(28px, 5vw, 64px);
         align-items: start;
         max-width: 860px;
         margin: 0 auto;
+        width: 100%;
+        min-width: 0;
       }
       .k-resident-card--solo {
         max-width: 320px;
@@ -2736,6 +2757,21 @@ function PosterStyles() {
 
       /* ── responsive ─────────────────────────────────────────────── */
 
+      @media (max-width: 1100px) {
+        .k-event-feature {
+          grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+        }
+        .k-event-feature-cta {
+          grid-column: 2;
+          justify-self: start;
+          align-self: start;
+        }
+        .k-collective-feature {
+          grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+          gap: 24px;
+        }
+      }
+
       @media (max-width: 1024px) {
         .k-hero-wordmark {
           font-size: clamp(32px, 11.5cqi, 160px);
@@ -2753,6 +2789,12 @@ function PosterStyles() {
           padding: 20px 18px 28px;
           min-height: auto;
         }
+        .k-panel--events,
+        .k-panel--collective,
+        .k-panel--sigil {
+          padding-top: clamp(36px, 6vh, 64px);
+          padding-bottom: clamp(36px, 6vh, 64px);
+        }
         .k-hero {
           min-height: 100svh;
           min-height: 100dvh;
@@ -2765,7 +2807,7 @@ function PosterStyles() {
           padding:
             calc(env(safe-area-inset-top, 0px) + 3.25rem)
             var(--k-page-gutter)
-            clamp(20px, 3.5vh, 40px);
+            calc(var(--k-audio-clearance) + 56px);
           grid-template-columns: 1fr;
           grid-template-rows: auto 1fr auto;
           gap: 10px;
@@ -2776,7 +2818,7 @@ function PosterStyles() {
           margin-top: 0;
           justify-self: start;
           align-self: start;
-          max-width: calc(100vw - 2 * var(--k-page-gutter) - 7.5rem);
+          max-width: min(14rem, calc(100% - 5rem));
           padding-right: 0.5rem;
         }
         .k-hero-flank--right {
@@ -2789,7 +2831,9 @@ function PosterStyles() {
         .k-hero-mark {
           grid-column: 1;
           grid-row: 2;
-          width: min(100%, calc(100vw - 2 * var(--k-page-gutter)));
+          width: 100%;
+          max-width: 100%;
+          min-height: clamp(180px, 34vh, 320px);
         }
         .k-hero-metastack {
           font-size: 8px;
@@ -2799,17 +2843,15 @@ function PosterStyles() {
           letter-spacing: 0.16em;
           line-height: 1.3;
         }
-        .k-hero-mark {
-          min-height: clamp(200px, 38vh, 360px);
-        }
         .k-hero-sun-stack {
-          width: min(82vw, 420px);
-          height: min(82vw, 420px);
+          width: min(78vw, 380px);
+          height: min(78vw, 380px);
         }
         .k-hero-bottom {
           left: var(--k-page-gutter);
           right: var(--k-page-gutter);
-          bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+          bottom: calc(var(--k-audio-clearance) + 10px);
+          gap: 10px;
         }
         .k-hero-wordmark {
           font-size: clamp(28px, 11cqi, 80px);
@@ -2824,44 +2866,15 @@ function PosterStyles() {
         .k-hero-tagline {
           font-size: 9px;
           letter-spacing: 0.1em;
-          max-width: 20ch;
+          max-width: 18ch;
         }
         [data-theme='heatmap'] .k-hero-flank--right::after {
           display: none;
         }
 
-        .k-panel--events,
-        .k-panel--collective,
-        .k-panel--sigil {
-          padding-left: var(--k-page-gutter);
-          padding-right: var(--k-page-gutter);
-        }
-
         .k-telemetry {
           grid-template-columns: 1fr;
         }
-
-        .k-event-feature {
-          grid-template-columns: 1fr;
-          max-width: none;
-          padding: clamp(14px, 3vw, 20px);
-        }
-        .k-event-feature-cta {
-          align-self: start;
-        }
-
-        .k-collective-feature {
-          grid-template-columns: minmax(0, 260px);
-          justify-content: center;
-          text-align: left;
-        }
-        .k-resident-writeup--solo {
-          border-left: none;
-          padding-left: 0;
-          max-width: none;
-        }
-        .k-resident-name { font-size: 13px; letter-spacing: 0.01em; }
-        .k-resident-role { font-size: 9px; letter-spacing: 0.18em; }
 
         .k-sigil-title {
           margin-top: 12px;
@@ -2897,9 +2910,49 @@ function PosterStyles() {
         .k-horizon { height: 28vh; }
       }
 
+      @media (max-width: 700px) {
+        .k-event-feature {
+          grid-template-columns: 1fr;
+          max-width: none;
+          padding: 14px;
+          gap: 14px;
+        }
+        .k-event-feature-visual {
+          max-height: 200px;
+        }
+        .k-event-feature-cta {
+          grid-column: 1;
+          align-self: start;
+        }
+        .k-event-feature-name {
+          font-size: clamp(36px, 12vw, 52px);
+        }
+
+        .k-collective-feature {
+          grid-template-columns: 1fr;
+          justify-content: stretch;
+          text-align: left;
+          gap: 20px;
+        }
+        .k-resident-card--solo {
+          max-width: none;
+          width: min(100%, 280px);
+        }
+        .k-resident-portrait--solo {
+          aspect-ratio: 4 / 5;
+        }
+        .k-resident-writeup--solo {
+          border-left: none;
+          padding-left: 0;
+          max-width: none;
+        }
+        .k-resident-name { font-size: 13px; letter-spacing: 0.01em; }
+        .k-resident-role { font-size: 9px; letter-spacing: 0.18em; }
+      }
+
       @media (max-width: 420px) {
         .k-hero-flank--left {
-          max-width: calc(100vw - 2 * var(--k-page-gutter) - 6.5rem);
+          max-width: min(11rem, calc(100% - 4.5rem));
         }
         .k-hero-metastack {
           font-size: 7px;
@@ -2909,8 +2962,12 @@ function PosterStyles() {
           font-size: clamp(26px, 10.8vw, 56px);
         }
         .k-hero-sun-stack {
-          width: min(78vw, 360px);
-          height: min(78vw, 360px);
+          width: min(72vw, 300px);
+          height: min(72vw, 300px);
+        }
+        .k-hero-tagline {
+          max-width: 16ch;
+          font-size: 8px;
         }
       }
     `}</style>

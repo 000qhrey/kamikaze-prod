@@ -116,12 +116,19 @@ export function SiteMenu() {
           );
         }
         .k-site-topbar--home {
-          background: transparent;
+          /* Keep brand/MENU readable once page content scrolls under the bar */
+          background: linear-gradient(
+            to bottom,
+            rgb(var(--void-rgb) / 0.88) 0%,
+            rgb(var(--void-rgb) / 0.45) 70%,
+            rgb(var(--void-rgb) / 0) 100%
+          );
         }
         .k-site-topbar > * {
           pointer-events: auto;
         }
         .k-site-topbar-brand {
+          grid-column: 1;
           justify-self: start;
           font-family: var(--font-archivo), 'Archivo', 'Archivo Black', system-ui,
             sans-serif;
@@ -136,6 +143,7 @@ export function SiteMenu() {
           color: var(--k-menu-red);
         }
         .k-site-topbar-nav {
+          grid-column: 2;
           justify-self: center;
           display: flex;
           flex-wrap: wrap;
@@ -144,6 +152,7 @@ export function SiteMenu() {
           max-width: min(720px, 70vw);
         }
         .k-site-topbar-nav-spacer {
+          grid-column: 2;
           display: block;
         }
         .k-site-topbar-nav-link {
@@ -159,6 +168,8 @@ export function SiteMenu() {
           color: var(--k-menu-red);
         }
         .k-site-topbar-menu {
+          /* Pin to last track — survives nav display:none collapsing the grid */
+          grid-column: 3;
           justify-self: end;
           display: inline-flex;
           align-items: center;
@@ -176,12 +187,22 @@ export function SiteMenu() {
           color: var(--k-menu-red);
         }
         @media (max-width: 900px) {
-          .k-site-topbar-nav {
-            display: none;
-          }
           .k-site-topbar {
+            grid-template-columns: 1fr auto;
             padding-left: 18px;
             padding-right: 18px;
+          }
+          .k-site-topbar-nav,
+          .k-site-topbar-nav-spacer {
+            display: none;
+          }
+          .k-site-topbar-menu {
+            grid-column: 2;
+          }
+          .k-site-topbar--home {
+            background: rgb(var(--void-rgb) / 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
           }
         }
         @media (max-width: 700px) {
@@ -191,6 +212,10 @@ export function SiteMenu() {
           }
           .k-site-topbar-brand {
             font-size: 13px;
+            letter-spacing: 0.04em;
+          }
+          .k-site-topbar-menu {
+            letter-spacing: 0.2em;
           }
         }
       `}</style>
