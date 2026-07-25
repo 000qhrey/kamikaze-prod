@@ -146,16 +146,26 @@ function useReveal<T extends HTMLElement>() {
   useEffect(() => {
     const node = ref.current
     if (!node) return
+    const mark = () => {
+      node.dataset.inview = 'true'
+    }
+    // Already on screen when mounted (common after DeferredSection swaps in)
+    const r = node.getBoundingClientRect()
+    if (r.top < window.innerHeight && r.bottom > 0) {
+      mark()
+      return
+    }
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            node.dataset.inview = 'true'
+            mark()
             io.unobserve(node)
           }
         }
       },
-      { threshold: 0.12 },
+      // ponytail: low threshold — iOS was stranding opacity:0 cards at 0.12
+      { threshold: 0, rootMargin: '120px 0px' },
     )
     io.observe(node)
     return () => io.disconnect()
@@ -1149,9 +1159,10 @@ function PosterStyles() {
         max-width: 100%;
       }
 
-      /* Skip layout/paint for below-fold panels — keep size estimate modest */
+      /* Skip layout/paint for below-fold panels.
+         Events stays paint-eager — content-visibility + opacity reveal
+         left the OVERRIDE card invisible on iOS Safari. */
       .k-panel--telemetry,
-      .k-panel--events,
       .k-panel--collective,
       .k-panel--sigil {
         content-visibility: auto;
@@ -2724,7 +2735,6 @@ function PosterStyles() {
       }
       .k-section-body,
       .k-section-visual,
-      .k-event-feature,
       .k-collective-feature,
       .k-telemetry,
       .k-sigil-title,
@@ -2736,6 +2746,11 @@ function PosterStyles() {
         transition:
           opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
           transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      /* Always paint — no opacity gate (iOS left this blank under UPCOMING EVENTS) */
+      .k-event-feature {
+        opacity: 1;
+        transform: none;
       }
       .k-hero-bottom {
         opacity: 0;
