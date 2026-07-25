@@ -200,16 +200,20 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                     {isSecretLocation ? event.venue : event.city}
                   </span>
                 </div>
-                <div className="font-mono text-sm">
+                <div className="font-mono text-sm pr-0 sm:pr-28">
                   <span className="text-white/50">{EVENTS.lineup}:</span>
-                  <span className="text-white/60 ml-2">{formatLineup(event.lineup)}</span>
+                  <span className="text-white/60 ml-2 break-words">
+                    {formatLineup(event.lineup)}
+                  </span>
                 </div>
               </div>
             )}
 
+            {/* In-flow on mobile so it can't sit on top of the lineup */}
             <div
               className={clsx(
-                'absolute bottom-4 right-4 font-mono text-xs transition-all duration-300',
+                'mt-6 font-mono text-xs transition-all duration-300',
+                'sm:absolute sm:bottom-4 sm:right-4 sm:mt-0',
                 isHovered ? 'text-arterial' : 'text-white/50'
               )}
             >

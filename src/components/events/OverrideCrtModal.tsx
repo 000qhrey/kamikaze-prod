@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Event, formatEventDatePartial } from '@/data/events'
+import { Event, formatEventDate } from '@/data/events'
 import { Artist, getArtistBySlug } from '@/data/artists'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { EVENTS } from '@/data/siteCopy'
@@ -155,7 +155,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
   if (!isOpen) return null
 
-  const dateLabel = formatEventDatePartial(event.date)
+  const dateLabel = formatEventDate(event.date)
   const locationLabel = event.isSecretLocation
     ? 'LOCATION TBA'
     : `${event.city.toUpperCase()}, INDIA`
@@ -363,8 +363,8 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                     />
 
                     {/* Pinned OVERRIDE — tighter on mobile */}
-                    <div className="relative z-10 h-full flex flex-col justify-end md:justify-center p-3 sm:p-6 md:p-10 lg:p-12">
-                      <div className="max-w-lg space-y-1.5 sm:space-y-3 md:space-y-4">
+                    <div className="relative z-10 h-full flex flex-col justify-end md:justify-center px-4 py-3 sm:p-6 md:p-10 lg:p-12">
+                      <div className="max-w-lg space-y-1.5 sm:space-y-3 md:space-y-4 min-w-0">
                         <p className="hidden sm:block font-mono text-[9px] sm:text-[10px] tracking-[0.45em] text-white/35 uppercase">
                           Current signal
                         </p>
@@ -372,21 +372,22 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                           {event.name}
                         </h2>
                         <p className="font-mono text-[9px] sm:text-xs tracking-[0.3em] text-arterial uppercase">
-                          A night of hard techno
+                          Peak pressure // one room
                         </p>
                         <p className="hidden md:block font-mono text-sm text-white/55 max-w-md leading-relaxed">
-                          {event.description ?? 'Hard techno transmission.'}
+                          {event.description ?? 'Peak pressure transmission.'}
                         </p>
-                        <div className="flex flex-wrap gap-x-3 sm:gap-x-5 gap-y-1 font-mono text-[9px] sm:text-xs text-white/50">
-                          <span>
+                        {/* Stack on phone so DATE isn't clipped by the glass edge */}
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-y-1 gap-x-5 font-mono text-[10px] sm:text-xs text-white/50 leading-normal">
+                          <span className="whitespace-nowrap">
                             <span className="text-white/30">DATE </span>
                             {dateLabel}
                           </span>
-                          <span className="hidden sm:inline">
+                          <span className="hidden sm:inline whitespace-nowrap">
                             <span className="text-white/30">TIME </span>
                             23:59 — LATE
                           </span>
-                          <span>
+                          <span className="whitespace-nowrap">
                             <span className="text-white/30">LOC </span>
                             <span className="text-arterial">{locationLabel}</span>
                           </span>
@@ -432,27 +433,25 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                   <p className="font-mono text-[7px] sm:text-[8px] tracking-[0.35em] text-white/30 uppercase mb-1 sm:mb-2">
                     Channels
                   </p>
-                  <div
-                    className={clsx(
-                      'grid gap-1 sm:gap-2',
-                      channels.length > 3 ? 'grid-cols-3 sm:grid-cols-3' : 'grid-cols-3'
-                    )}
-                  >
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     {channels.map((artist, i) => {
                       const selected = i === channelIndex
                       const status = artist.isOpenCall ? 'CALL' : 'LIVE'
-                      const shortName =
-                        artist.name === 'COMPETITION WINNER' ? 'OPEN' : artist.name
+                      const shortName = artist.isOpenCall
+                        ? 'OPEN'
+                        : artist.name === 'COMPETITION WINNER'
+                          ? 'OPEN'
+                          : artist.name
                       return (
                         <button
                           key={artist.id}
                           type="button"
                           onClick={() => selectChannel(i)}
                           className={clsx(
-                            'relative text-left group focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial',
+                            'relative min-w-0 text-left group focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial',
                             'rounded-sm overflow-hidden border transition-all',
                             selected
-                              ? 'border-arterial shadow-[0_0_12px_rgba(204,0,0,0.35)]'
+                              ? 'border-arterial z-[1]'
                               : 'border-white/12 opacity-65 active:opacity-100 hover:opacity-100 hover:border-white/30'
                           )}
                         >
