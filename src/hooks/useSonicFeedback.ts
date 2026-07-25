@@ -191,6 +191,44 @@ export function playClickSound() {
   oscillator.stop(ctx.currentTime + 0.02)
 }
 
+/** CRT POWER — tube wind-down + soft thump */
+export function playPowerOffSound() {
+  const ctx = getAudioContext()
+  const gain = getMasterGain()
+  if (!ctx || !gain) return
+
+  if (ctx.state === 'suspended') {
+    void ctx.resume()
+  }
+
+  const t0 = ctx.currentTime
+
+  // Descending CRT whistle
+  const osc = ctx.createOscillator()
+  const env = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(900, t0)
+  osc.frequency.exponentialRampToValueAtTime(60, t0 + 0.28)
+  env.gain.setValueAtTime(0.22, t0)
+  env.gain.exponentialRampToValueAtTime(0.001, t0 + 0.32)
+  osc.connect(env)
+  env.connect(gain)
+  osc.start(t0)
+  osc.stop(t0 + 0.34)
+
+  // Soft mechanical click at the end
+  const click = ctx.createOscillator()
+  const clickEnv = ctx.createGain()
+  click.type = 'square'
+  click.frequency.value = 70
+  clickEnv.gain.setValueAtTime(0.18, t0 + 0.22)
+  clickEnv.gain.exponentialRampToValueAtTime(0.001, t0 + 0.3)
+  click.connect(clickEnv)
+  clickEnv.connect(gain)
+  click.start(t0 + 0.22)
+  click.stop(t0 + 0.32)
+}
+
 // High-frequency chirp for fast-boot acknowledgment (800hz → 1200hz, 50ms)
 export function playChirpSound() {
   const ctx = getAudioContext()

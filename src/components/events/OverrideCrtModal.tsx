@@ -7,7 +7,11 @@ import { Event, formatEventDate } from '@/data/events'
 import { Artist, getArtistBySlug } from '@/data/artists'
 import { TerminalButton } from '@/components/ui/TerminalButton'
 import { EVENTS } from '@/data/siteCopy'
-import { playChannelSwitch, playSubmitSound } from '@/hooks/useSonicFeedback'
+import {
+  playChannelSwitch,
+  playPowerOffSound,
+  playSubmitSound,
+} from '@/hooks/useSonicFeedback'
 import { CrtSigil } from '@/components/events/CrtSigil'
 import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
@@ -162,7 +166,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
   return (
     <div
-      className="fixed inset-0 z-[220] flex items-start md:items-stretch justify-center p-1.5 sm:p-3 md:p-4 overflow-y-auto"
+      className="fixed inset-0 z-[220] flex items-stretch justify-center p-1.5 sm:p-3 md:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={`${event.name} transmission`}
@@ -173,19 +177,20 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
         body.k-crt-focus .k-site-menu-overlay,
         body.k-crt-focus .k-audio-bar,
         body.k-crt-focus .k-audio-panel,
-        body.k-crt-focus .k-audio-sheet {
+        body.k-crt-focus .k-audio-sheet,
+        body.k-crt-focus footer {
           opacity: 0 !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
       `}</style>
-      {/* Room behind the set — blur + dim; eats clicks (POWER / CLOSE only dismiss) */}
+      {/* Room behind the set — solid enough that footer/ticker can't bleed through */}
       <div
         className="absolute inset-0"
         aria-hidden
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.88) 55%, rgba(0,0,0,0.96) 100%)',
+            'radial-gradient(ellipse at center, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.94) 50%, rgba(0,0,0,0.98) 100%)',
           backdropFilter: 'blur(18px) saturate(0.55)',
           WebkitBackdropFilter: 'blur(18px) saturate(0.55)',
         }}
@@ -202,17 +207,15 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
       <div
         className={clsx(
           'relative z-10 w-full max-w-[1500px]',
-          /* Phone: hug content. Desktop: fill the stage. */
-          'h-auto max-h-[100dvh] overflow-y-auto md:overflow-hidden',
-          'md:h-full md:max-h-[min(96vh,920px)]',
-          'flex flex-col min-h-0 animate-[crt-pop_0.4s_ease-out]'
+          'h-full max-h-[100dvh] md:max-h-[min(96vh,920px)]',
+          'flex flex-col min-h-0 overflow-hidden animate-[crt-pop_0.4s_ease-out]'
         )}
         style={{
           filter: 'drop-shadow(0 0 40px rgba(204,0,0,0.12)) drop-shadow(0 24px 80px rgba(0,0,0,0.85))',
         }}
       >
         <div
-          className="relative flex flex-col flex-none md:flex-1 min-h-0 rounded-lg sm:rounded-2xl p-1.5 sm:p-3"
+          className="relative flex flex-col flex-1 min-h-0 rounded-lg sm:rounded-2xl p-1.5 sm:p-3"
           style={{
             background:
               'linear-gradient(165deg, #222 0%, #121212 40%, #0a0a0a 75%, #161616 100%)',
@@ -237,8 +240,8 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
             </button>
           </div>
 
-          {/* Stage: glass + side rail (channels + dossier) */}
-          <div className="relative flex-none md:flex-1 min-h-0 flex flex-col md:flex-row gap-1.5 sm:gap-3">
+          {/* Stage scrolls; CH− / TUNE / CH+ stay pinned below */}
+          <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col md:flex-row gap-1.5 sm:gap-3">
             {/* Full-stage tune static (covers glass + rail) */}
             {ready && tuning && (
               <div
@@ -426,7 +429,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
               <aside
                 className={clsx(
                   'flex flex-col flex-none min-h-0',
-                  'md:w-[min(320px,34%)] md:h-full md:min-h-0',
+                  'md:w-[min(320px,34%)] md:self-stretch',
                   'border border-white/10 bg-black/80 rounded-md sm:rounded-lg overflow-hidden'
                 )}
               >
@@ -517,18 +520,16 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
             )}
           </div>
 
-          {/* Control footer — CH− · TUNE · CH+ centered */}
+          {/* Control footer — always visible under the scroll stage */}
           {ready && (
-            <div className="mt-1.5 sm:mt-2.5 shrink-0 grid grid-cols-[1fr_auto_1fr] items-center px-0.5 sm:px-1">
-              <div aria-hidden />
-              <div className="flex items-center gap-2.5 sm:gap-4">
+            <div className="relative mt-1.5 sm:mt-2 shrink-0 flex items-center justify-center gap-1 px-1 pt-2 pb-1.5 border-t border-white/10 bg-[#121212]">
+              <div className="flex items-center gap-3.5 sm:gap-4">
                 <CrtKnob
                   label="CH−"
                   onClick={() => changeChannel(-1)}
-                  compact
                   active={tuning}
                 />
-                <div className="flex flex-col items-center min-w-[7rem] sm:min-w-[9rem]">
+                <div className="flex flex-col items-center min-w-[6.5rem] sm:min-w-[9rem]">
                   <span
                     className={clsx(
                       'font-mono text-[9px] sm:text-[10px] tracking-[0.35em]',
@@ -544,26 +545,26 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                 <CrtKnob
                   label="CH+"
                   onClick={() => changeChannel(1)}
-                  compact
                   active={tuning}
                 />
               </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="group flex items-center gap-1.5 sm:gap-2"
-                  aria-label="Power off"
-                >
-                  <span className="font-mono text-[8px] sm:text-[9px] tracking-[0.3em] text-white/35 group-hover:text-white/60">
-                    POWER
-                  </span>
-                  <span className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#333] bg-gradient-to-b from-[#2a2a2a] to-[#111] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] flex items-center justify-center group-hover:border-arterial/60 transition-colors">
-                    <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-1.5 h-1.5 rounded-full bg-arterial shadow-[0_0_6px_#cc0000]" />
-                    <span className="font-mono text-[8px] text-white/40">⏻</span>
-                  </span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  playPowerOffSound()
+                  onClose()
+                }}
+                className="absolute right-0.5 sm:right-1 top-1/2 -translate-y-1/2 group flex items-center gap-1.5 sm:gap-2"
+                aria-label="Power off"
+              >
+                <span className="hidden sm:inline font-mono text-[9px] tracking-[0.3em] text-white/35 group-hover:text-white/60">
+                  POWER
+                </span>
+                <span className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#333] bg-gradient-to-b from-[#2a2a2a] to-[#111] shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] flex items-center justify-center group-hover:border-arterial/60 transition-colors">
+                  <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-1.5 h-1.5 rounded-full bg-arterial shadow-[0_0_6px_#cc0000]" />
+                  <span className="font-mono text-[8px] text-white/40">⏻</span>
+                </span>
+              </button>
             </div>
           )}
         </div>
@@ -641,9 +642,9 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
           </p>
         </div>
 
-        <div className="font-mono text-[9px] sm:text-[10px] grid grid-cols-2 sm:grid-cols-1 gap-x-3 gap-y-1 sm:space-y-1 sm:block">
-          <MetaRow label="Origin" value={artist.origin ?? artist.location} />
-          <MetaRow label="Genre" value={artist.genre ?? '—'} />
+        <div className="font-mono text-[9px] sm:text-[10px] grid grid-cols-2 md:grid-cols-1 gap-x-3 gap-y-1.5 border-y border-white/10 py-1.5 md:border-0 md:py-0">
+          <MetaCell label="Origin" value={artist.origin ?? artist.location} />
+          <MetaCell label="Genre" value={artist.genre ?? '—'} />
         </div>
       </div>
 
@@ -699,11 +700,11 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
   )
 }
 
-function MetaRow({ label, value }: { label: string; value: string }) {
+function MetaCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-2 sm:gap-3 border-b border-white/10 pb-1 sm:pb-1.5 sm:mb-1">
+    <div className="min-w-0 flex flex-col gap-0.5 md:flex-row md:justify-between md:gap-3 md:border-b md:border-white/10 md:pb-1.5">
       <span className="text-white/30 tracking-wider uppercase shrink-0">{label}</span>
-      <span className="text-white/65 text-right truncate">{value}</span>
+      <span className="text-white/65 truncate md:text-right">{value}</span>
     </div>
   )
 }
