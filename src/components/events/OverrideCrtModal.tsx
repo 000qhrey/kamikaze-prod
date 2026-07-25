@@ -162,7 +162,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
   return (
     <div
-      className="fixed inset-0 z-[220] flex items-stretch justify-center p-1.5 sm:p-3 md:p-4"
+      className="fixed inset-0 z-[220] flex items-start md:items-stretch justify-center p-1.5 sm:p-3 md:p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={`${event.name} transmission`}
@@ -201,8 +201,10 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
       <div
         className={clsx(
-          'relative z-10 w-full h-full max-w-[1500px]',
-          'max-h-[100dvh] sm:max-h-[min(96vh,920px)]',
+          'relative z-10 w-full max-w-[1500px]',
+          /* Phone: hug content. Desktop: fill the stage. */
+          'h-auto max-h-[100dvh] overflow-y-auto md:overflow-hidden',
+          'md:h-full md:max-h-[min(96vh,920px)]',
           'flex flex-col min-h-0 animate-[crt-pop_0.4s_ease-out]'
         )}
         style={{
@@ -210,7 +212,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
         }}
       >
         <div
-          className="relative flex flex-col flex-1 min-h-0 rounded-lg sm:rounded-2xl p-1.5 sm:p-3"
+          className="relative flex flex-col flex-none md:flex-1 min-h-0 rounded-lg sm:rounded-2xl p-1.5 sm:p-3"
           style={{
             background:
               'linear-gradient(165deg, #222 0%, #121212 40%, #0a0a0a 75%, #161616 100%)',
@@ -236,7 +238,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
           </div>
 
           {/* Stage: glass + side rail (channels + dossier) */}
-          <div className="relative flex-1 min-h-0 flex flex-col md:flex-row gap-1.5 sm:gap-3">
+          <div className="relative flex-none md:flex-1 min-h-0 flex flex-col md:flex-row gap-1.5 sm:gap-3">
             {/* Full-stage tune static (covers glass + rail) */}
             {ready && tuning && (
               <div
@@ -265,7 +267,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
             {/* Glass — compact hero on mobile, dominant on desktop */}
             <div
-              className="relative shrink-0 md:flex-1 h-[28vh] max-h-[220px] md:h-auto md:max-h-none md:min-h-0 overflow-hidden rounded-md sm:rounded-lg bg-black"
+              className="relative shrink-0 md:flex-1 h-[34vh] max-h-[260px] md:h-auto md:max-h-none md:min-h-0 overflow-hidden rounded-md sm:rounded-lg bg-black"
               style={{
                 boxShadow:
                   'inset 0 0 80px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(204,0,0,0.22)',
@@ -423,8 +425,8 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
             {ready && active && (
               <aside
                 className={clsx(
-                  'flex flex-col flex-1 min-h-0 md:flex-none',
-                  'md:w-[min(320px,34%)]',
+                  'flex flex-col flex-none min-h-0',
+                  'md:w-[min(320px,34%)] md:h-full md:min-h-0',
                   'border border-white/10 bg-black/80 rounded-md sm:rounded-lg overflow-hidden'
                 )}
               >
@@ -614,8 +616,8 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
   const ctaLabel = artist.ctaLabel ?? (isOpenCall ? 'SEND YOUR MIX →' : 'VIEW FULL PROFILE →')
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 p-2.5 sm:p-4 overflow-hidden gap-2 sm:gap-3">
-      <div className="space-y-2 sm:space-y-3">
+    <div className="flex flex-col flex-none md:flex-1 min-h-0 p-2.5 sm:p-4 overflow-y-auto gap-2 sm:gap-3">
+      <div className="space-y-2 sm:space-y-3 shrink-0">
         <div>
           <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.35em] text-signal mb-0.5">
             CH {channel} · {isOpenCall ? 'OPEN CALL' : 'LIVE'}
@@ -643,7 +645,10 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
           <MetaRow label="Origin" value={artist.origin ?? artist.location} />
           <MetaRow label="Genre" value={artist.genre ?? '—'} />
         </div>
+      </div>
 
+      {/* Keep actions under meta — mt-auto left a dead band on phone */}
+      <div className="shrink-0 flex flex-col gap-1.5 sm:gap-2 mt-1 md:mt-auto">
         {!isOpenCall && (artist.socials.instagram || artist.socials.soundcloud) && (
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             {artist.socials.instagram && (
@@ -668,28 +673,28 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
             )}
           </div>
         )}
-      </div>
 
-      <Link
-        href={isOpenCall ? ctaHref : profileHref}
-        className={clsx(
-          'mt-auto shrink-0 relative block w-full text-center',
-          'font-mono text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em]',
-          'py-2 sm:py-2.5 px-3',
-          'bg-arterial/15 border border-arterial text-arterial',
-          'active:bg-arterial active:text-void hover:bg-arterial hover:text-void transition-colors'
-        )}
-      >
-        {ctaLabel}
-      </Link>
-      {isOpenCall && (
         <Link
-          href={profileHref}
-          className="shrink-0 font-mono text-[9px] tracking-[0.2em] text-center text-white/40 hover:text-white/70 transition-colors"
+          href={isOpenCall ? ctaHref : profileHref}
+          className={clsx(
+            'relative block w-full text-center',
+            'font-mono text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em]',
+            'py-2 sm:py-2.5 px-3',
+            'bg-arterial/15 border border-arterial text-arterial',
+            'active:bg-arterial active:text-void hover:bg-arterial hover:text-void transition-colors'
+          )}
         >
-          READ THE BRIEF →
+          {ctaLabel}
         </Link>
-      )}
+        {isOpenCall && (
+          <Link
+            href={profileHref}
+            className="font-mono text-[9px] tracking-[0.2em] text-center text-white/40 hover:text-white/70 transition-colors"
+          >
+            READ THE BRIEF →
+          </Link>
+        )}
+      </div>
     </div>
   )
 }

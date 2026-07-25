@@ -31,11 +31,11 @@ export default function EventsPage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6 flex-grow pb-16">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 flex-grow pb-16">
         {/* Header */}
-        <header className="mb-16">
+        <header className="mb-8 sm:mb-16">
           <ScrambleText
-            className="font-display text-5xl md:text-7xl tracking-wider mb-4 block"
+            className="font-display text-4xl sm:text-5xl md:text-7xl tracking-wider mb-3 sm:mb-4 block"
             triggerOnView
             triggerOnHover={false}
             duration={600}
@@ -44,18 +44,18 @@ export default function EventsPage() {
           >
             {EVENTS.pageTitle}
           </ScrambleText>
-          <p className="font-mono text-white/70">
+          <p className="font-mono text-sm sm:text-base text-white/70">
             {EVENTS.tagline}
           </p>
         </header>
 
         {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
-          <section className="mb-32">
-            <h2 className="font-mono text-xs text-arterial uppercase tracking-[0.5em] mb-12 -skew-x-6">
+          <section className="mb-12 sm:mb-24 md:mb-32">
+            <h2 className="font-mono text-[10px] sm:text-xs text-arterial uppercase tracking-[0.5em] mb-6 sm:mb-12 -skew-x-6">
               {'>>>'} {EVENTS.upcoming}
             </h2>
-            <div className="space-y-12">
+            <div className="space-y-8 sm:space-y-12">
               {upcomingEvents.map((event, index) => (
                 <EventCard key={event.id} event={event} index={index} />
               ))}
@@ -65,7 +65,7 @@ export default function EventsPage() {
 
         {/* Past Events / Dead Signals */}
         <section>
-          <h2 className="font-mono text-xs text-white/50 uppercase tracking-[0.5em] mb-12 skew-x-3">
+          <h2 className="font-mono text-[10px] sm:text-xs text-white/50 uppercase tracking-[0.5em] mb-6 sm:mb-12 skew-x-3">
             [ {EVENTS.past} ]
           </h2>
           {pastEvents.length > 0 ? (

@@ -482,6 +482,9 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
   const [hovered, setHovered] = useState(false)
   const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Mobile / lite: always the manifesto PNG — never mount logo.glb
+  const useStatic = skipWebGL || lite || !allowWebGL
+
   useEffect(() => {
     if (skipWebGL || lite) {
       setAllowWebGL(false)
@@ -519,17 +522,15 @@ function HeroSunStack({ reduced }: { reduced: boolean }) {
     [],
   )
 
-  const useStatic = skipWebGL || lite || !allowWebGL
-
   return (
     <div
       className={['k-hero-sun-stack', hovered ? 'k-hero-sun-stack--hover' : '']
         .filter(Boolean)
         .join(' ')}
       aria-hidden
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onTouchStart={onTouchStart}
+      onMouseEnter={useStatic ? undefined : onEnter}
+      onMouseLeave={useStatic ? undefined : onLeave}
+      onTouchStart={useStatic ? undefined : onTouchStart}
     >
       <div className="k-hero-sun-bloom" />
       <div className="k-hero-sun">
@@ -1228,19 +1229,21 @@ function PosterStyles() {
       .k-hero-sun-logo--static {
         display: grid;
         place-items: center;
+        /* Match sun disc — don't oversize like the GLB canvas spike bleed */
+        inset: 0;
       }
       .k-hero-sun-logo--static img {
-        width: 58%;
-        height: 58%;
+        width: 78%;
+        height: 78%;
         object-fit: contain;
-        opacity: 0.92;
-        filter: brightness(0.95) saturate(1.05);
-        transform: rotate(45deg);
+        opacity: 0.95;
+        /* Face-on PNG (same as manifesto hanko) — no GLB orientation hack */
+        filter: brightness(1.02) saturate(1.08);
         user-select: none;
         pointer-events: none;
       }
       [data-theme='heatmap'] .k-hero-sun-logo--static img {
-        filter: brightness(1.05) saturate(1.35) hue-rotate(-8deg);
+        filter: brightness(1.08) saturate(1.35) hue-rotate(-8deg);
       }
 
       /* Flanking meta pinned to page gutters; mark centred in viewport */
@@ -2873,11 +2876,12 @@ function PosterStyles() {
           font-size: clamp(28px, 11cqi, 80px);
           letter-spacing: 0.03em;
         }
-        .k-hero-sun-logo {
+        .k-hero-sun-logo:not(.k-hero-sun-logo--static) {
           inset: -10%;
         }
         .k-hero-sun-logo--static img {
-          transform: rotate(45deg);
+          width: 82%;
+          height: 82%;
         }
         .k-hero-tagline {
           font-size: 9px;

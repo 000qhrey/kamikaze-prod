@@ -160,8 +160,8 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
             </div>
           )}
 
-          <div className="relative p-4 sm:p-6 md:p-8 md:pl-24">
-            <div className="font-mono text-xs text-arterial mb-2 tracking-widest">
+          <div className="relative p-4 sm:p-6 md:p-8 md:pl-24 flex flex-col gap-3 sm:gap-4">
+            <div className="font-mono text-[10px] sm:text-xs text-arterial tracking-widest">
               <span>{getDisplayDate()}</span>
               {' // '}
               <span className="text-arterial font-medium">
@@ -173,7 +173,7 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
 
             <h3
               className={clsx(
-                'font-display text-2xl sm:text-4xl md:text-6xl tracking-tight leading-none mb-4 sm:mb-6',
+                'font-display text-2xl sm:text-4xl md:text-6xl tracking-tight leading-none',
                 'transition-all duration-300',
                 isHovered && !isMobile ? 'tracking-wider' : ''
               )}
@@ -183,37 +183,37 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
 
             {isFullyRedacted ? (
               <div className="space-y-1">
-                <div className="font-mono text-sm">
+                <div className="font-mono text-xs sm:text-sm">
                   <span className="text-white/50">{EVENTS.location}:</span>
                   <span className="text-white/70 ml-2">TBA</span>
                 </div>
-                <div className="font-mono text-sm">
+                <div className="font-mono text-xs sm:text-sm">
                   <span className="text-white/50">Status:</span>
                   <span className="text-arterial ml-2">More info soon</span>
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
-                <div className="font-mono text-sm">
+              <div className="space-y-1.5">
+                <div className="font-mono text-xs sm:text-sm">
                   <span className="text-white/50">{EVENTS.location}:</span>
                   <span className="ml-2 font-medium text-white/80">
                     {isSecretLocation ? event.venue : event.city}
                   </span>
                 </div>
-                <div className="font-mono text-sm pr-0 sm:pr-28">
+                <div className="font-mono text-xs sm:text-sm">
                   <span className="text-white/50">{EVENTS.lineup}:</span>
-                  <span className="text-white/60 ml-2 break-words">
+                  <span className="text-white/60 ml-2 break-words [overflow-wrap:anywhere]">
                     {formatLineup(event.lineup)}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* In-flow on mobile so it can't sit on top of the lineup */}
+            {/* Always in-flow — absolute bottom left a dead band on short cards */}
             <div
               className={clsx(
-                'mt-6 font-mono text-xs transition-all duration-300',
-                'sm:absolute sm:bottom-4 sm:right-4 sm:mt-0',
+                'font-mono text-xs transition-all duration-300',
+                'pt-1 sm:pt-2 sm:self-end',
                 isHovered ? 'text-arterial' : 'text-white/50'
               )}
             >
