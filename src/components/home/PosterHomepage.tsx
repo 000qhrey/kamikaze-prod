@@ -1489,16 +1489,21 @@ function PosterStyles() {
         );
         mix-blend-mode: screen;
       }
-      .k-hero-wordmark:hover {
-        animation: k-wordmark-hover 260ms ease-out forwards;
+      /* Channel glitch — fine pointer only; holds while hovered */
+      @media (hover: hover) and (pointer: fine) {
+        .k-hero-wordmark:hover {
+          animation: k-wordmark-channel 480ms steps(2, end) infinite;
+          will-change: transform, color, text-shadow, filter;
+        }
+        .k-hero-wordmark:hover::after {
+          animation: k-wordmark-scan 480ms steps(2, end) infinite;
+        }
       }
-      .k-hero-wordmark:hover::after {
-        animation: k-wordmark-scan 260ms steps(2) forwards;
-      }
-      @keyframes k-wordmark-hover {
+      @keyframes k-wordmark-channel {
         0%,
         100% {
-          transform: scale(1);
+          transform: translate(0, 0) skewX(0deg);
+          color: var(--k-wordmark);
           filter: brightness(1);
           text-shadow:
             0 0 1px rgba(10, 8, 6, 0.55),
@@ -1506,13 +1511,59 @@ function PosterStyles() {
             -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
-        45% {
-          transform: scale(1.012);
+        12% {
+          transform: translate(-1.5px, 0.5px) skewX(-0.4deg);
+          color: var(--k-thermal-mid);
+          filter: brightness(1.12);
+          text-shadow:
+            -3px 0 color-mix(in srgb, var(--k-thermal-mid) 90%, transparent),
+            3px 0 rgba(0, 255, 255, 0.55),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+        }
+        28% {
+          transform: translate(1.5px, -1px) skewX(0.6deg);
+          color: #7efcff;
+          filter: brightness(1.2);
+          text-shadow:
+            4px 0 color-mix(in srgb, var(--k-thermal-mid) 80%, transparent),
+            -2px 0 rgba(0, 255, 255, 0.65),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+        }
+        40% {
+          transform: translate(-0.5px, 1.5px) skewX(0deg);
+          color: var(--k-wordmark);
+          filter: brightness(0.95);
+          text-shadow:
+            -2px 0 rgba(0, 255, 255, 0.4),
+            2px 0 color-mix(in srgb, var(--k-thermal-mid) 70%, transparent),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+        }
+        55% {
+          transform: translate(2px, 0) skewX(1.2deg);
+          color: var(--k-thermal-mid);
+          filter: brightness(1.18);
+          text-shadow:
+            -4px 0 color-mix(in srgb, var(--k-thermal-mid) 95%, transparent),
+            3px 0 rgba(0, 255, 255, 0.45),
+            0 0 18px color-mix(in srgb, var(--k-thermal-mid) 35%, transparent),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+        }
+        70% {
+          transform: translate(-2px, -0.5px) skewX(-0.8deg);
+          color: #a8f7ff;
           filter: brightness(1.08);
           text-shadow:
-            -3px 0 color-mix(in srgb, var(--k-thermal-mid) 85%, transparent),
-            3px 0 rgba(0, 255, 255, 0.5),
-            0 0 1px rgba(10, 8, 6, 0.55),
+            3px 0 rgba(0, 255, 255, 0.7),
+            -3px 0 color-mix(in srgb, var(--k-thermal-mid) 75%, transparent),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+        }
+        85% {
+          transform: translate(0.5px, 1px) skewX(0.3deg);
+          color: var(--k-thermal-mid);
+          filter: brightness(1.15);
+          text-shadow:
+            -2px 0 color-mix(in srgb, var(--k-thermal-mid) 85%, transparent),
+            2px 0 rgba(0, 255, 255, 0.5),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
       }
@@ -1520,12 +1571,22 @@ function PosterStyles() {
         0%,
         100% {
           opacity: 0;
-          transform: translateY(0);
+          transform: translateY(-8%);
         }
-        45%,
-        55% {
-          opacity: 0.65;
-          transform: translateY(2px);
+        18%,
+        22% {
+          opacity: 0.7;
+          transform: translateY(12%);
+        }
+        48%,
+        52% {
+          opacity: 0.45;
+          transform: translateY(55%);
+        }
+        78%,
+        82% {
+          opacity: 0.55;
+          transform: translateY(88%);
         }
       }
 
@@ -1696,22 +1757,28 @@ function PosterStyles() {
         }
       }
       .k-home[data-reduced='true'] .k-hero-wordmark:hover {
-        animation: none;
-        filter: none;
+        animation: none !important;
+        filter: brightness(1.08);
         transform: none;
-        opacity: 0.88;
-        transition: opacity 180ms ease;
+        color: var(--k-thermal-mid);
+        text-shadow:
+          0 0 18px color-mix(in srgb, var(--k-thermal-mid) 40%, transparent),
+          0 10px 36px rgba(0, 0, 0, 0.55);
+        transition: color 180ms ease, filter 180ms ease, text-shadow 180ms ease;
       }
       .k-home[data-reduced='true'] .k-hero-wordmark:hover::after {
         display: none;
       }
       @media (prefers-reduced-motion: reduce) {
         .k-hero-wordmark:hover {
-          animation: none;
-          filter: none;
+          animation: none !important;
+          filter: brightness(1.08);
           transform: none;
-          opacity: 0.88;
-          transition: opacity 180ms ease;
+          color: var(--k-thermal-mid);
+          text-shadow:
+            0 0 18px color-mix(in srgb, var(--k-thermal-mid) 40%, transparent),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+          transition: color 180ms ease, filter 180ms ease, text-shadow 180ms ease;
         }
         .k-hero-wordmark:hover::after {
           display: none;
