@@ -1475,6 +1475,9 @@ function PosterStyles() {
         pointer-events: auto;
         cursor: default;
         isolation: isolate;
+        /* Prod-style always-on RGB jitter (kamikaze-prod Hero text-jitter + chromatic) */
+        animation: k-wordmark-idle 0.55s steps(2, end) infinite;
+        will-change: transform, text-shadow;
       }
       .k-hero-wordmark::after {
         content: '';
@@ -1488,86 +1491,77 @@ function PosterStyles() {
           transparent 56%
         );
         mix-blend-mode: screen;
+        animation: k-wordmark-scan-idle 2.8s steps(2, end) infinite;
       }
-      /* Channel glitch — fine pointer only; holds while hovered */
-      @media (hover: hover) and (pointer: fine) {
-        .k-hero-wordmark:hover {
-          animation: k-wordmark-channel 480ms steps(2, end) infinite;
-          will-change: transform, color, text-shadow, filter;
-        }
-        .k-hero-wordmark:hover::after {
-          animation: k-wordmark-scan 480ms steps(2, end) infinite;
-        }
-      }
-      @keyframes k-wordmark-channel {
+      /*
+       * Idle shake — whole wordmark unit.
+       * Ported from 000qhrey/kamikaze-prod Hero: base ±2px RGB split + stepped jitter.
+       * Tasteful vs hover-channel (no hard color snaps / skew storms).
+       */
+      @keyframes k-wordmark-idle {
         0%,
         100% {
-          transform: translate(0, 0) skewX(0deg);
+          transform: translate(0, 0);
           color: var(--k-wordmark);
           filter: brightness(1);
           text-shadow:
             0 0 1px rgba(10, 8, 6, 0.55),
             0.5px 0 0 rgba(10, 8, 6, 0.35),
             -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            -2px 0 rgba(255, 0, 0, 0.55),
+            2px 0 rgba(0, 255, 255, 0.55),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
-        12% {
-          transform: translate(-1.5px, 0.5px) skewX(-0.4deg);
-          color: var(--k-thermal-mid);
-          filter: brightness(1.12);
+        20% {
+          transform: translate(-1.5px, 0.5px);
+          color: var(--k-wordmark);
+          filter: brightness(1.04);
           text-shadow:
-            -3px 0 color-mix(in srgb, var(--k-thermal-mid) 90%, transparent),
-            3px 0 rgba(0, 255, 255, 0.55),
-            0 10px 36px rgba(0, 0, 0, 0.55);
-        }
-        28% {
-          transform: translate(1.5px, -1px) skewX(0.6deg);
-          color: #7efcff;
-          filter: brightness(1.2);
-          text-shadow:
-            4px 0 color-mix(in srgb, var(--k-thermal-mid) 80%, transparent),
-            -2px 0 rgba(0, 255, 255, 0.65),
+            0 0 1px rgba(10, 8, 6, 0.55),
+            0.5px 0 0 rgba(10, 8, 6, 0.35),
+            -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            -3px 0 rgba(255, 0, 0, 0.65),
+            2px 0 rgba(0, 255, 255, 0.6),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
         40% {
-          transform: translate(-0.5px, 1.5px) skewX(0deg);
+          transform: translate(1.5px, -1px);
           color: var(--k-wordmark);
-          filter: brightness(0.95);
+          filter: brightness(1.06);
           text-shadow:
-            -2px 0 rgba(0, 255, 255, 0.4),
-            2px 0 color-mix(in srgb, var(--k-thermal-mid) 70%, transparent),
+            0 0 1px rgba(10, 8, 6, 0.55),
+            0.5px 0 0 rgba(10, 8, 6, 0.35),
+            -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            -2px 1px rgba(255, 0, 0, 0.55),
+            3px -1px rgba(0, 255, 255, 0.65),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
-        55% {
-          transform: translate(2px, 0) skewX(1.2deg);
-          color: var(--k-thermal-mid);
-          filter: brightness(1.18);
+        60% {
+          transform: translate(-1px, 1px);
+          color: var(--k-wordmark);
+          filter: brightness(0.98);
           text-shadow:
-            -4px 0 color-mix(in srgb, var(--k-thermal-mid) 95%, transparent),
-            3px 0 rgba(0, 255, 255, 0.45),
-            0 0 18px color-mix(in srgb, var(--k-thermal-mid) 35%, transparent),
+            0 0 1px rgba(10, 8, 6, 0.55),
+            0.5px 0 0 rgba(10, 8, 6, 0.35),
+            -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            -2.5px 0 rgba(255, 0, 0, 0.6),
+            2.5px 0 rgba(0, 255, 255, 0.55),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
-        70% {
-          transform: translate(-2px, -0.5px) skewX(-0.8deg);
-          color: #a8f7ff;
-          filter: brightness(1.08);
+        80% {
+          transform: translate(2px, 0);
+          color: var(--k-wordmark);
+          filter: brightness(1.03);
           text-shadow:
+            0 0 1px rgba(10, 8, 6, 0.55),
+            0.5px 0 0 rgba(10, 8, 6, 0.35),
+            -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            -1.5px 0 rgba(255, 0, 0, 0.5),
             3px 0 rgba(0, 255, 255, 0.7),
-            -3px 0 color-mix(in srgb, var(--k-thermal-mid) 75%, transparent),
-            0 10px 36px rgba(0, 0, 0, 0.55);
-        }
-        85% {
-          transform: translate(0.5px, 1px) skewX(0.3deg);
-          color: var(--k-thermal-mid);
-          filter: brightness(1.15);
-          text-shadow:
-            -2px 0 color-mix(in srgb, var(--k-thermal-mid) 85%, transparent),
-            2px 0 rgba(0, 255, 255, 0.5),
             0 10px 36px rgba(0, 0, 0, 0.55);
         }
       }
-      @keyframes k-wordmark-scan {
+      @keyframes k-wordmark-scan-idle {
         0%,
         100% {
           opacity: 0;
@@ -1575,18 +1569,42 @@ function PosterStyles() {
         }
         18%,
         22% {
-          opacity: 0.7;
-          transform: translateY(12%);
+          opacity: 0.28;
+          transform: translateY(18%);
         }
         48%,
         52% {
-          opacity: 0.45;
+          opacity: 0.18;
           transform: translateY(55%);
         }
         78%,
         82% {
-          opacity: 0.55;
+          opacity: 0.22;
           transform: translateY(88%);
+        }
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .k-hero-wordmark:hover,
+        .k-hero-wordmark:focus-visible {
+          animation: none;
+          transform: none;
+          filter: none;
+          color: var(--k-wordmark);
+          text-shadow:
+            0 0 1px rgba(10, 8, 6, 0.55),
+            0.5px 0 0 rgba(10, 8, 6, 0.35),
+            -0.5px 0.5px 0 rgba(10, 8, 6, 0.25),
+            0 10px 36px rgba(0, 0, 0, 0.55);
+          transition:
+            color 220ms ease,
+            text-shadow 220ms ease,
+            transform 220ms ease,
+            filter 220ms ease;
+        }
+        .k-hero-wordmark:hover::after,
+        .k-hero-wordmark:focus-visible::after {
+          animation: none;
+          opacity: 0;
         }
       }
 
@@ -1653,6 +1671,15 @@ function PosterStyles() {
           0 0 24px color-mix(in srgb, var(--k-thermal-core) 45%, transparent),
           0 0 48px color-mix(in srgb, var(--k-thermal-mid) 30%, transparent),
           0 8px 28px rgba(0, 0, 0, 0.65);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        [data-theme='heatmap'] .k-hero-wordmark:hover,
+        [data-theme='heatmap'] .k-hero-wordmark:focus-visible {
+          text-shadow:
+            0 0 24px color-mix(in srgb, var(--k-thermal-core) 45%, transparent),
+            0 0 48px color-mix(in srgb, var(--k-thermal-mid) 30%, transparent),
+            0 8px 28px rgba(0, 0, 0, 0.65);
+        }
       }
       /* Quiet thermal scale — heatmap-only */
       [data-theme='heatmap'] .k-hero-flank--right::after {
@@ -1756,32 +1783,24 @@ function PosterStyles() {
           filter: none;
         }
       }
-      .k-home[data-reduced='true'] .k-hero-wordmark:hover {
-        animation: none !important;
-        filter: brightness(1.08);
-        transform: none;
-        color: var(--k-thermal-mid);
-        text-shadow:
-          0 0 18px color-mix(in srgb, var(--k-thermal-mid) 40%, transparent),
-          0 10px 36px rgba(0, 0, 0, 0.55);
-        transition: color 180ms ease, filter 180ms ease, text-shadow 180ms ease;
+      /* Reduced-motion only — do NOT gate on data-lite (touch Macs / phones
+         still get the cheap CSS shake; lite is for heavy WebGL/particles). */
+      .k-home[data-reduced='true'] .k-hero-wordmark {
+        animation: none;
+        will-change: auto;
       }
-      .k-home[data-reduced='true'] .k-hero-wordmark:hover::after {
-        display: none;
+      .k-home[data-reduced='true'] .k-hero-wordmark::after {
+        animation: none;
+        opacity: 0;
       }
       @media (prefers-reduced-motion: reduce) {
-        .k-hero-wordmark:hover {
-          animation: none !important;
-          filter: brightness(1.08);
-          transform: none;
-          color: var(--k-thermal-mid);
-          text-shadow:
-            0 0 18px color-mix(in srgb, var(--k-thermal-mid) 40%, transparent),
-            0 10px 36px rgba(0, 0, 0, 0.55);
-          transition: color 180ms ease, filter 180ms ease, text-shadow 180ms ease;
+        .k-hero-wordmark {
+          animation: none;
+          will-change: auto;
         }
-        .k-hero-wordmark:hover::after {
-          display: none;
+        .k-hero-wordmark::after {
+          animation: none;
+          opacity: 0;
         }
       }
 
