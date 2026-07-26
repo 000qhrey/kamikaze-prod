@@ -27,6 +27,7 @@ import { HOME_COPY, CONSTANT } from './homeCopy'
 import { HomeFooter } from './HomeFooter'
 import { SunLogoStatic } from './SunLogoStatic'
 import { EventFeatureVisual } from './EventFeatureVisual'
+import { ScrambleText } from '@/components/effects/ScrambleText'
 
 const SunLogo3D = dynamic(
   () => import('./SunLogo3D').then((m) => m.SunLogo3D),
@@ -718,6 +719,7 @@ function PanelTelemetry({ now }: { now: string }) {
 
 function PanelEvents() {
   const ref = useReveal<HTMLElement>()
+  const lite = useLiteMode()
   const event = getFeaturedEvent()
   if (!event) return null
 
@@ -744,7 +746,16 @@ function PanelEvents() {
           <EventFeatureVisual artistSlugs={event.lineupArtistSlugs ?? []} />
           <div className="k-event-feature-meta">
             <span className="k-event-feature-date">{dateLabel}</span>
-            <span className="k-event-feature-name">{event.name}</span>
+            <ScrambleText
+              className="k-event-feature-name"
+              triggerOnHover={!lite}
+              triggerOnView
+              duration={600}
+              resolveToColor="#CC0000"
+              finalColor="#EFEFEF"
+            >
+              {event.name}
+            </ScrambleText>
             <span className="k-event-feature-loc">{location}</span>
           </div>
           <span className="k-event-feature-cta">{HOME_COPY.events.cta}</span>

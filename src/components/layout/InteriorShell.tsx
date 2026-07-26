@@ -82,7 +82,9 @@ export default function InteriorShell({ children }: { children: ReactNode }) {
         visitor.visitCount++
         visitor.lastVisit = new Date().toISOString()
         localStorage.setItem(VISITOR_STORAGE_KEY, JSON.stringify(visitor))
-        setBootMode('fast')
+        // Returning visitor — skip FastBoot / WELCOME BACK on remount & nav
+        setHasBooted(true)
+        setBootMode('none')
       } else {
         const newVisitor: VisitorState = {
           firstVisit: new Date().toISOString(),

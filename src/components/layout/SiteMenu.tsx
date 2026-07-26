@@ -8,12 +8,13 @@
  * initial JS stays lean.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { NAV_LINKS } from '@/data/navigation'
 import { HOME_COPY } from '@/components/home/homeCopy'
 import { getAssetPath } from '@/lib/basePath'
+import { playHoverSound } from '@/hooks/useSonicFeedback'
 import clsx from 'clsx'
 
 const SiteMenuOverlay = dynamic(() => import('./SiteMenuOverlay'), {
@@ -22,6 +23,137 @@ const SiteMenuOverlay = dynamic(() => import('./SiteMenuOverlay'), {
 
 function isNavLinkActive(pathname: string, href: string): boolean {
   return pathname === href || (href !== '/' && pathname.startsWith(href))
+}
+
+const BRAND_IDLE = 'KAMIKAZE'
+const BRAND_KANJI = '神風'
+const BRAND_FULL = 'UNDERGROUND NEVER DIES'
+/** Settled hover look — mixed Latin + 神風 + block (the cool mid-scramble vibe) */
+const BRAND_CORRUPT = 'KA神風▓ZE'
+const BRAND_GLITCH = '神風死暴走地下カミカゼ力地ミ▓▒░█01<>[]'
+
+type BrandPhase = 'idle' | 'kanji' | 'full' | 'corrupt'
+
+function TopbarBrand() {
+  const [display, setDisplay] = useState(BRAND_IDLE)
+  const [phase, setPhase] = useState<BrandPhase>('idle')
+  const [live, setLive] = useState(false)
+  const morphRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const chainRef = useRef<ReturnType<typeof setTimeout>[]>([])
+  const pulseRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const fromRef = useRef(BRAND_IDLE)
+
+  const clearTimers = useCallback(() => {
+    if (morphRef.current) {
+      clearInterval(morphRef.current)
+      morphRef.current = null
+    }
+    for (const t of chainRef.current) clearTimeout(t)
+    chainRef.current = []
+    if (pulseRef.current) {
+      clearInterval(pulseRef.current)
+      pulseRef.current = null
+    }
+  }, [])
+
+  const morphTo = useCallback((target: string) => {
+    if (morphRef.current) clearInterval(morphRef.current)
+    const from = fromRef.current
+    const maxLen = Math.max(target.length, from.length)
+    let frame = 0
+    const total = 18
+
+    morphRef.current = setInterval(() => {
+      frame++
+      if (frame >= total) {
+        setDisplay(target)
+        fromRef.current = target
+        if (morphRef.current) {
+          clearInterval(morphRef.current)
+          morphRef.current = null
+        }
+        return
+      }
+      const progress = frame / total
+      const revealed = Math.floor(progress * target.length)
+      let out = ''
+      for (let i = 0; i < maxLen; i++) {
+        if (i < revealed) out += target[i] ?? ''
+        else if (i < target.length)
+          out += BRAND_GLITCH[Math.floor(Math.random() * BRAND_GLITCH.length)]
+      }
+      setDisplay(out)
+    }, 28)
+  }, [])
+
+  const startCorruptPulse = useCallback(() => {
+    if (pulseRef.current) clearInterval(pulseRef.current)
+    // Keep the cool mixed mark, occasionally re-glitch the block glyph
+    pulseRef.current = setInterval(() => {
+      const blocks = '▓▒░█'
+      const block = blocks[Math.floor(Math.random() * blocks.length)]
+      const next = `KA神風${block}ZE`
+      setDisplay(next)
+      fromRef.current = next
+    }, 180)
+  }, [])
+
+  useEffect(() => {
+    return () => clearTimers()
+  }, [clearTimers])
+
+  const onEnter = () => {
+    // Touch / narrow — keep static wordmark
+    if (typeof window !== 'undefined') {
+      if (window.matchMedia('(max-width: 700px)').matches) return
+      if (window.matchMedia('(pointer: coarse)').matches) return
+    }
+    playHoverSound()
+    clearTimers()
+    setLive(true)
+    setPhase('kanji')
+    morphTo(BRAND_KANJI)
+    chainRef.current.push(
+      setTimeout(() => {
+        setPhase('full')
+        morphTo(BRAND_FULL)
+      }, 700),
+      setTimeout(() => {
+        setPhase('corrupt')
+        morphTo(BRAND_CORRUPT)
+        // After morph settles, keep the block glyph alive
+        chainRef.current.push(
+          setTimeout(() => {
+            startCorruptPulse()
+          }, 520),
+        )
+      }, 1700),
+    )
+  }
+
+  const onLeave = () => {
+    clearTimers()
+    setLive(false)
+    setPhase('idle')
+    morphTo(BRAND_IDLE)
+  }
+
+  return (
+    <a
+      href={getAssetPath('/')}
+      className={clsx(
+        'k-site-topbar-brand',
+        live && phase !== 'idle' && 'k-site-topbar-brand--live',
+      )}
+      aria-label="Home"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <span className="k-site-topbar-brand-text" data-phase={phase}>
+        {display}
+      </span>
+    </a>
+  )
 }
 
 export function SiteMenu() {
@@ -46,9 +178,7 @@ export function SiteMenu() {
       <header
         className={clsx('k-site-topbar', isHome && 'k-site-topbar--home')}
       >
-        <a href={getAssetPath('/')} className="k-site-topbar-brand" aria-label="Home">
-          KAMIKAZE
-        </a>
+        <TopbarBrand />
         {isHome ? (
           <nav className="k-site-topbar-nav" aria-label="Primary">
             {NAV_LINKS.map((link) => (
@@ -138,9 +268,34 @@ export function SiteMenu() {
           font-size: 14px;
           text-decoration: none;
           transition: color 200ms ease;
+          min-width: 5.5rem;
+          max-width: min(48vw, 18rem);
+          overflow: hidden;
+          text-overflow: clip;
+          white-space: nowrap;
         }
-        .k-site-topbar-brand:hover {
+        .k-site-topbar-brand:hover,
+        .k-site-topbar-brand--live {
           color: var(--k-menu-red);
+        }
+        .k-site-topbar-brand-text {
+          display: inline-block;
+          transition: letter-spacing 200ms ease;
+        }
+        .k-site-topbar-brand-text[data-phase='full'] {
+          font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+          font-weight: 500;
+          font-size: 10px;
+          letter-spacing: 0.14em;
+        }
+        .k-site-topbar-brand-text[data-phase='kanji'] {
+          letter-spacing: 0.2em;
+        }
+        .k-site-topbar-brand-text[data-phase='corrupt'] {
+          font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-shadow: 0 0 12px color-mix(in srgb, var(--k-menu-red) 55%, transparent);
         }
         .k-site-topbar-nav {
           grid-column: 2;

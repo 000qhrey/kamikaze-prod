@@ -7,6 +7,7 @@ import { playHoverSound } from '@/hooks/useSonicFeedback'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { EVENTS } from '@/data/siteCopy'
 import { OverrideCrtModal } from '@/components/events/OverrideCrtModal'
+import { ScrambleText } from '@/components/effects/ScrambleText'
 import clsx from 'clsx'
 
 interface EventCardProps {
@@ -20,12 +21,25 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
   const [crtOpen, setCrtOpen] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
+  const [dateHovered, setDateHovered] = useState(false)
+  const [scanY, setScanY] = useState<number | null>(null)
+  const [titleGap, setTitleGap] = useState<{ left: number; right: number; top: number; bottom: number } | null>(
+    null,
+  )
   const cardRef = useRef<HTMLDivElement>(null)
+  const glassRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
   const isMobile = useIsMobile()
   const isSoldOut = !event.ticketUrl
   const isSecretLocation = event.isSecretLocation
   const isFullyRedacted = event.isFullyRedacted
   const opensCrt = Boolean(event.featured || event.lineupArtistSlugs?.length)
+  const displayDate = (() => {
+    if (isFullyRedacted) return '??.??.????'
+    if (isSecretLocation) return formatEventDatePartial(event.date)
+    return formatEventDate(event.date)
+  })()
+  const verticalDate = displayDate.replace(/\./g, '')
 
   useEffect(() => {
     if (!opensCrt) return
@@ -41,12 +55,6 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
     return () => window.removeEventListener('hashchange', tryOpen)
   }, [event.id, opensCrt, autoOpenCrt])
 
-  const getDisplayDate = () => {
-    if (isFullyRedacted) return '??.??.????'
-    if (isSecretLocation) return formatEventDatePartial(event.date)
-    return formatEventDate(event.date)
-  }
-
   const handleCardClick = useCallback(() => {
     if (opensCrt) {
       setCrtOpen(true)
@@ -61,7 +69,23 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     })
-  }, [])
+
+    const glass = glassRef.current
+    const title = titleRef.current
+    if (!glass || isMobile) return
+    const gr = glass.getBoundingClientRect()
+    setScanY(e.clientY - gr.top)
+    if (title) {
+      const tr = title.getBoundingClientRect()
+      const pad = 6
+      setTitleGap({
+        left: Math.max(0, tr.left - gr.left - pad),
+        right: Math.min(gr.width, tr.right - gr.left + pad),
+        top: tr.top - gr.top - pad,
+        bottom: tr.bottom - gr.top + pad,
+      })
+    }
+  }, [isMobile])
 
   const skewDirection = index % 2 === 0 ? -1.5 : 1.5
 
@@ -92,7 +116,11 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
             setDangerLevel(1)
           }
         }}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseLeave={() => {
+          setIsHovered(false)
+          setScanY(null)
+          setTitleGap(null)
+        }}
       >
         <div
           className="absolute -top-1 left-0 right-0 h-2 bg-void"
@@ -108,9 +136,48 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
           }}
         />
 
+        {/* Vertical date sits behind the glass card */}
+        {!isMobile && (
+          <div
+            className="absolute -left-4 md:-left-8 top-0 bottom-0 z-0 flex items-center select-none"
+            aria-hidden
+            onMouseEnter={() => setDateHovered(true)}
+            onMouseLeave={() => setDateHovered(false)}
+          >
+            <div
+              className={clsx(
+                'text-[4rem] md:text-[6rem] leading-none',
+                'text-arterial/25 transition-all duration-500',
+                isHovered || dateHovered ? 'text-arterial/50 scale-110' : ''
+              )}
+              style={{
+                writingMode: 'vertical-rl',
+                textOrientation: 'mixed',
+                transform: 'rotate(180deg)',
+                /* Archivo — not CyberpunkCity (titles / OVERRIDE) */
+                fontFamily: 'var(--font-archivo), Archivo, system-ui, sans-serif',
+                fontWeight: 700,
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '0.04em',
+              }}
+            >
+              <ScrambleText
+                triggerOnHover
+                duration={500}
+                resolveToColor="#CC0000"
+                finalColor="#CC0000"
+                className="!font-[inherit] tracking-inherit"
+              >
+                {verticalDate}
+              </ScrambleText>
+            </div>
+          </div>
+        )}
+
         <div
+          ref={glassRef}
           className={clsx(
-            'relative border-l-4 border-arterial glass-card',
+            'relative z-[1] border-l-4 border-arterial glass-card',
             'transition-all duration-300',
             isHovered && !isMobile ? 'glass-card-heavy border-l-8' : ''
           )}
@@ -118,6 +185,26 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
             transform: isMobile ? 'none' : `skewY(${-skewDirection}deg)`,
           }}
         >
+          {/* Scan line — breaks around the title so it never cuts OVERRIDE */}
+          {isHovered && !isMobile && scanY != null && (
+            <div className="pointer-events-none absolute inset-0 z-[2] overflow-hidden" aria-hidden>
+              {titleGap && scanY >= titleGap.top && scanY <= titleGap.bottom ? (
+                <>
+                  <div
+                    className="absolute h-px bg-arterial"
+                    style={{ top: scanY, left: 0, width: Math.max(0, titleGap.left) }}
+                  />
+                  <div
+                    className="absolute h-px bg-arterial"
+                    style={{ top: scanY, left: titleGap.right, right: 0 }}
+                  />
+                </>
+              ) : (
+                <div className="absolute left-0 right-0 h-px bg-arterial" style={{ top: scanY }} />
+              )}
+            </div>
+          )}
+
           {isHovered && !isMobile && (
             <div
               className="absolute pointer-events-none z-50 transition-opacity duration-150"
@@ -141,28 +228,17 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
             </div>
           )}
 
-          {!isMobile && (
-            <div className="absolute -left-4 md:-left-8 top-0 bottom-0 flex items-center pointer-events-none select-none">
-              <span
-                className={clsx(
-                  'font-display text-[4rem] md:text-[6rem] leading-none',
-                  'text-arterial/20 transition-all duration-500',
-                  isHovered ? 'text-arterial/40 scale-110' : ''
-                )}
-                style={{
-                  writingMode: 'vertical-rl',
-                  textOrientation: 'mixed',
-                  transform: 'rotate(180deg)',
-                }}
-              >
-                {getDisplayDate().replace(/\./g, '')}
-              </span>
-            </div>
-          )}
-
-          <div className="relative p-4 sm:p-6 md:p-8 md:pl-24 flex flex-col gap-3 sm:gap-4">
+          <div className="relative z-10 p-4 sm:p-6 md:p-8 md:pl-24 flex flex-col gap-3 sm:gap-4">
             <div className="font-mono text-[10px] sm:text-xs text-arterial tracking-widest">
-              <span>{getDisplayDate()}</span>
+              <ScrambleText
+                triggerOnHover={!isMobile}
+                duration={450}
+                resolveToColor="#CC0000"
+                finalColor="#CC0000"
+                className="text-arterial"
+              >
+                {displayDate}
+              </ScrambleText>
               {' // '}
               <span className="text-arterial font-medium">
                 {isSecretLocation
@@ -172,13 +248,22 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
             </div>
 
             <h3
+              ref={titleRef}
               className={clsx(
                 'font-display text-2xl sm:text-4xl md:text-6xl tracking-tight leading-none',
                 'transition-all duration-300',
                 isHovered && !isMobile ? 'tracking-wider' : ''
               )}
             >
-              {event.name}
+              <ScrambleText
+                triggerOnHover={!isMobile}
+                duration={600}
+                resolveToColor="#CC0000"
+                finalColor="#EFEFEF"
+                className="font-display tracking-inherit"
+              >
+                {event.name}
+              </ScrambleText>
             </h3>
 
             {isFullyRedacted ? (
@@ -222,19 +307,10 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
           </div>
 
           {isSoldOut && (
-            <div className="absolute top-4 right-4 font-mono text-xs text-arterial/60 border border-arterial/40 px-2 py-1 transform rotate-6">
+            <div className="absolute top-4 right-4 z-10 font-mono text-xs text-arterial/60 border border-arterial/40 px-2 py-1 transform rotate-6">
               SOLD OUT
             </div>
           )}
-
-          <div
-            className={clsx(
-              'absolute left-0 right-0 h-px bg-arterial',
-              'transition-all duration-100',
-              isHovered ? 'opacity-100' : 'opacity-0'
-            )}
-            style={{ top: `${Math.random() * 100}%` }}
-          />
         </div>
 
         <div

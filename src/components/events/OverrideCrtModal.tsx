@@ -242,32 +242,6 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
 
           {/* Stage scrolls; CH− / TUNE / CH+ stay pinned below */}
           <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col md:flex-row gap-1.5 sm:gap-3">
-            {/* Full-stage tune static (covers glass + rail) */}
-            {ready && tuning && (
-              <div
-                className="pointer-events-none absolute inset-0 z-50 rounded-md sm:rounded-lg overflow-hidden"
-                aria-hidden
-              >
-                <div
-                  className="absolute inset-0 bg-black"
-                  style={{ animation: 'crt-static 0.06s steps(2) infinite' }}
-                />
-                <div
-                  className="absolute inset-0 opacity-90 mix-blend-screen"
-                  style={{
-                    backgroundImage:
-                      "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E\")",
-                    animation: 'crt-noise-shift 0.05s steps(3) infinite',
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-mono text-[10px] sm:text-xs tracking-[0.5em] text-white/70">
-                    TUNING…
-                  </span>
-                </div>
-              </div>
-            )}
-
             {/* Glass — compact hero on mobile, dominant on desktop */}
             <div
               className="relative shrink-0 md:flex-1 h-[34vh] max-h-[260px] md:h-auto md:max-h-none md:min-h-0 overflow-hidden rounded-md sm:rounded-lg bg-black"
@@ -296,6 +270,32 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                   backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
                 }}
               />
+
+              {/* Channel tune static — glass panel only, not the rail */}
+              {ready && tuning && (
+                <div
+                  className="pointer-events-none absolute inset-0 z-50 overflow-hidden"
+                  aria-hidden
+                >
+                  <div
+                    className="absolute inset-0 bg-black"
+                    style={{ animation: 'crt-static 0.06s steps(2) infinite' }}
+                  />
+                  <div
+                    className="absolute inset-0 opacity-90 mix-blend-screen"
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E\")",
+                      animation: 'crt-noise-shift 0.05s steps(3) infinite',
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-mono text-[10px] sm:text-xs tracking-[0.5em] text-white/70">
+                      TUNING…
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {(boot === 'static' || boot === 'sync') && (
                 <div
