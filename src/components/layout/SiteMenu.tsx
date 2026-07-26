@@ -179,25 +179,22 @@ export function SiteMenu() {
         className={clsx('k-site-topbar', isHome && 'k-site-topbar--home')}
       >
         <TopbarBrand />
-        {isHome ? (
-          <nav className="k-site-topbar-nav" aria-label="Primary">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={getAssetPath(link.href)}
-                className={clsx(
-                  'k-site-topbar-nav-link',
-                  isNavLinkActive(pathname, link.href) &&
-                    'k-site-topbar-nav-link--active',
-                )}
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        ) : (
-          <span className="k-site-topbar-nav-spacer" aria-hidden />
-        )}
+        {/* Desktop: always show primary links across home + interior */}
+        <nav className="k-site-topbar-nav" aria-label="Primary">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={getAssetPath(link.href)}
+              className={clsx(
+                'k-site-topbar-nav-link',
+                isNavLinkActive(pathname, link.href) &&
+                  'k-site-topbar-nav-link--active',
+              )}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
         <button
           type="button"
           className="k-site-topbar-menu"
@@ -260,19 +257,22 @@ export function SiteMenu() {
         .k-site-topbar-brand {
           grid-column: 1;
           justify-self: start;
-          font-family: var(--font-archivo), 'Archivo', 'Archivo Black', system-ui,
+          /* Same face as hero logo wordmark (CyberpunkCity) */
+          font-family: 'CyberpunkCity', 'Archivo Black', var(--font-archivo-black),
             sans-serif;
-          font-weight: 900;
-          letter-spacing: 0.02em;
+          font-weight: 400;
+          letter-spacing: 0.04em;
           color: var(--k-menu-bone);
-          font-size: 14px;
+          font-size: 15px;
           text-decoration: none;
+          text-transform: uppercase;
           transition: color 200ms ease;
           min-width: 5.5rem;
           max-width: min(48vw, 18rem);
           overflow: hidden;
           text-overflow: clip;
           white-space: nowrap;
+          line-height: 1;
         }
         .k-site-topbar-brand:hover,
         .k-site-topbar-brand--live {
@@ -282,6 +282,9 @@ export function SiteMenu() {
           display: inline-block;
           transition: letter-spacing 200ms ease;
         }
+        .k-site-topbar-brand-text[data-phase='idle'] {
+          font-family: inherit;
+        }
         .k-site-topbar-brand-text[data-phase='full'] {
           font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
           font-weight: 500;
@@ -289,6 +292,7 @@ export function SiteMenu() {
           letter-spacing: 0.14em;
         }
         .k-site-topbar-brand-text[data-phase='kanji'] {
+          font-family: inherit;
           letter-spacing: 0.2em;
         }
         .k-site-topbar-brand-text[data-phase='corrupt'] {
@@ -311,12 +315,17 @@ export function SiteMenu() {
           display: block;
         }
         .k-site-topbar-nav-link {
+          /* Same ritual face as brand / hero wordmark */
+          font-family: 'CyberpunkCity', 'Archivo Black', var(--font-archivo-black),
+            sans-serif;
+          font-weight: 400;
           color: var(--k-menu-bone-3);
           text-decoration: none;
-          font-size: 10px;
-          letter-spacing: 0.22em;
+          font-size: 11px;
+          letter-spacing: 0.12em;
           transition: color 200ms ease;
           white-space: nowrap;
+          line-height: 1;
         }
         .k-site-topbar-nav-link:hover,
         .k-site-topbar-nav-link--active {
@@ -328,15 +337,19 @@ export function SiteMenu() {
           justify-self: end;
           display: inline-flex;
           align-items: center;
+          font-family: 'CyberpunkCity', 'Archivo Black', var(--font-archivo-black),
+            sans-serif;
+          font-weight: 400;
           color: var(--k-menu-bone-2);
           background: none;
           border: none;
           padding: 0;
-          font: inherit;
-          letter-spacing: inherit;
-          text-transform: inherit;
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
           cursor: pointer;
           transition: color 200ms ease;
+          line-height: 1;
         }
         .k-site-topbar-menu:hover {
           color: var(--k-menu-red);
