@@ -2077,6 +2077,7 @@ function PosterStyles() {
         justify-content: center;
         gap: 10px;
         min-width: 0;
+        container-type: inline-size;
       }
       .k-event-feature-date {
         font-family: 'IBM Plex Mono', monospace;
@@ -2088,14 +2089,16 @@ function PosterStyles() {
         /* Same ritual face as hero wordmark — less razor than Archivo */
         font-family: 'CyberpunkCity', 'Archivo Black', sans-serif;
         font-weight: 400;
-        font-size: clamp(32px, 7vw, 68px);
-        letter-spacing: 0.04em;
+        /* ~8 glyphs — scale to meta column like hero wordmark */
+        font-size: clamp(22px, 11.5cqi, 68px);
+        letter-spacing: 0.03em;
         line-height: 0.95;
         text-transform: uppercase;
         color: var(--k-bone);
         min-width: 0;
         max-width: 100%;
-        overflow-wrap: anywhere;
+        width: fit-content;
+        white-space: nowrap;
       }
       .k-event-feature-loc {
         font-family: 'IBM Plex Mono', monospace;
@@ -3042,7 +3045,7 @@ function PosterStyles() {
           align-self: start;
         }
         .k-event-feature-name {
-          font-size: clamp(36px, 12vw, 52px);
+          font-size: clamp(28px, 10.5vw, 52px);
         }
 
         .k-collective-feature {
