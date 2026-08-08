@@ -7,12 +7,15 @@
 
 import { useState, useEffect, type ReactNode } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import { SiteMenu } from '@/components/layout/SiteMenu'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { FontLoader } from '@/components/layout/FontLoader'
 import { ScrollTracker } from '@/components/layout/ScrollTracker'
 import { Footer } from '@/components/layout/Footer'
 import { TransitionProvider } from '@/providers/TransitionProvider'
+import { getAssetPath } from '@/lib/basePath'
+import { NAV_LINKS } from '@/data/siteCopy'
 
 const SigilScene3D = dynamic(
   () => import('@/components/canvas/SigilScene3D'),
@@ -45,6 +48,7 @@ const TerminalAudioPlayer = dynamic(
 
 export default function HomeShell({ children }: { children: ReactNode }) {
   const [showAudio, setShowAudio] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     let cancelled = false
@@ -66,6 +70,23 @@ export default function HomeShell({ children }: { children: ReactNode }) {
       window.removeEventListener('keydown', onInteract)
     }
   }, [])
+
+  // Warm interior routes so home→events/artists doesn't hitch on first click
+  useEffect(() => {
+    const warm = () => {
+      for (const link of NAV_LINKS) {
+        if (link.href === '/') continue
+        router.prefetch(getAssetPath(link.href))
+      }
+    }
+
+    const ric = window.requestIdleCallback?.(warm, { timeout: 2500 })
+    const timer = window.setTimeout(warm, 1800)
+    return () => {
+      window.clearTimeout(timer)
+      if (ric != null && window.cancelIdleCallback) window.cancelIdleCallback(ric)
+    }
+  }, [router])
 
   return (
     <>

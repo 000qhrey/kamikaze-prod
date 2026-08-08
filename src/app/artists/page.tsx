@@ -53,8 +53,8 @@ export default function ArtistsPage() {
       </div>
 
       {/* Roster — artists who stood with Kamikaze */}
-      <section className="relative z-10 mt-20 md:mt-28 px-4 sm:px-6 max-w-6xl mx-auto">
-        <div className="mb-10 md:mb-14 max-w-3xl">
+      <section className="relative z-10 mt-20 md:mt-28 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div className="mb-8 md:mb-10 max-w-3xl">
           <p className="font-mono text-[10px] sm:text-xs text-arterial tracking-[0.35em] mb-3">
             [{ARTISTS.rosterEyebrow}]
           </p>
@@ -66,7 +66,7 @@ export default function ArtistsPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-xl sm:max-w-2xl md:max-w-3xl">
           {roster.map((artist, index) => (
             <ArtistTile key={artist.id} artist={artist} index={index} />
           ))}
