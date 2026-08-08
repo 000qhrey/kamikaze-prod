@@ -18,10 +18,18 @@ export const HOME_COPY = {
   },
 
   events: {
-    label: 'UPCOMING EVENTS',
+    label: 'FEATURED EVENT',
     locationTbd: 'LOCATION TBA',
     cta: 'DETAILS →',
     viewAll: 'ALL EVENTS →',
+  },
+
+  mix: {
+    label: 'FEATURED MIX',
+    eyebrow: 'SOUNDCLOUD',
+    play: '▶ PLAY',
+    listen: '[ LISTEN ON SOUNDCLOUD → ]',
+    artist: 'ARTIST PROFILE →',
   },
 
   residents: {
