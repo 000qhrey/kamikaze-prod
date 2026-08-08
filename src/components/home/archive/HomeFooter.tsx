@@ -13,7 +13,7 @@ import { AscendButton } from '@/components/layout/AscendButton'
 import { MarqueeGlitch } from '@/components/effects/MarqueeGlitch'
 import { FOOTER_NAV } from '@/data/navigation'
 import { KillSwitch } from '@/components/layout/KillSwitch'
-import { HOME_COPY } from './homeCopy'
+import { HOME_COPY } from '../homeCopy'
 
 const GLITCH_CHARS = '!@#$%^&*()_+-=[]{}|;:,.<>?/~`'
 

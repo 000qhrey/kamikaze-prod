@@ -1,6 +1,8 @@
 import { SignalUpload } from '@/components/artists/SignalUpload'
+import { ArtistTile } from '@/components/artists/ArtistTile'
 import { ArtistsBackground } from '@/components/artists/ArtistsBackground'
 import { ScrambleText } from '@/components/effects/ScrambleText'
+import { getRosterArtists } from '@/data/artists'
 import { ARTISTS, META } from '@/data/siteCopy'
 
 export const metadata = {
@@ -9,6 +11,8 @@ export const metadata = {
 }
 
 export default function ArtistsPage() {
+  const roster = getRosterArtists()
+
   return (
     <div className="relative pt-24 pb-16">
       <ArtistsBackground />
@@ -47,6 +51,27 @@ export default function ArtistsPage() {
           </p>
         </div>
       </div>
+
+      {/* Roster — artists who stood with Kamikaze */}
+      <section className="relative z-10 mt-20 md:mt-28 px-4 sm:px-6 max-w-6xl mx-auto">
+        <div className="mb-10 md:mb-14 max-w-3xl">
+          <p className="font-mono text-[10px] sm:text-xs text-arterial tracking-[0.35em] mb-3">
+            [{ARTISTS.rosterEyebrow}]
+          </p>
+          <h2 className="font-display text-2xl sm:text-4xl md:text-5xl tracking-wider text-white leading-tight mb-3">
+            {ARTISTS.rosterTitle}
+          </h2>
+          <p className="font-mono text-sm text-white/55 tracking-wide">
+            {ARTISTS.rosterSubtitle}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+          {roster.map((artist, index) => (
+            <ArtistTile key={artist.id} artist={artist} index={index} />
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

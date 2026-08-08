@@ -354,7 +354,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                         src={getAssetPath(active.photo)}
                         alt={active.name}
                         fill
-                        className="object-cover object-center opacity-55"
+                        className="object-cover object-center opacity-80"
                         sizes="(max-width: 1500px) 70vw, 1000px"
                         priority
                       />
@@ -363,18 +363,18 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                       className="absolute inset-0"
                       style={{
                         background:
-                          'linear-gradient(105deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0.3) 100%)',
+                          'linear-gradient(105deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.15) 100%)',
                       }}
                     />
 
-                    {/* Pinned OVERRIDE — tighter on mobile */}
+                    {/* Pinned channel artist — tighter on mobile */}
                     <div className="relative z-10 h-full flex flex-col justify-end md:justify-center px-4 py-3 sm:p-6 md:p-10 lg:p-12">
                       <div className="max-w-lg space-y-1.5 sm:space-y-3 md:space-y-4 min-w-0">
                         <p className="hidden sm:block font-mono text-[9px] sm:text-[10px] tracking-[0.45em] text-white/35 uppercase">
                           Current signal
                         </p>
                         <h2 className="font-display text-3xl sm:text-5xl md:text-7xl tracking-tight text-white leading-[0.9]">
-                          {event.name}
+                          {active?.name ?? event.name}
                         </h2>
                         <p className="font-mono text-[9px] sm:text-xs tracking-[0.3em] text-arterial uppercase">
                           Peak pressure // one room
@@ -406,16 +406,33 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 border-r border-t border-arterial" />
                             <span className="absolute -bottom-1 -left-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 border-l border-b border-arterial" />
                             <span className="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 border-r border-b border-arterial" />
-                            <TerminalButton
-                              disabled
-                              className="!px-3 !py-1.5 sm:!px-5 sm:!py-2.5 text-[10px] sm:text-sm"
-                            >
-                              BOOK TICKETS
-                            </TerminalButton>
+                            {event.ticketUrl ? (
+                              <TerminalButton
+                                className="!px-3 !py-1.5 sm:!px-5 sm:!py-2.5 text-[10px] sm:text-sm"
+                                onClick={() => {
+                                  window.open(
+                                    event.ticketUrl,
+                                    '_blank',
+                                    'noopener,noreferrer'
+                                  )
+                                }}
+                              >
+                                BOOK TICKETS
+                              </TerminalButton>
+                            ) : (
+                              <>
+                                <TerminalButton
+                                  disabled
+                                  className="!px-3 !py-1.5 sm:!px-5 sm:!py-2.5 text-[10px] sm:text-sm"
+                                >
+                                  BOOK TICKETS
+                                </TerminalButton>
+                                <p className="hidden sm:block mt-2 font-mono text-[9px] text-white/35 tracking-wide">
+                                  {EVENTS.bookSoonHint}
+                                </p>
+                              </>
+                            )}
                           </div>
-                          <p className="hidden sm:block mt-2 font-mono text-[9px] text-white/35 tracking-wide">
-                            {EVENTS.bookSoonHint}
-                          </p>
                         </div>
                       </div>
                     </div>
@@ -466,7 +483,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                               src={getAssetPath(artist.photo)}
                               alt=""
                               fill
-                              className="object-cover object-center grayscale group-hover:grayscale-0 transition-[filter]"
+                              className="object-cover object-center grayscale-[0.25] group-hover:grayscale-0 transition-[filter]"
                               sizes="120px"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent sm:hidden" />

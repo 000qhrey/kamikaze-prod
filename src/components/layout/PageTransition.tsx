@@ -19,11 +19,11 @@ export function PageTransition({ children }: { children: ReactNode }) {
     if (!el || typeof el.animate !== 'function') return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
+    // Opacity only — a lingering `transform` (even translateY(0)) makes
+    // this node a containing block, which traps `position: fixed` heroes
+    // inside a tall section and centers them below the fold.
     const anim = el.animate(
-      [
-        { opacity: 0, transform: 'translateY(8px)' },
-        { opacity: 1, transform: 'translateY(0)' },
-      ],
+      [{ opacity: 0 }, { opacity: 1 }],
       {
         duration: 300,
         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',

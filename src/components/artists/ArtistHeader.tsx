@@ -130,8 +130,8 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
           className="object-cover transition-all duration-200"
           style={{
             filter: isInHeader
-              ? 'brightness(0.35) contrast(1.6) grayscale(0.9)'
-              : 'brightness(0.3) contrast(1.5) grayscale(1)',
+              ? 'brightness(0.9) contrast(1.15) grayscale(0.15)'
+              : 'brightness(0.85) contrast(1.1) grayscale(0.2)',
             transform: isInHeader ? `scale(1.02)` : 'scale(1)',
           }}
           priority
@@ -166,14 +166,14 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
 
       {/* Scanlines */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="absolute inset-0 pointer-events-none opacity-10"
         style={{
           background: `repeating-linear-gradient(
             0deg,
             transparent,
             transparent 2px,
-            rgba(0, 0, 0, 0.5) 2px,
-            rgba(0, 0, 0, 0.5) 4px
+            rgba(0, 0, 0, 0.35) 2px,
+            rgba(0, 0, 0, 0.35) 4px
           )`,
         }}
       />

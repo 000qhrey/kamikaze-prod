@@ -23,6 +23,8 @@ export interface Artist {
     title: string
     url: string
     platform: 'soundcloud' | 'youtube' | 'mixcloud'
+    /** Optional cover art path under /public */
+    cover?: string
   }[]
   /**
    * Open-call / competition slot — CRT + profile become a mix submission CTA
@@ -82,9 +84,10 @@ She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Pagan
     },
     mixes: [
       {
-        title: 'KAMIKAZE Sessions 001',
-        url: 'https://soundcloud.com/ibliiiz/kamikaze-001',
+        title: 'KAMIKAZE × IBLIIIZ — IMPACT 001',
+        url: 'https://soundcloud.com/ibliiiz/kamikaze-x-ibliiiz-impact-001',
         platform: 'soundcloud',
+        cover: '/artists/ibliiiz-impact-001.png',
       },
     ],
   },

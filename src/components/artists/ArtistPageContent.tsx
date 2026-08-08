@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Artist } from '@/data/artists'
 import { ARTIST_DETAIL } from '@/data/siteCopy'
+import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
 
 interface ArtistPageContentProps {
@@ -155,14 +157,27 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                       'hover:border-arterial/50 hover:bg-void/80'
                     )}
                   >
-                    {/* Top row - index and title */}
+                    {/* Top row - cover, index and title */}
                     <div className="flex items-start gap-4 mb-4">
-                      <span className="font-mono text-xs text-white/50">
-                        [{String(index + 1).padStart(2, '0')}]
-                      </span>
-                      <h3 className="font-mono text-lg md:text-xl text-white group-hover:text-arterial transition-colors">
-                        {mix.title}
-                      </h3>
+                      {mix.cover && (
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 border border-white/20 overflow-hidden">
+                          <Image
+                            src={getAssetPath(mix.cover)}
+                            alt=""
+                            fill
+                            className="object-cover brightness-110"
+                            sizes="80px"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <span className="font-mono text-xs text-white/50">
+                          [{String(index + 1).padStart(2, '0')}]
+                        </span>
+                        <h3 className="font-mono text-lg md:text-xl text-white group-hover:text-arterial transition-colors mt-1">
+                          {mix.title}
+                        </h3>
+                      </div>
                     </div>
 
                     {/* Metadata row - rack mount style */}

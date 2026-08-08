@@ -127,8 +127,8 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             )}
             style={{
               filter: isHovered
-                ? 'brightness(1.3) contrast(1.4)'
-                : 'brightness(0.7) contrast(1.2) grayscale(1)',
+                ? 'brightness(1.1) contrast(1.15) grayscale(0)'
+                : 'brightness(0.95) contrast(1.1) grayscale(1)',
             }}
           >
             {/* Slice 1 */}

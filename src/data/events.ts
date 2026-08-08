@@ -28,10 +28,11 @@ export const events: Event[] = [
     lineup: ['SIREN', 'IBLIIIZ', 'ANSHE', 'JUNVON', 'OPEN SLOT'],
     /** Artist slugs for CRT channel surf — order = channel order */
     lineupArtistSlugs: ['siren', 'ibliiiz', 'anshe', 'junvon', 'open-slot'],
-    ticketUrl: 'https://ra.co/events/kamikaze-override',
+    ticketUrl:
+      'https://whatsaround.app/home/events/kamikaze-presents-override-born-beneath-the-sound',
     isPast: false,
     featured: true,
-    description: 'Peak pressure in Trivandrum. Venue and tickets coming soon.',
+    description: 'Peak pressure in Trivandrum. Venue TBA — tickets live.',
     isSecretLocation: false,
     tbdFields: ['venue'],
   },

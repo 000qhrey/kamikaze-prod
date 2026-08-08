@@ -23,7 +23,7 @@ import {
 } from '@/data/events'
 import { getAssetPath } from '@/lib/basePath'
 import { useLiteMode, useSkipHeroWebGL } from '@/hooks/useLiteMode'
-import { HOME_COPY, CONSTANT } from './homeCopy'
+import { HOME_COPY, CONSTANT } from '../homeCopy'
 import { HomeFooter } from './HomeFooter'
 import { SunLogoStatic } from './SunLogoStatic'
 import { EventFeatureVisual } from './EventFeatureVisual'

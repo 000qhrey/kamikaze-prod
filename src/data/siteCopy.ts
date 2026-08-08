@@ -75,6 +75,9 @@ export const ARTISTS = {
   divider: 'We review every demo. No guarantees — just an honest listen.',
   footerNote:
     'Keep it unreleased if you can. Tell us your city. If it fits what we\'re building, we\'ll reach out.',
+  rosterEyebrow: 'THE ROOM',
+  rosterTitle: 'ARTISTS WHO STOOD WITH KAMIKAZE',
+  rosterSubtitle: 'Tap a face. Enter the dossier.',
   uploadSection: 'SUBMIT YOUR MUSIC',
   uploadButton: 'UPLOAD DEMO',
   uploadSuccess: 'Demo received. We will be in touch.',

@@ -510,8 +510,8 @@ a:hover {
     0deg,
     transparent 0px,
     transparent 2px,
-    rgba(0, 0, 0, 0.15) 2px,
-    rgba(0, 0, 0, 0.15) 4px
+    rgba(0, 0, 0, 0.22) 2px,
+    rgba(0, 0, 0, 0.22) 4px
   );
   animation: scanline-roll 30s linear infinite;
   will-change: transform;
