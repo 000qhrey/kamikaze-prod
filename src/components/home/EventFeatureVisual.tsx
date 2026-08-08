@@ -1,16 +1,17 @@
 'use client'
 
 /**
- * Featured-event thumbnail: sigil at rest, fast lineup channel-surf on hover.
- * Lite / reduced-motion: static sigil only.
+ * Featured-event thumbnail — always-on lineup channel-surf (desktop + mobile).
+ * Reduced-motion / lite: static artist collage (no animation).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { getArtistBySlug } from '@/data/artists'
 import { getAssetPath } from '@/lib/basePath'
 import { useLiteMode } from '@/hooks/useLiteMode'
 
-const FRAME_MS = 55 // ~18fps — reads as 10× channel surf
+const FRAME_MS = 280 // brisk channel flip, readable on mobile
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -31,7 +32,7 @@ export function EventFeatureVisual({
 }) {
   const lite = useLiteMode()
   const reduced = usePrefersReducedMotion()
-  const staticOnly = lite || reduced
+  const collageOnly = lite || reduced
 
   const frames = useMemo(
     () =>
@@ -42,53 +43,116 @@ export function EventFeatureVisual({
     [artistSlugs]
   )
 
-  const [live, setLive] = useState(false)
+  const collage = useMemo(() => frames.slice(0, 4), [frames])
   const [armed, setArmed] = useState(false)
   const [frame, setFrame] = useState(0)
-  const readyRef = useRef(false)
 
-  const prefetch = useCallback(() => {
-    if (staticOnly || readyRef.current || frames.length === 0) return
-    readyRef.current = true
+  // Prefetch then unlock surf (skip when collage-only)
+  useEffect(() => {
+    if (collageOnly || frames.length === 0) {
+      setArmed(false)
+      return
+    }
+    let cancelled = false
     void Promise.all(
       frames.map(
         (src) =>
           new Promise<void>((resolve) => {
-            const img = new Image()
+            const img = new window.Image()
             img.decoding = 'async'
             img.onload = () => resolve()
             img.onerror = () => resolve()
             img.src = src
           })
       )
-    ).then(() => setArmed(true))
-  }, [frames, staticOnly])
+    ).then(() => {
+      if (!cancelled) setArmed(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [frames, collageOnly])
 
   useEffect(() => {
-    if (!live || staticOnly || !armed || frames.length === 0) return
+    if (!armed || collageOnly || frames.length === 0) return
     const id = window.setInterval(() => {
       setFrame((i) => (i + 1) % frames.length)
     }, FRAME_MS)
     return () => window.clearInterval(id)
-  }, [live, staticOnly, armed, frames.length])
+  }, [armed, collageOnly, frames.length])
 
-  const onEnter = () => {
-    if (staticOnly) return
-    prefetch()
-    setLive(true)
-  }
-  const onLeave = () => setLive(false)
-
-  const surfing = live && armed && !staticOnly && frames.length > 0
+  const surfing = armed && !collageOnly && frames.length > 0
   const sigilSrc = getAssetPath('/logo-sigil-384.webp')
+
+  // Static collage for lite / reduced-motion
+  if (collageOnly && collage.length > 0) {
+    return (
+      <div className="k-efv k-efv--collage" aria-hidden>
+        <div className="k-efv-collage">
+          {collage.map((src, i) => (
+            <div key={src + i} className="k-efv-collage-cell">
+              <Image
+                src={src}
+                alt=""
+                fill
+                className="object-cover object-center brightness-95 contrast-110"
+                sizes="110px"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="k-efv-scan" />
+        <span className="k-efv-cross">+</span>
+        <style jsx>{`
+          .k-efv {
+            position: absolute;
+            inset: 0;
+            background: #0a0a0a;
+            overflow: hidden;
+          }
+          .k-efv-collage {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+          }
+          .k-efv-collage-cell {
+            position: relative;
+            overflow: hidden;
+          }
+          .k-efv-scan {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 2px,
+              rgba(0, 0, 0, 0.35) 2px,
+              rgba(0, 0, 0, 0.35) 4px
+            );
+            opacity: 0.5;
+          }
+          .k-efv-cross {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            z-index: 3;
+            color: #cc0000;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+          }
+        `}</style>
+      </div>
+    )
+  }
 
   return (
     <div
       className="k-efv"
       data-surf={surfing ? 'true' : undefined}
-      data-static={staticOnly ? 'true' : undefined}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
       aria-hidden
     >
       <div className="k-efv-glow" />
@@ -98,7 +162,7 @@ export function EventFeatureVisual({
         <img src={sigilSrc} alt="" width={384} height={384} draggable={false} />
       </div>
 
-      {armed && frames.length > 0 ? (
+      {frames.length > 0 ? (
         <div
           className="k-efv-feed"
           style={{ backgroundImage: `url(${frames[frame]})` }}
@@ -143,7 +207,7 @@ export function EventFeatureVisual({
           z-index: 1;
           display: grid;
           place-items: center;
-          transition: opacity 120ms ease, filter 160ms ease, transform 200ms ease;
+          transition: opacity 120ms ease;
         }
         .k-efv-sigil img {
           width: min(58%, 160px);
@@ -154,9 +218,6 @@ export function EventFeatureVisual({
             brightness(0.9) sepia(1) saturate(9) hue-rotate(-25deg) contrast(1.2)
             drop-shadow(0 0 18px rgba(204, 0, 0, 0.45));
           animation: k-efv-sigil-idle 4.2s ease-in-out infinite;
-        }
-        .k-efv[data-static='true'] .k-efv-sigil img {
-          animation: none;
         }
         @keyframes k-efv-sigil-idle {
           0%,
@@ -180,7 +241,7 @@ export function EventFeatureVisual({
           background-position: center 20%;
           background-repeat: no-repeat;
           filter: contrast(1.15) saturate(0.85) brightness(0.92);
-          transition: opacity 60ms linear;
+          transition: opacity 80ms linear;
         }
         .k-efv-feed::after {
           content: '';
@@ -203,34 +264,6 @@ export function EventFeatureVisual({
         }
         .k-efv[data-surf='true'] .k-efv-feed {
           opacity: 1;
-          animation: k-efv-feed-glitch 0.22s steps(3) infinite;
-        }
-        .k-efv[data-static='true'][data-surf='true'] .k-efv-feed {
-          animation: none;
-        }
-        @keyframes k-efv-feed-glitch {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0);
-            clip-path: inset(0 0 0 0);
-            filter: contrast(1.15) saturate(0.85) brightness(0.92);
-          }
-          33% {
-            transform: translate3d(-3px, 0, 0);
-            clip-path: inset(12% 0 48% 0);
-            filter:
-              contrast(1.25) saturate(1.1) brightness(1.05)
-              drop-shadow(-3px 0 0 rgba(204, 0, 0, 0.55))
-              drop-shadow(3px 0 0 rgba(255, 255, 255, 0.2));
-          }
-          66% {
-            transform: translate3d(3px, 1px, 0);
-            clip-path: inset(50% 0 18% 0);
-            filter:
-              contrast(1.2) saturate(0.7) brightness(0.95)
-              drop-shadow(2px 0 0 rgba(204, 0, 0, 0.4))
-              drop-shadow(-2px 0 0 rgba(255, 255, 255, 0.18));
-          }
         }
         .k-efv-cross {
           position: absolute;

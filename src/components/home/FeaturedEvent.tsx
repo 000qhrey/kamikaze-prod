@@ -2,7 +2,7 @@
 
 /**
  * Homepage featured event — OVERRIDE (classic CRT chrome).
- * Thumbnail: sigil at rest, fast artist slideshow on hover.
+ * Thumbnail: auto channel-surf through lineup photos (works on mobile).
  */
 
 import { useTransition } from '@/providers/TransitionProvider'
