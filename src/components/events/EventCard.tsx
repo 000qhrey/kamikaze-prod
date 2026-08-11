@@ -126,8 +126,8 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                 : 'grid-cols-1'
             )}
           >
-            {/* Left — details */}
-            <div className="flex flex-col justify-between gap-6 p-5 sm:p-7 md:p-9 md:pr-6">
+            {/* Details — below cover on mobile, left on desktop */}
+            <div className="order-2 md:order-1 flex flex-col justify-between gap-6 p-5 sm:p-7 md:p-9 md:pr-6">
               <div className="space-y-5 sm:space-y-6">
                 <div className="font-mono text-[10px] sm:text-xs tracking-[0.35em] uppercase">
                   <span className="text-arterial">KAMIKAZE</span>
@@ -223,9 +223,9 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
               </div>
             </div>
 
-            {/* Right — cover */}
+            {/* Cover — above details on mobile, right on desktop */}
             {event.coverImage && (
-              <div className="relative min-h-[280px] sm:min-h-[340px] md:min-h-full border-t md:border-t-0 md:border-l border-white/10">
+              <div className="order-1 md:order-2 relative min-h-[280px] sm:min-h-[340px] md:min-h-full border-b md:border-b-0 md:border-l border-white/10">
                 <div className="absolute inset-3 sm:inset-4 overflow-hidden border border-white/10 bg-void">
                   <Image
                     src={getAssetPath(event.coverImage)}
