@@ -9,7 +9,7 @@ import {
   Vignette,
 } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
-import { useRef, useMemo, useState, useEffect, Suspense } from 'react'
+import { useRef, useMemo, useState, useEffect, Suspense, type ComponentType } from 'react'
 import {
   Points,
   ShaderMaterial,
@@ -560,6 +560,13 @@ function PostProcessing({ isMobile }: { isMobile: boolean }) {
   }
 
   // Desktop: Full effects
+  // Cast: @react-three/postprocessing EffectProps break under CI React 19 JSX checks.
+  const Chromatic = ChromaticAberration as unknown as ComponentType<{
+    offset: Vector2
+    radialModulation?: boolean
+    modulationOffset?: number
+  }>
+
   return (
     <EffectComposer multisampling={0}>
       <Bloom
@@ -569,7 +576,7 @@ function PostProcessing({ isMobile }: { isMobile: boolean }) {
         mipmapBlur
         radius={0.3}
       />
-      <ChromaticAberration
+      <Chromatic
         offset={new Vector2(0.0005, 0.0005)}
         radialModulation={false}
         modulationOffset={0}
