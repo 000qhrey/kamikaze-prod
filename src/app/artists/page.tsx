@@ -52,19 +52,11 @@ export default function ArtistsPage() {
         </div>
       </div>
 
-      {/* Roster — artists who stood with Kamikaze */}
+      {/* Roster */}
       <section className="relative z-10 mt-20 md:mt-28 px-4 sm:px-6 max-w-4xl mx-auto">
-        <div className="mb-8 md:mb-10 max-w-3xl">
-          <p className="font-mono text-[10px] sm:text-xs text-arterial tracking-[0.35em] mb-3">
-            [{ARTISTS.rosterEyebrow}]
-          </p>
-          <h2 className="font-display text-2xl sm:text-4xl md:text-5xl tracking-wider text-white leading-tight mb-3">
-            {ARTISTS.rosterTitle}
-          </h2>
-          <p className="font-mono text-sm text-white/55 tracking-wide">
-            {ARTISTS.rosterSubtitle}
-          </p>
-        </div>
+        <p className="font-mono text-[10px] sm:text-xs text-arterial tracking-[0.35em] mb-6 md:mb-8">
+          [{ARTISTS.rosterEyebrow}]
+        </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-xl sm:max-w-2xl md:max-w-3xl">
           {roster.map((artist, index) => (
