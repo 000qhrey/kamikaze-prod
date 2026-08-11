@@ -34,7 +34,7 @@ export const events: Event[] = [
       'https://whatsaround.app/home/events/kamikaze-presents-override-born-beneath-the-sound',
     isPast: false,
     featured: true,
-    coverImage: '/events/override-cover.png',
+    coverImage: '/events/override-cover.jpg',
     description: 'Peak pressure in Trivandrum. Venue TBA — tickets live.',
     isSecretLocation: false,
     tbdFields: ['venue'],

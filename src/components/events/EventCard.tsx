@@ -184,19 +184,22 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-3 pt-1">
                 {event.ticketUrl && (
                   <a
                     href={event.ticketUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
                     className={clsx(
                       'inline-flex items-center justify-center gap-3',
                       'font-mono text-xs sm:text-sm tracking-[0.3em] uppercase',
                       'border border-arterial text-white px-5 py-3.5 sm:px-6 sm:py-4',
                       'bg-arterial/10 hover:bg-arterial/20 transition-colors duration-200',
-                      'focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial'
+                      'focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial',
+                      'relative z-10'
                     )}
                   >
                     {EVENTS.bookTickets}
@@ -207,22 +210,15 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                 )}
 
                 {opensCrt && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setCrtOpen(true)
-                    }}
+                  <span
                     className={clsx(
-                      'inline-flex items-center justify-center',
                       'font-mono text-[10px] sm:text-xs tracking-[0.3em] uppercase',
-                      'border border-white/25 text-white/70 px-4 py-3.5 sm:py-4',
-                      'hover:border-arterial/50 hover:text-arterial transition-colors duration-200',
-                      'focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial'
+                      'text-white/45 group-hover:text-arterial transition-colors duration-200',
+                      'pointer-events-none'
                     )}
                   >
                     [{EVENTS.enterTransmission}]
-                  </button>
+                  </span>
                 )}
 
                 {!opensCrt && !event.ticketUrl && (
