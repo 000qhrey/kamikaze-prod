@@ -7,6 +7,7 @@ import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
 import { playHoverSound } from '@/hooks/useSonicFeedback'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { EVENTS } from '@/data/siteCopy'
+import { getAssetPath } from '@/lib/basePath'
 import { OverrideCrtModal } from '@/components/events/OverrideCrtModal'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import clsx from 'clsx'
@@ -61,7 +62,7 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
       : `${event.city.toUpperCase()}, INDIA`
 
   const lineupValue = isFullyRedacted ? '█████████' : formatLineup(event.lineup)
-  const ticketsValue = isSoldOut ? EVENTS.accessDenied : EVENTS.ticketsLive
+  const ticketsStatus = isSoldOut ? EVENTS.accessDenied : EVENTS.ticketsLive
 
   return (
     <>
@@ -164,23 +165,16 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                     icon="wave"
                   />
                   <InfoRow
-                    label="TICKETS"
-                    value={ticketsValue}
-                    icon="ticket"
-                    valueClassName={isSoldOut ? 'text-arterial' : 'text-white'}
+                    label={EVENTS.date}
+                    value={displayDate}
+                    icon="date"
                   />
                 </div>
 
-                <p className="font-mono text-[10px] sm:text-xs text-white/40 tracking-[0.25em]">
-                  {displayDate}
-                  {!isFullyRedacted && !isSecretLocation && (
-                    <>
-                      {' // '}
-                      <span className="text-arterial/80">
-                        {event.city.toUpperCase()}, INDIA
-                      </span>
-                    </>
-                  )}
+                <p className="font-mono text-[10px] sm:text-xs tracking-[0.25em]">
+                  <span className={isSoldOut ? 'text-arterial' : 'text-white/50'}>
+                    {ticketsStatus}
+                  </span>
                 </p>
               </div>
 
@@ -234,7 +228,7 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
               <div className="relative min-h-[280px] sm:min-h-[340px] md:min-h-full border-t md:border-t-0 md:border-l border-white/10">
                 <div className="absolute inset-3 sm:inset-4 overflow-hidden border border-white/10 bg-void">
                   <Image
-                    src={event.coverImage}
+                    src={getAssetPath(event.coverImage)}
                     alt={`${event.name} cover`}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -308,7 +302,7 @@ function InfoRow({
 }: {
   label: string
   value: string
-  icon: 'pin' | 'wave' | 'ticket'
+  icon: 'pin' | 'wave' | 'ticket' | 'date'
   valueClassName?: string
 }) {
   return (
@@ -329,6 +323,12 @@ function InfoRow({
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z" />
             <path d="M12 6v12" strokeDasharray="2 2" />
+          </svg>
+        )}
+        {icon === 'date' && (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="5" width="18" height="16" rx="1.5" />
+            <path d="M3 10h18M8 3v4M16 3v4" />
           </svg>
         )}
       </span>
