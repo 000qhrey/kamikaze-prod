@@ -1,10 +1,8 @@
-import { getUpcomingEvents, getPastEvents } from '@/data/events'
+import { getUpcomingEvents } from '@/data/events'
 import { EventCard } from '@/components/events/EventCard'
-import { PastEventCard } from '@/components/events/PastEventCard'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { ScrambleText } from '@/components/effects/ScrambleText'
-import { DeadSignalsEmpty } from '@/components/events/DeadSignalsEmpty'
 import { EventsHashHandler } from '@/components/events/EventsHashHandler'
 import { EVENTS, META } from '@/data/siteCopy'
 
@@ -15,15 +13,12 @@ export const metadata = {
 
 export default function EventsPage() {
   const upcomingEvents = getUpcomingEvents()
-  const pastEvents = getPastEvents()
 
   return (
     <div className="relative min-h-screen flex flex-col pt-24">
       <EventsHashHandler />
-      {/* Manifesto texture - huge scrolling text */}
       <ManifestoTexture phrase="CONTROLLED COLLAPSE" parallaxSpeed={0.12} />
 
-      {/* Background noise canvas */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.02] z-0"
         style={{
@@ -31,9 +26,8 @@ export default function EventsPage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 flex-grow pb-16">
-        {/* Header */}
-        <header className="mb-8 sm:mb-16">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 flex-grow pb-20 w-full">
+        <header className="mb-8 sm:mb-12">
           <ScrambleText
             className="font-display text-4xl sm:text-5xl md:text-7xl tracking-wider mb-3 sm:mb-4 block"
             triggerOnView
@@ -49,35 +43,18 @@ export default function EventsPage() {
           </p>
         </header>
 
-        {/* Upcoming Events */}
         {upcomingEvents.length > 0 && (
-          <section className="mb-12 sm:mb-24 md:mb-32">
-            <h2 className="font-mono text-[10px] sm:text-xs text-arterial uppercase tracking-[0.5em] mb-6 sm:mb-12 -skew-x-6">
+          <section>
+            <h2 className="font-mono text-[10px] sm:text-xs text-arterial uppercase tracking-[0.5em] mb-6 sm:mb-10 -skew-x-6">
               {'>>>'} {EVENTS.upcoming}
             </h2>
-            <div className="space-y-8 sm:space-y-12">
+            <div className="space-y-10 sm:space-y-14">
               {upcomingEvents.map((event, index) => (
                 <EventCard key={event.id} event={event} index={index} />
               ))}
             </div>
           </section>
         )}
-
-        {/* Past Events / Dead Signals */}
-        <section>
-          <h2 className="font-mono text-[10px] sm:text-xs text-white/50 uppercase tracking-[0.5em] mb-6 sm:mb-12 skew-x-3">
-            [ {EVENTS.past} ]
-          </h2>
-          {pastEvents.length > 0 ? (
-            <div className="space-y-4">
-              {pastEvents.map((event, index) => (
-                <PastEventCard key={event.id} event={event} index={index} />
-              ))}
-            </div>
-          ) : (
-            <DeadSignalsEmpty />
-          )}
-        </section>
       </div>
 
       <PerspectiveGrid />

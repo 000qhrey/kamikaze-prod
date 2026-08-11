@@ -15,6 +15,8 @@ export interface Event {
   isDateHidden?: boolean
   /** Homepage featured event — only one should be true */
   featured?: boolean
+  /** Optional cover art for events page card */
+  coverImage?: string
   tbdFields?: ('venue' | 'lineup' | 'date')[]
 }
 
@@ -32,6 +34,7 @@ export const events: Event[] = [
       'https://whatsaround.app/home/events/kamikaze-presents-override-born-beneath-the-sound',
     isPast: false,
     featured: true,
+    coverImage: '/events/override-cover.png',
     description: 'Peak pressure in Trivandrum. Venue TBA — tickets live.',
     isSecretLocation: false,
     tbdFields: ['venue'],

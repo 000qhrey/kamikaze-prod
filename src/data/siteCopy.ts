@@ -26,7 +26,7 @@ export const META = {
   },
   events: {
     title: 'EVENTS | Kamikaze',
-    description: 'Upcoming techno experiences and past events from Kamikaze.',
+    description: 'Upcoming techno experiences from Kamikaze.',
   },
   contact: {
     title: 'CONTACT | Kamikaze',
@@ -46,10 +46,14 @@ export const HERO = {
 
 export const EVENTS = {
   pageTitle: 'EVENTS',
-  tagline: 'Experiences we\'re building. Past ones live in the archive.',
+  tagline: 'Experiences we\'re building.',
   upcoming: 'UPCOMING EVENTS',
   past: 'PAST EVENTS',
   viewDetails: 'VIEW DETAILS',
+  enterTransmission: 'ENTER TRANSMISSION',
+  bookTickets: 'BOOK TICKETS',
+  presents: 'PRESENTS',
+  ticketsLive: 'EARLY ACCESS LIVE',
   close: 'CLOSE',
   getTickets: 'GET TICKETS',
   bookNow: 'BOOK NOW',
