@@ -126,8 +126,44 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                 : 'grid-cols-1'
             )}
           >
+            {/* Cover first in DOM — top on mobile, right on desktop */}
+            {event.coverImage && (
+              <div
+                className={clsx(
+                  'relative w-full border-b md:border-b-0 md:border-l border-white/10',
+                  'aspect-square md:aspect-auto md:min-h-[28rem] md:h-full',
+                  'md:order-2'
+                )}
+              >
+                <div className="absolute inset-3 sm:inset-4 overflow-hidden border border-white/10 bg-void">
+                  <Image
+                    src={getAssetPath(event.coverImage)}
+                    alt={`${event.name} cover`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className={clsx(
+                      'object-contain md:object-cover object-center',
+                      'transition-transform duration-700',
+                      isHovered && !isMobile ? 'scale-[1.03]' : 'scale-100'
+                    )}
+                    priority={index === 0}
+                  />
+                  <div
+                    className="pointer-events-none absolute top-3 right-3 grid grid-cols-3 gap-1"
+                    aria-hidden
+                  >
+                    {Array.from({ length: 9 }).map((_, i) => (
+                      <span key={i} className="text-arterial/70 text-[10px] leading-none">
+                        +
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Details — below cover on mobile, left on desktop */}
-            <div className="order-2 md:order-1 flex flex-col justify-between gap-6 p-5 sm:p-7 md:p-9 md:pr-6">
+            <div className="md:order-1 flex flex-col justify-between gap-6 p-5 sm:p-7 md:p-9 md:pr-6">
               <div className="space-y-5 sm:space-y-6">
                 <div className="font-mono text-[10px] sm:text-xs tracking-[0.35em] uppercase">
                   <span className="text-arterial">KAMIKAZE</span>
@@ -222,42 +258,6 @@ export function EventCard({ event, index, autoOpenCrt = false }: EventCardProps)
                 )}
               </div>
             </div>
-
-            {/* Cover — above details on mobile, right on desktop */}
-            {event.coverImage && (
-              <div className="order-1 md:order-2 relative min-h-[280px] sm:min-h-[340px] md:min-h-full border-b md:border-b-0 md:border-l border-white/10">
-                <div className="absolute inset-3 sm:inset-4 overflow-hidden border border-white/10 bg-void">
-                  <Image
-                    src={getAssetPath(event.coverImage)}
-                    alt={`${event.name} cover`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className={clsx(
-                      'object-cover transition-transform duration-700',
-                      isHovered && !isMobile ? 'scale-[1.04]' : 'scale-100'
-                    )}
-                    priority={index === 0}
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 opacity-40 mix-blend-screen"
-                    style={{
-                      background:
-                        'linear-gradient(180deg, transparent 55%, rgba(204,0,0,0.35) 100%)',
-                    }}
-                  />
-                  <div
-                    className="pointer-events-none absolute top-3 right-3 grid grid-cols-3 gap-1"
-                    aria-hidden
-                  >
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <span key={i} className="text-arterial/70 text-[10px] leading-none">
-                        +
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {isSoldOut && (
