@@ -7,14 +7,11 @@ import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 import clsx from 'clsx'
 import { MERCH } from '@/data/siteCopy'
+import { SUPABASE_URL } from '@/lib/supabase'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'already_bound' | 'error'
 
-// Construct Edge Function URL from Supabase URL
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const EDGE_FUNCTION_URL = SUPABASE_URL
-  ? `${SUPABASE_URL}/functions/v1/join-waitlist`
-  : ''
+const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/join-waitlist`
 
 interface WaitlistResponse {
   success: boolean

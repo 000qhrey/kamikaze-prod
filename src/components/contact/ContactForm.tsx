@@ -8,8 +8,7 @@ import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 
 import { CONTACT } from '@/data/siteCopy'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+import { SUPABASE_URL } from '@/lib/supabase'
 
 function formatContactError(message: string) {
   if (message === 'SYSTEM_NOT_CONFIGURED') return CONTACT.systemOffline

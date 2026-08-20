@@ -3,8 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react'
 import clsx from 'clsx'
 import { ARTISTS } from '@/data/siteCopy'
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+import { SUPABASE_URL } from '@/lib/supabase'
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error'
 
