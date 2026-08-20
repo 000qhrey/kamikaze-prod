@@ -241,10 +241,10 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
           </div>
 
           {/* Stage scrolls; CH− / TUNE / CH+ stay pinned below */}
-          <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col md:flex-row gap-1.5 sm:gap-3">
+          <div className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col md:flex-row gap-2 sm:gap-3">
             {/* Glass — compact hero on mobile, dominant on desktop */}
             <div
-              className="relative shrink-0 md:flex-1 h-[34vh] max-h-[260px] md:h-auto md:max-h-none md:min-h-0 overflow-hidden rounded-md sm:rounded-lg bg-black"
+              className="relative shrink-0 md:flex-1 h-[38vh] max-h-[300px] md:h-auto md:max-h-none md:min-h-0 overflow-hidden rounded-md sm:rounded-lg bg-black"
               style={{
                 boxShadow:
                   'inset 0 0 80px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(204,0,0,0.22)',
@@ -354,51 +354,57 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                         src={getAssetPath(active.photo)}
                         alt={active.name}
                         fill
-                        className="object-cover object-center opacity-80"
+                        className="object-cover opacity-[0.78]"
+                        style={{
+                          objectPosition: active.crtFocus ?? 'center 18%',
+                        }}
                         sizes="(max-width: 1500px) 70vw, 1000px"
                         priority
                       />
                     )}
+                    {/* Readability scrim — keep faces visible up-right, copy readable bottom-left */}
                     <div
                       className="absolute inset-0"
                       style={{
-                        background:
-                          'linear-gradient(105deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.28) 45%, rgba(0,0,0,0.15) 100%)',
+                        background: [
+                          'linear-gradient(105deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 38%, rgba(0,0,0,0.12) 72%, rgba(0,0,0,0.28) 100%)',
+                          'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 28%, rgba(0,0,0,0.12) 55%, transparent 72%)',
+                        ].join(', '),
                       }}
                     />
 
-                    {/* Pinned channel artist — tighter on mobile */}
-                    <div className="relative z-10 h-full flex flex-col justify-end md:justify-center px-4 py-3 sm:p-6 md:p-10 lg:p-12">
-                      <div className="max-w-lg space-y-1.5 sm:space-y-3 md:space-y-4 min-w-0">
-                        <p className="hidden sm:block font-mono text-[9px] sm:text-[10px] tracking-[0.45em] text-white/35 uppercase">
+                    {/* Pinned channel artist — copy sits in the scrim well */}
+                    <div className="relative z-10 h-full flex flex-col justify-end px-4 py-3.5 sm:p-6 md:p-10 lg:p-12">
+                      <div className="max-w-lg space-y-2 sm:space-y-3.5 md:space-y-4 min-w-0">
+                        <p className="hidden sm:block font-mono text-[9px] sm:text-[10px] tracking-[0.45em] text-white/40 uppercase drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
                           Current signal
                         </p>
-                        <h2 className="font-display text-3xl sm:text-5xl md:text-7xl tracking-tight text-white leading-[0.9]">
+                        <h2 className="font-display text-3xl sm:text-5xl md:text-7xl tracking-tight text-white leading-[0.9] drop-shadow-[0_2px_18px_rgba(0,0,0,0.85)]">
                           {active?.name ?? event.name}
                         </h2>
-                        <p className="font-mono text-[9px] sm:text-xs tracking-[0.3em] text-arterial uppercase">
+                        <p className="font-mono text-[9px] sm:text-xs tracking-[0.3em] text-arterial uppercase drop-shadow-[0_1px_10px_rgba(0,0,0,0.9)]">
                           Peak pressure // one room
                         </p>
-                        <p className="hidden md:block font-mono text-sm text-white/55 max-w-md leading-relaxed">
+                        <p className="hidden md:block font-mono text-sm text-white/70 max-w-md leading-relaxed drop-shadow-[0_1px_10px_rgba(0,0,0,0.85)]">
                           {event.description ?? 'Peak pressure transmission.'}
                         </p>
                         {/* Stack on phone so DATE isn't clipped by the glass edge */}
-                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-y-1 gap-x-5 font-mono text-[10px] sm:text-xs text-white/50 leading-normal">
+                        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-y-1 gap-x-5 font-mono text-[10px] sm:text-xs text-white/65 leading-normal drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
                           <span className="whitespace-nowrap">
-                            <span className="text-white/30">DATE </span>
+                            <span className="text-white/40">DATE </span>
                             {dateLabel}
                           </span>
                           <span className="hidden sm:inline whitespace-nowrap">
-                            <span className="text-white/30">TIME </span>
+                            <span className="text-white/40">TIME </span>
                             23:59 — LATE
                           </span>
                           <span className="whitespace-nowrap">
-                            <span className="text-white/30">LOC </span>
+                            <span className="text-white/40">LOC </span>
                             <span className="text-arterial">{locationLabel}</span>
                           </span>
                         </div>
                         <div
-                          className="pt-1 sm:pt-2"
+                          className="pt-1.5 sm:pt-2"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="relative inline-block">
@@ -427,7 +433,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                                 >
                                   BOOK TICKETS
                                 </TerminalButton>
-                                <p className="hidden sm:block mt-2 font-mono text-[9px] text-white/35 tracking-wide">
+                                <p className="hidden sm:block mt-2 font-mono text-[9px] text-white/40 tracking-wide">
                                   {EVENTS.bookSoonHint}
                                 </p>
                               </>
@@ -446,16 +452,16 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
               <aside
                 className={clsx(
                   'flex flex-col flex-none min-h-0',
-                  'md:w-[min(320px,34%)] md:self-stretch',
-                  'border border-white/10 bg-black/80 rounded-md sm:rounded-lg overflow-hidden'
+                  'md:w-[min(340px,36%)] md:self-stretch',
+                  'border border-white/10 bg-black/85 rounded-md sm:rounded-lg overflow-hidden'
                 )}
               >
                 {/* Channel tuner */}
-                <div className="shrink-0 border-b border-white/10 px-2 py-1.5 sm:p-2.5">
-                  <p className="font-mono text-[7px] sm:text-[8px] tracking-[0.35em] text-white/30 uppercase mb-1 sm:mb-2">
+                <div className="shrink-0 border-b border-white/10 px-2.5 py-2 sm:px-3 sm:py-3">
+                  <p className="font-mono text-[8px] tracking-[0.35em] text-white/35 uppercase mb-1.5 sm:mb-2.5">
                     Channels
                   </p>
-                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                     {channels.map((artist, i) => {
                       const selected = i === channelIndex
                       const status = artist.isOpenCall ? 'CALL' : 'LIVE'
@@ -473,20 +479,26 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                             'relative min-w-0 text-left group focus:outline-none focus-visible:ring-1 focus-visible:ring-arterial',
                             'rounded-sm overflow-hidden border transition-all',
                             selected
-                              ? 'border-arterial z-[1]'
-                              : 'border-white/12 opacity-65 active:opacity-100 hover:opacity-100 hover:border-white/30'
+                              ? 'border-arterial z-[1] shadow-[0_0_12px_rgba(204,0,0,0.35)]'
+                              : 'border-white/12 opacity-55 active:opacity-100 hover:opacity-100 hover:border-white/35'
                           )}
                         >
                           {/* Mobile: short strip; desktop: square */}
-                          <div className="relative h-11 sm:h-auto sm:aspect-square">
+                          <div className="relative h-12 sm:h-auto sm:aspect-square">
                             <Image
                               src={getAssetPath(artist.photo)}
                               alt=""
                               fill
-                              className="object-cover object-center grayscale-[0.25] group-hover:grayscale-0 transition-[filter]"
+                              className="object-cover grayscale-[0.3] group-hover:grayscale-0 transition-[filter]"
+                              style={{
+                                objectPosition: artist.crtFocus ?? 'center 18%',
+                              }}
                               sizes="120px"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent sm:hidden" />
+                            {selected && (
+                              <div className="absolute inset-0 ring-1 ring-inset ring-arterial/80 pointer-events-none" />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/25 to-transparent sm:hidden" />
                             <div className="absolute bottom-0.5 left-1 right-1 sm:hidden">
                               <p
                                 className={clsx(
@@ -507,7 +519,12 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                               </p>
                             </div>
                           </div>
-                          <div className="hidden sm:block px-1 py-1 bg-black/80">
+                          <div
+                            className={clsx(
+                              'hidden sm:block px-1.5 py-1.5',
+                              selected ? 'bg-arterial/15' : 'bg-black/85'
+                            )}
+                          >
                             <p
                               className={clsx(
                                 'font-mono text-[8px] tracking-wider',
@@ -519,7 +536,7 @@ export function OverrideCrtModal({ event, isOpen, onClose }: OverrideCrtModalPro
                             </p>
                             <p
                               className={clsx(
-                                'font-mono text-[9px] truncate',
+                                'font-mono text-[10px] truncate mt-0.5',
                                 selected ? 'text-white' : 'text-white/55'
                               )}
                             >
@@ -634,47 +651,47 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
   const ctaLabel = artist.ctaLabel ?? (isOpenCall ? 'SEND YOUR MIX →' : 'VIEW FULL PROFILE →')
 
   return (
-    <div className="flex flex-col flex-none md:flex-1 min-h-0 p-2.5 sm:p-4 overflow-y-auto gap-2 sm:gap-3">
-      <div className="space-y-2 sm:space-y-3 shrink-0">
+    <div className="flex flex-col flex-none md:flex-1 min-h-0 p-3 sm:p-4 overflow-y-auto gap-3 sm:gap-4">
+      <div className="space-y-3 sm:space-y-4 shrink-0">
         <div>
-          <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.35em] text-signal mb-0.5">
+          <p className="font-mono text-[8px] sm:text-[9px] tracking-[0.35em] text-signal mb-1">
             CH {channel} · {isOpenCall ? 'OPEN CALL' : 'LIVE'}
           </p>
-          <h3 className="font-display text-lg sm:text-2xl text-white tracking-wide leading-none">
+          <h3 className="font-display text-lg sm:text-xl md:text-2xl text-white tracking-wide leading-none">
             {artist.name}
           </h3>
-          <p className="font-mono text-[9px] sm:text-[10px] text-arterial/90 mt-1 tracking-wide">
+          <p className="font-mono text-[9px] sm:text-[10px] text-arterial/90 mt-1.5 tracking-wide leading-snug">
             {artist.tagline}
           </p>
         </div>
 
         <div>
-          <p className="font-mono text-[7px] sm:text-[8px] tracking-[0.35em] text-white/30 uppercase mb-0.5 sm:mb-1">
+          <p className="font-mono text-[8px] tracking-[0.35em] text-white/35 uppercase mb-1.5">
             {isOpenCall ? 'Brief' : 'Biography'}
           </p>
-          <p className="font-mono text-[10px] sm:text-[11px] text-white/60 leading-snug line-clamp-3 sm:line-clamp-4">
+          <p className="font-mono text-[10px] sm:text-[11px] text-white/65 leading-relaxed line-clamp-3 sm:line-clamp-4">
             {isOpenCall
               ? 'Do you have what it takes to open our night? Send your mix — you might open OVERRIDE.'
               : blurb}
           </p>
         </div>
 
-        <div className="font-mono text-[9px] sm:text-[10px] grid grid-cols-2 md:grid-cols-1 gap-x-3 gap-y-1.5 border-y border-white/10 py-1.5 md:border-0 md:py-0">
+        <div className="font-mono text-[9px] sm:text-[10px] grid grid-cols-2 md:grid-cols-1 gap-x-3 gap-y-2 border-y border-white/10 py-2.5 md:border-0 md:py-0 md:space-y-0">
           <MetaCell label="Origin" value={artist.origin ?? artist.location} />
           <MetaCell label="Genre" value={artist.genre ?? '—'} />
         </div>
       </div>
 
-      {/* Keep actions under meta — mt-auto left a dead band on phone */}
-      <div className="shrink-0 flex flex-col gap-1.5 sm:gap-2 mt-1 md:mt-auto">
+      {/* Secondary actions — tickets own the primary CTA on the glass */}
+      <div className="shrink-0 flex flex-col gap-2 sm:gap-2.5 mt-0.5 md:mt-auto pt-1">
         {!isOpenCall && (artist.socials.instagram || artist.socials.soundcloud) && (
-          <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {artist.socials.instagram && (
               <a
                 href={artist.socials.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[9px] sm:text-[10px] tracking-wider text-center py-1.5 sm:py-2 border border-white/20 text-white/70 active:border-arterial active:text-arterial hover:border-arterial hover:text-arterial transition-colors"
+                className="font-mono text-[9px] sm:text-[10px] tracking-wider text-center py-2 border border-white/15 text-white/55 active:border-arterial active:text-arterial hover:border-arterial hover:text-arterial transition-colors"
               >
                 INSTAGRAM
               </a>
@@ -684,7 +701,7 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
                 href={artist.socials.soundcloud}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[9px] sm:text-[10px] tracking-wider text-center py-1.5 sm:py-2 border border-white/20 text-white/70 active:border-signal active:text-signal hover:border-signal hover:text-signal transition-colors"
+                className="font-mono text-[9px] sm:text-[10px] tracking-wider text-center py-2 border border-white/15 text-white/55 active:border-signal active:text-signal hover:border-signal hover:text-signal transition-colors"
               >
                 SOUNDCLOUD
               </a>
@@ -696,10 +713,11 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
           href={isOpenCall ? ctaHref : profileHref}
           className={clsx(
             'relative block w-full text-center',
-            'font-mono text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em]',
-            'py-2 sm:py-2.5 px-3',
-            'bg-arterial/15 border border-arterial text-arterial',
-            'active:bg-arterial active:text-void hover:bg-arterial hover:text-void transition-colors'
+            'font-mono text-[10px] sm:text-[11px] tracking-[0.22em] sm:tracking-[0.28em]',
+            'py-2 sm:py-2.5 px-3 transition-colors',
+            isOpenCall
+              ? 'bg-arterial/15 border border-arterial text-arterial active:bg-arterial active:text-void hover:bg-arterial hover:text-void'
+              : 'border border-white/25 text-white/70 hover:border-white/50 hover:text-white active:border-arterial active:text-arterial'
           )}
         >
           {ctaLabel}
@@ -719,9 +737,9 @@ function ArtistDossier({ artist, channel }: { artist: Artist; channel: string })
 
 function MetaCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 flex flex-col gap-0.5 md:flex-row md:justify-between md:gap-3 md:border-b md:border-white/10 md:pb-1.5">
-      <span className="text-white/30 tracking-wider uppercase shrink-0">{label}</span>
-      <span className="text-white/65 truncate md:text-right">{value}</span>
+    <div className="min-w-0 flex flex-col gap-0.5 md:flex-row md:justify-between md:gap-3 md:border-b md:border-white/10 md:pb-2">
+      <span className="text-white/35 tracking-wider uppercase shrink-0">{label}</span>
+      <span className="text-white/70 truncate md:text-right">{value}</span>
     </div>
   )
 }

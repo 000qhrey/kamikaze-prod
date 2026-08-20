@@ -3,6 +3,11 @@ export interface Artist {
   name: string
   slug: string
   photo: string
+  /**
+   * CSS object-position for CRT hero / channel thumbs.
+   * Prefer faces in frame — default in UI is `center 18%`.
+   */
+  crtFocus?: string
   bio: string
   /** Short CRT dossier copy — keep ~2 lines so the rail never scrolls */
   blurb?: string
@@ -42,6 +47,7 @@ export const artists: Artist[] = [
     name: 'SIREN',
     slug: 'siren',
     photo: '/artists/siren.jpg',
+    crtFocus: 'center 12%',
     location: 'Belgium',
     origin: 'India → Belgium',
     genre: 'Hard Groove / Techno',
@@ -69,6 +75,7 @@ She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Pagan
     name: 'IBLIIIZ',
     slug: 'ibliiiz',
     photo: '/artists/ibliiiz.png',
+    crtFocus: 'center 8%',
     location: 'Underground',
     origin: 'Underground',
     genre: 'Hard Techno / Schranz',
@@ -96,6 +103,8 @@ She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Pagan
     name: 'ANSHE',
     slug: 'anshe',
     photo: '/artists/anshe.jpg',
+    // Landscape plate — bias up so face stays in the CRT glass
+    crtFocus: '58% 22%',
     location: 'India',
     origin: 'India',
     genre: 'Hard Techno',
@@ -123,6 +132,7 @@ On the road she runs a strict NXS2 brief (DJM + linked CDJs), treating every boo
     name: 'JUNVON',
     slug: 'junvon',
     photo: '/artists/junvon.jpg',
+    crtFocus: 'center 15%',
     location: 'Trivandrum',
     origin: 'Trivandrum, India',
     genre: 'Peak-Time Techno',
