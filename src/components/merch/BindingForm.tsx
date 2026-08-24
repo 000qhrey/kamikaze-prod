@@ -7,11 +7,15 @@ import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 import clsx from 'clsx'
 import { MERCH } from '@/data/siteCopy'
-import { SUPABASE_URL } from '@/lib/supabase'
+import {
+  SUPABASE_URL,
+  supabaseFunctionHeaders,
+  supabaseFunctionUrl,
+} from '@/lib/supabase'
 
 type FormState = 'idle' | 'submitting' | 'success' | 'already_bound' | 'error'
 
-const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/join-waitlist`
+const EDGE_FUNCTION_URL = supabaseFunctionUrl('join-waitlist')
 
 interface WaitlistResponse {
   success: boolean
@@ -49,7 +53,7 @@ export function BindingForm() {
     try {
       const response = await fetch(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: supabaseFunctionHeaders(),
         body: JSON.stringify({ email: email.trim() }),
       })
 

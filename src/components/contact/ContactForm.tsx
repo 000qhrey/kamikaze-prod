@@ -8,7 +8,11 @@ import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 
 import { CONTACT } from '@/data/siteCopy'
-import { SUPABASE_URL } from '@/lib/supabase'
+import {
+  SUPABASE_URL,
+  supabaseFunctionHeaders,
+  supabaseFunctionUrl,
+} from '@/lib/supabase'
 
 function formatContactError(message: string) {
   if (message === 'SYSTEM_NOT_CONFIGURED') return CONTACT.systemOffline
@@ -42,11 +46,9 @@ export function ContactForm() {
         throw new Error('SYSTEM_NOT_CONFIGURED')
       }
 
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/contact-form`, {
+      const response = await fetch(supabaseFunctionUrl('contact-form'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: supabaseFunctionHeaders(),
         body: JSON.stringify(data),
       })
 

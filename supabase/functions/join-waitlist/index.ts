@@ -1,17 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
 
-function corsHeaders(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  const allowed = /^https:\/\/(kamikaze\.host|zhreyu\.github\.io)$/.test(origin)
-    ? origin
-    : 'https://kamikaze.host';
-
-  return {
-    'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
-}
 function generateSerialKey(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let result = 'KMKZ-'
@@ -72,47 +61,41 @@ function buildEmailHtml(serialKey: string): string {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders(req) })
+    return new Response('ok', { headers: corsHeaders(req) })
   }
 
   if (req.method !== 'POST') {
     return new Response(
       JSON.stringify({ success: false, message: 'METHOD_NOT_ALLOWED' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 405, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
     )
   }
 
   try {
     const { email } = await req.json()
 
-    // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.toLowerCase().trim())) {
       return new Response(
         JSON.stringify({ success: false, message: 'INVALID_FREQUENCY_FORMAT' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
       )
     }
 
     const normalizedEmail = email.toLowerCase().trim()
     const serialKey = generateSerialKey()
 
-    // Initialize Supabase client with service role
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
 
-    // Insert into database
     const { error: dbError } = await supabase
       .from('merch_waitlist')
       .insert([{ email: normalizedEmail, serial_key: serialKey }])
 
     if (dbError) {
-      // Check for unique constraint violation (email already exists)
       if (dbError.code === '23505') {
-        // Fetch existing entry
         const { data: existing } = await supabase
           .from('merch_waitlist')
           .select('serial_key')
@@ -125,25 +108,24 @@ Deno.serve(async (req) => {
             message: 'SIGNAL_ALREADY_BOUND',
             serialKey: existing?.serial_key,
           }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 409, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
         )
       }
 
       console.error('Database error:', dbError)
       return new Response(
         JSON.stringify({ success: false, message: 'UPLINK_FAILED' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 500, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
       )
     }
 
-    // Send email via Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (resendApiKey) {
       try {
         const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${resendApiKey}`,
+            Authorization: `Bearer ${resendApiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -157,11 +139,9 @@ Deno.serve(async (req) => {
         if (!emailResponse.ok) {
           const emailError = await emailResponse.text()
           console.error('Resend error:', emailError)
-          // Don't fail the request - signup succeeded even if email fails
         }
       } catch (emailError) {
         console.error('Email send error:', emailError)
-        // Don't fail the request
       }
     }
 
@@ -171,13 +151,13 @@ Deno.serve(async (req) => {
         message: 'BINDING_SEALED',
         serialKey,
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
     )
   } catch (error) {
     console.error('Request error:', error)
     return new Response(
       JSON.stringify({ success: false, message: 'TRANSMISSION_ERROR' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
     )
   }
 })

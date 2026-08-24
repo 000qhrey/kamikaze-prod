@@ -3,7 +3,11 @@
 import { useState, FormEvent, useEffect } from 'react'
 import clsx from 'clsx'
 import { ARTISTS } from '@/data/siteCopy'
-import { SUPABASE_URL } from '@/lib/supabase'
+import {
+  SUPABASE_URL,
+  supabaseFunctionHeaders,
+  supabaseFunctionUrl,
+} from '@/lib/supabase'
 
 type UploadState = 'idle' | 'uploading' | 'success' | 'error'
 
@@ -56,9 +60,9 @@ export function SignalUpload() {
         throw new Error('UPLOAD_OFFLINE')
       }
 
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/submit-demo`, {
+      const response = await fetch(supabaseFunctionUrl('submit-demo'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: supabaseFunctionHeaders(),
         body: JSON.stringify({
           soundcloudUrl: soundcloudLink.trim(),
           artistAlias: artistAlias.trim(),
