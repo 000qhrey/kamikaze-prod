@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { getAssetPath } from '@/lib/basePath'
 import Arrow from './Arrow'
+import SoundToggle from './SoundToggle'
 import s from './Nav.module.css'
 
 const LINKS = [
@@ -60,6 +61,7 @@ export default function Nav() {
   const current = (href: string) => (pathname.startsWith(href) ? 'page' : undefined)
 
   return (
+    <>
     <header className="wrap fixed inset-x-0 top-0 z-10 flex h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] items-center justify-between gap-4 bg-gradient-to-b from-void via-void/90 to-void/0 pt-[env(safe-area-inset-top,0px)] [backdrop-filter:blur(3px)]">
       <Link href="/" aria-label="Kamikaze home" className="relative z-[2] flex min-h-[44px] items-center gap-[10px]">
         <img src={getAssetPath('/logo-sigil-96.webp')} alt="" width={34} height={34} />
@@ -77,6 +79,8 @@ export default function Nav() {
         Get the venue first
       </Link>
 
+      <SoundToggle />
+
       <button
         ref={button}
         type="button"
@@ -87,6 +91,8 @@ export default function Nav() {
       >
         {open ? 'Close' : 'Menu'}
       </button>
+      </header>
+      {/* The menu lives OUTSIDE the header: the header's backdrop-filter would otherwise make it the containing block for this fixed sheet and collapse it into the 64px bar. */}
       <div id="menu" className={`${s.menu} ${open ? s.open : ''} md:hidden`}>
         <nav aria-label="Menu" className="flex flex-1 flex-col justify-center">
           {LINKS.map(([href, label], i) => (
@@ -102,6 +108,6 @@ export default function Nav() {
           </Link>
         </div>
       </div>
-    </header>
+    </>
   )
 }

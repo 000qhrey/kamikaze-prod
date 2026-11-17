@@ -4,15 +4,20 @@
 
 /* Lights off: black room, bone type, one red. Values mirror the approved design canvas. */
 :root {
+  /* a ladder of warm near-blacks: the room has a floor, walls and a lit centre, not one flat black */
+  --pit: #050505;
   --void: #0a0a0a;
-  --bone: #efefef;
-  --dim: rgba(239, 239, 239, 0.74);
+  --coal: #121010;
+  --ember: #1a1313;
+  --bone: #ebe6df; /* warmed off paper white so every screen reads less clinical */
+  --dim: rgba(235, 230, 223, 0.74);
   --red: #cc0000;
   --red-hi: #e00000;
   --hot: #ff3b30;
-  --hair: rgba(239, 239, 239, 0.16);
-  --line: rgba(239, 239, 239, 0.4);
+  --hair: rgba(235, 230, 223, 0.16);
+  --line: rgba(235, 230, 223, 0.4);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --beat: 0.41667s; /* 144 BPM — the room's heartbeat, shared by the light and the sound */
   --gutter: clamp(20px, 2.8vw, 40px);
   --nav-h: 64px;
   --split: -2px 0 0 rgba(255, 0, 0, 0.7), 2px 0 0 rgba(0, 255, 255, 0.55);
@@ -165,7 +170,7 @@
     width: 100%;
     height: 54px;
     padding: 0 14px;
-    background: rgba(10, 10, 10, 0.7);
+    background: linear-gradient(180deg, var(--coal), var(--void));
     color: var(--bone);
     border: 1px solid var(--line);
     border-radius: 0;
@@ -198,7 +203,8 @@
     position: relative;
     padding: 20px;
     border: 1px solid var(--hair);
-    background: rgba(10, 10, 10, 0.72);
+    background: linear-gradient(180deg, var(--coal), var(--void));
+    box-shadow: inset 0 1px 0 rgba(235, 230, 223, 0.05), 0 24px 48px -28px #000;
   }
   .frame::before,
   .frame::after {
@@ -300,18 +306,37 @@
     z-index: 6;
     pointer-events: none;
   }
+  /* warmer, wider vignette: a faint red bleed into near-black at the edges, not flat black corners */
   .fx-vig {
-    background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.6) 100%);
+    background: radial-gradient(ellipse at 50% 42%, transparent 35%, rgba(26, 0, 0, 0.28) 72%, rgba(0, 0, 0, 0.82) 100%);
   }
   .fx-scan {
     background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 4px);
     opacity: 0.5;
   }
   .fx-grain {
-    inset: -50%;
+    inset: -20%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-    opacity: 0.09;
+    opacity: 0.13;
     animation: grain 0.5s steps(4) infinite;
+  }
+  /* the room itself: a lit centre falling to a pit at the edges (the floor/walls), plus a red wash
+     off the sigil that breathes on the 144 BPM beat. Fixed, behind the sigil canvas and all content. */
+  .fx-room {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(118% 92% at 50% 38%, var(--ember) 0%, var(--void) 44%, var(--pit) 100%);
+  }
+  .fx-room::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(66% 52% at 50% 40%, rgba(204, 0, 0, 0.16), transparent 70%);
+    mix-blend-mode: screen;
+    opacity: 0.34;
+    animation: roompulse var(--beat) ease-out infinite;
   }
   /* hero "count-in": a soft bone vignette breathes four times on load, arming the room (one 144 BPM beat each) */
   .fx-countin {
@@ -337,6 +362,22 @@
     animation: datebeat 0.417s ease-out infinite;
   }
   /* footer wordmark: a hot band of light flows through the outlined letters. Overlay a gradient-filled copy over the stroked one; at rest the band sits off-screen so only the outline shows. */
+  /* sound toggle dot: a red pulse on the beat while off (the invitation), solid + lit when on */
+  .sound-dot {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--red);
+    opacity: 0.5;
+    animation: dotblink var(--beat) ease-out infinite;
+  }
+  .sound-dot.on {
+    background: var(--hot);
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(255, 59, 48, 0.9);
+    animation: none;
+  }
   .footmark-sweep {
     background-image: linear-gradient(100deg, transparent 42%, rgba(255, 59, 48, 0.85) 48%, rgba(239, 239, 239, 0.95) 50%, rgba(255, 59, 48, 0.85) 52%, transparent 58%);
     background-size: 240% 100%;
@@ -354,6 +395,16 @@
   60%,
   100% {
     transform: translateX(100%);
+  }
+}
+/* a kick of red light: bright on the beat, decaying to the resting wash */
+@keyframes roompulse {
+  0% {
+    opacity: 0.68;
+  }
+  64%,
+  100% {
+    opacity: 0.3;
   }
 }
 @keyframes grain {
@@ -384,6 +435,15 @@
   }
   100% {
     opacity: 0;
+  }
+}
+@keyframes dotblink {
+  0% {
+    opacity: 0.85;
+  }
+  60%,
+  100% {
+    opacity: 0.28;
   }
 }
 @keyframes datebeat {
@@ -420,8 +480,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .fx-grain,
+  .fx-room::after,
+  .date-beat,
+  .footmark-sweep,
+  .sound-dot,
   .bar::after {
     animation: none;
+  }
+  .fx-room::after {
+    opacity: 0.3;
   }
   .js .reveal {
     clip-path: none;

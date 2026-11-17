@@ -19,7 +19,7 @@
 .menu {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 5; /* above content (z1), below the CRT overlays (z6) and the header bar (z10) so brand + Close stay on top */
   display: flex;
   flex-direction: column;
   padding: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 16px) var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px));

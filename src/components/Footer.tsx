@@ -1,21 +1,12 @@
-'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { EMAIL, INSTAGRAM, SOUNDCLOUD } from '@/lib/site'
 import Arrow from './Arrow'
 
 const row = 'rowlink md:mono md:min-h-[44px] md:border-0 md:underline-offset-4 md:hover:underline'
 const copyright = '© 2026 Kamikaze'
 
-/** Links, the outlined wordmark, the copyright line. Contact, pass and admin already carry the routes, so they get the copyright only. */
+/** The same footer on every page: links, the outlined wordmark, the copyright line. */
 export default function Footer() {
-  const pathname = usePathname()
-  if (/^\/(contact|pass|kaizen)\//.test(pathname))
-    return (
-      <footer className="wrap pb-9 pt-7">
-        <p className="mono dim">{copyright}</p>
-      </footer>
-    )
   return (
     // bottom padding on phone clears the dock
     <footer data-sigil="footer" className="wrap pb-[calc(96px+env(safe-area-inset-bottom,0px))] pt-10 md:pb-7">

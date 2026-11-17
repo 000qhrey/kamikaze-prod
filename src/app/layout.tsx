@@ -75,6 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('js')` }} />
       </head>
       <body>
+        <div className="fx-room" aria-hidden="true" />
         <SigilCanvas />
         <FlashLayer />
         <a id="skip" href="#main" className="mono sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-30 focus:bg-bone focus:px-4 focus:py-3 focus:text-void">

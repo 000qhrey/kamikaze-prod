@@ -53,7 +53,7 @@ export default function Home() {
               </span>
             ))}
           </h1>
-          <p className={`${s.rise} mono mx-auto mt-[10px] table bg-void/75 px-[10px] py-1 tracking-[.3em] md:mt-[18px] md:px-3 md:py-[5px]`} style={i(0)}>
+          <p className={`${s.rise} mono mx-auto mt-[10px] table bg-[radial-gradient(120%_160%_at_50%_50%,rgba(5,5,5,.9),rgba(5,5,5,.5)_58%,transparent)] px-[14px] py-1 tracking-[.3em] md:mt-[18px] md:px-5 md:py-[5px]`} style={i(0)}>
             The room is the headliner
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function Home() {
         <div className="relative flex flex-wrap items-end justify-between gap-7 max-md:-mt-[calc(var(--s)*0.44)]">
           <div className="relative isolate w-full md:w-auto md:max-w-[520px]">
             {/* phone only: a dark fade behind the date so the red numerals stay legible over the bright chrome of the sigil's lower third */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-[-12%] -top-20 -z-10 h-44 bg-[radial-gradient(130%_100%_at_50%_42%,rgba(10,10,10,.92),rgba(10,10,10,.6)_45%,transparent_72%)] md:hidden" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-[-12%] -top-20 -z-10 h-44 bg-[radial-gradient(130%_100%_at_50%_42%,rgba(5,5,5,.92),rgba(5,5,5,.6)_45%,transparent_72%)] md:hidden" />
             <p className={`${s.rise} date-beat num hot text-[38px] md:text-[64px]`} style={i(1)}>
               {next ? fmtDate(next.date) : 'No date yet'}
             </p>
